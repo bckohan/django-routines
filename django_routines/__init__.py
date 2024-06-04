@@ -242,10 +242,10 @@ def routines() -> t.Generator[Routine, None, None]:
     """
     from django.conf import settings
 
-    routines: t.Dict[str, t.Any]
-    if not settings.configured:
-        routines = sys._getframe(1).f_globals[ROUTINE_SETTING]  # noqa: WPS437
-    else:
-        routines = getattr(settings, ROUTINE_SETTING, {})
+    routines = (
+        sys._getframe(1).f_globals[ROUTINE_SETTING]  # noqa: WPS437
+        if not settings.configured
+        else getattr(settings, ROUTINE_SETTING, {})
+    )
     for routine in routines.values():
         yield Routine.from_dict(routine)
