@@ -64,8 +64,14 @@ jobs:
     - name: Run Unit Tests
       run: |
         poetry run pytest
+        poetry run pytest --cov-append -k test_dataclasses
+        poetry run pytest --cov-append -k test_dict
+        poetry run pytest --cov-append -k test_no_django
         poetry run pip uninstall -y rich
         poetry run pytest --cov-append
+        poetry run pytest --cov-append -k test_dataclasses
+        poetry run pytest --cov-append -k test_dict
+        poetry run pytest --cov-append -k test_no_django
         mv .coverage py${{ matrix.python-version }}-dj${{ matrix.django-version }}.coverage
 
     - name: Store coverage files

@@ -18,6 +18,8 @@ import sys
 import typing as t
 from dataclasses import asdict, dataclass, field
 
+from django.core.exceptions import ImproperlyConfigured
+
 VERSION = (1, 0, 0)
 
 __title__ = "Django Routines"
@@ -227,18 +229,25 @@ def get_routine(name: str) -> Routine:
     :return: The routine.
     :raises: KeyError if the routine does not exist, or routines have not been
         configured.
+    :raises: ImproperlyConfigured if the DJANGO_ROUTINES settings variable is not valid.
     """
     from django.conf import settings
 
-    if not settings.configured:
-        Routine.from_dict(sys._getframe(1).f_globals[ROUTINE_SETTING][name])  # noqa: WPS437
-    return Routine.from_dict(getattr(settings, ROUTINE_SETTING, {})[name])
+    try:
+        if not settings.configured:
+            Routine.from_dict(sys._getframe(1).f_globals[ROUTINE_SETTING][name])  # noqa: WPS437
+        return Routine.from_dict(getattr(settings, ROUTINE_SETTING, {})[name])
+    except TypeError as err:
+        raise ImproperlyConfigured(
+            f"{ROUTINE_SETTING} routine {name} is malformed."
+        ) from err
 
 
 def routines() -> t.Generator[Routine, None, None]:
     """
     A generator that yields Routine objects from settings.
     :yield: Routine objects
+    :raises: ImproperlyConfigured if the DJANGO_ROUTINES settings variable is not valid.
     """
     from django.conf import settings
 
@@ -247,5 +256,10 @@ def routines() -> t.Generator[Routine, None, None]:
         if not settings.configured
         else getattr(settings, ROUTINE_SETTING, {})
     )
-    for routine in routines.values():
-        yield Routine.from_dict(routine)
+    for name, routine in routines.items():
+        try:
+            yield Routine.from_dict(routine)
+        except TypeError as err:
+            raise ImproperlyConfigured(
+                f"{ROUTINE_SETTING} routine {name} is malformed."
+            ) from err
