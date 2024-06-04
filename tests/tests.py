@@ -1,6 +1,9 @@
 from io import StringIO
+from importlib.util import find_spec
+import pytest
 
-from django.core.management import call_command, CommandError
+from django.core.management import BaseCommand, call_command, CommandError
+from django_typer import get_command
 from django.test import TestCase
 import re
 
@@ -219,3 +222,151 @@ class Tests(TestCase):
     def test_routine_with_bad_command(self):
         with self.assertRaises(CommandError):
             call_command("routine", "bad")
+
+    routine_help_rich = """
+ Usage: ./manage.py routine [OPTIONS] COMMAND [ARGS]...                         
+                                                                                
+ Run batches of commands configured in settings.                                
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Django ─────────────────────────────────────────────────────────────────────╮
+│ --verbosity          INTEGER RANGE [0<=x<=3]  Verbosity level; 0=minimal     │
+│                                               output, 1=normal output,       │
+│                                               2=verbose output, 3=very       │
+│                                               verbose output                 │
+│                                               [default: 1]                   │
+│ --version                                     Show program's version number  │
+│                                               and exit.                      │
+│ --settings           TEXT                     The Python path to a settings  │
+│                                               module, e.g.                   │
+│                                               "myproject.settings.main". If  │
+│                                               this isn't provided, the       │
+│                                               DJANGO_SETTINGS_MODULE         │
+│                                               environment variable will be   │
+│                                               used.                          │
+│ --pythonpath         PATH                     A directory to add to the      │
+│                                               Python path, e.g.              │
+│                                               "/home/djangoprojects/myproje… │
+│                                               [default: None]                │
+│ --traceback                                   Raise on CommandError          │
+│                                               exceptions                     │
+│ --no-color                                    Don't colorize the command     │
+│                                               output.                        │
+│ --force-color                                 Force colorization of the      │
+│                                               command output.                │
+│ --skip-checks                                 Skip system checks.            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ bad      Bad command test routine                                            │
+│ deploy   Deploy the site application into production.                        │
+│ test     Test Routine 1                                                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+"""
+
+    routine_test_help_rich = """
+ Usage: ./manage.py routine test [OPTIONS] COMMAND [ARGS]...                    
+                                                                                
+                                                                                
+ Test Routine 1                                                                 
+                                                                                
+                                                                                
+ [0] track 2 | initial, demo                                                    
+ [1] track 0 (verbosity=0) | initial                                            
+ [3] track 3 (demo=2)                                                           
+ [3] track 4 (demo=6)                                                           
+ [4] track 1                                                                    
+ [6] track 5 | demo                                                             
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --all              Include all switched commands.                            │
+│ --demo                                                                       │
+│ --initial                                                                    │
+│ --help             Show this message and exit.                               │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ list   List the commands that will be run.                                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+"""
+
+    @pytest.mark.skipif(find_spec("rich") is None, reason="Rich is not installed.")
+    def test_helps_rich(self):
+        stdout = StringIO()
+        routine = get_command("routine", BaseCommand, stdout=stdout, no_color=True)
+        routine.print_help("./manage.py", "routine")
+        self.assertEqual(stdout.getvalue().strip(), self.routine_help_rich.strip())
+        stdout.truncate(0)
+        stdout.seek(0)
+
+        routine.print_help("./manage.py", "routine", "test")
+        self.assertEqual(
+            stdout.getvalue().strip().replace("\x08", ""),
+            self.routine_test_help_rich.strip(),
+        )
+
+    routine_help_no_rich = """
+Usage: ./manage.py routine [OPTIONS] COMMAND [ARGS]...
+
+  Run batches of commands configured in settings.
+
+Options:
+  --verbosity INTEGER RANGE  Verbosity level; 0=minimal output, 1=normal
+                             output, 2=verbose output, 3=very verbose output
+                             [default: 1; 0<=x<=3]
+  --version                  Show program's version number and exit.
+  --settings TEXT            The Python path to a settings module, e.g.
+                             "myproject.settings.main". If this isn't
+                             provided, the DJANGO_SETTINGS_MODULE environment
+                             variable will be used.
+  --pythonpath PATH          A directory to add to the Python path, e.g.
+                             "/home/djangoprojects/myproject".
+  --traceback                Raise on CommandError exceptions
+  --no-color                 Don't colorize the command output.
+  --force-color              Force colorization of the command output.
+  --skip-checks              Skip system checks.
+  --help                     Show this message and exit.
+
+Commands:
+  bad     Bad command test routine
+  deploy  Deploy the site application into production.
+  test    Test Routine 1
+"""
+
+    routine_test_help_no_rich = """
+Usage: ./manage.py routine test [OPTIONS] COMMAND [ARGS]...
+
+  Test Routine 1
+  -----------------------------------
+  
+  [0] track 2 | initial, demo
+  [1] track 0 (verbosity=0) | initial
+  [3] track 3 (demo=2)
+  [3] track 4 (demo=6)
+  [4] track 1
+  [6] track 5 | demo
+
+Options:
+  --all      Include all switched commands.
+  --demo
+  --initial
+  --help     Show this message and exit.
+
+Commands:
+  list  List the commands that will be run.
+"""
+
+    @pytest.mark.skipif(find_spec("rich") is not None, reason="Rich is installed.")
+    def test_helps_no_rich(self):
+        stdout = StringIO()
+        routine = get_command("routine", BaseCommand, stdout=stdout, no_color=True)
+        routine.print_help("./manage.py", "routine")
+        self.assertEqual(stdout.getvalue().strip(), self.routine_help_no_rich.strip())
+        stdout.truncate(0)
+        stdout.seek(0)
+
+        routine.print_help("./manage.py", "routine", "test")
+        self.assertEqual(
+            stdout.getvalue().strip().replace("\x08", ""),
+            self.routine_test_help_no_rich.strip(),
+        )

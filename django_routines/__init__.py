@@ -110,12 +110,12 @@ class Routine:
         return len(self.commands)
 
     @property
-    def switches(self) -> t.Set[str]:
+    def switches(self) -> t.List[str]:
         switches: t.Set[str] = set()
         for command in self.commands:
             if command.switches:
                 switches.update(command.switches)
-        return switches
+        return sorted(switches)
 
     def plan(self, switches: t.Set[str]) -> t.List[RoutineCommand]:
         return [

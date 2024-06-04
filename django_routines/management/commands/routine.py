@@ -1,6 +1,5 @@
-import importlib
-import importlib.util
 import typing as t
+from importlib.util import find_spec
 
 import click
 import typer
@@ -14,7 +13,7 @@ from django_typer.types import Verbosity
 from django_routines import ROUTINE_SETTING, Routine, RoutineCommand, get_routine
 
 width = 80
-use_rich = importlib.util.find_spec("rich") is not None
+use_rich = find_spec("rich") is not None
 if use_rich:
     from rich.console import Console
 
@@ -181,7 +180,7 @@ for name, routine in getattr(settings, ROUTINE_SETTING, {}).items():
     ruler = f"[underline]{' ' * width}[/underline]\n" if use_rich else "-" * width
     cmd_strings = "\n".join(command_strings)
     cmd_strings = f"{'[bright]' if use_rich else ''}{cmd_strings}{'[/bright]' if use_rich else ''}"
-    help_txt = f"\b\n{routine.help_text}\n{ruler}\b\n\n{cmd_strings}\n"
+    help_txt = f"\b\n{routine.help_text}\n{ruler}\b\n{'' if use_rich else '\b\n'}{cmd_strings}\n"
     grp = Command.group(
         help=help_txt, short_help=routine.help_text, invoke_without_command=True
     )(locals()[name])
