@@ -58,6 +58,14 @@ class RoutineCommand:
     """
 
 
+# todo - remove this and replace with key argument when support for python <3.10 dropped.
+def insort_right_with_key(a, x, key=lambda x: x):
+    transformed_list = [key(item) for item in a]
+    transformed_x = key(x)
+    insert_point = bisect.bisect_right(transformed_list, transformed_x)
+    a.insert(insert_point, x)
+
+
 @dataclass
 class Routine:
     """
@@ -101,7 +109,9 @@ class Routine:
         ]
 
     def command(self, command: RoutineCommand):
-        bisect.insort(self.commands, command, key=lambda cmd: cmd.priority)
+        # python >= 3.10
+        # bisect.insort(self.commands, command, key=lambda cmd: cmd.priority)
+        insort_right_with_key(self.commands, command, key=lambda cmd: cmd.priority)
         return command
 
 

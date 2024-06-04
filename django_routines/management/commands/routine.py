@@ -49,7 +49,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
     verbosity: int = 1
     switches: t.Set[str] = set()
 
-    suppressed_base_arguments: t.Optional[t.Iterable[str]] = None
+    suppressed_base_arguments = set()
 
     _routine: t.Optional[Routine] = None
     _verbosity_passed: bool = False

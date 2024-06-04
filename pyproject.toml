@@ -70,6 +70,7 @@ pexpect = "^4.9.0"
 pyright = "^1.1.357"
 ruff = "^0.4.1"
 django-stubs = "^5.0.2"
+mypy = "^1.10.0"
 
 [tool.poetry.extras]
 rich = ["rich"]

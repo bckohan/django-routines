@@ -27,7 +27,7 @@ class Tests(TestCase):
         passed_options.clear()
 
         command = (
-            "routines",
+            "routine",
             ("--no-color" if no_color else "--force-color"),
             *(("--verbosity", str(verbosity)) if verbosity is not None else tuple()),
             "test",
@@ -126,9 +126,9 @@ class Tests(TestCase):
 
     def test_list(self, no_color=True):
         if no_color:
-            command = ("routines", "--no-color", "test")
+            command = ("routine", "--no-color", "test")
         else:
-            command = ("routines", "--force-color", "test")
+            command = ("routine", "--force-color", "test")
 
         out = StringIO()
         call_command(*command, "--all", "list", stdout=out)
