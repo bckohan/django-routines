@@ -182,7 +182,9 @@ for name, routine in getattr(settings, ROUTINE_SETTING, {}).items():
     cmd_strings = "\n".join(command_strings)
     cmd_strings = f"{'[bright]' if use_rich else ''}{cmd_strings}{'[/bright]' if use_rich else ''}"
     help_txt = f"\b\n{routine.help_text}\n{ruler}\b\n\n{cmd_strings}\n"
-    grp = Command.group(help=help_txt, invoke_without_command=True)(locals()[name])
+    grp = Command.group(
+        help=help_txt, short_help=routine.help_text, invoke_without_command=True
+    )(locals()[name])
 
     @grp.command(name="list", help=_("List the commands that will be run."))
     def list(self):
