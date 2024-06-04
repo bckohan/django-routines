@@ -180,7 +180,10 @@ for name, routine in getattr(settings, ROUTINE_SETTING, {}).items():
     ruler = f"[underline]{' ' * width}[/underline]\n" if use_rich else "-" * width
     cmd_strings = "\n".join(command_strings)
     cmd_strings = f"{'[bright]' if use_rich else ''}{cmd_strings}{'[/bright]' if use_rich else ''}"
-    help_txt = f"\b\n{routine.help_text}\n{ruler}\b\n{'' if use_rich else '\b\n'}{cmd_strings}\n"
+    lb = "\b\n"
+    help_txt = (
+        f"{lb}{routine.help_text}\n{ruler}{lb}{'' if use_rich else lb}{cmd_strings}\n"
+    )
     grp = Command.group(
         help=help_txt, short_help=routine.help_text, invoke_without_command=True
     )(locals()[name])
