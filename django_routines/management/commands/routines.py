@@ -179,7 +179,8 @@ for name, routine in getattr(settings, ROUTINE_SETTING, {}).items():
     if not use_rich:
         width = max([len(cmd) for cmd in command_strings])
     ruler = f"[underline]{' ' * width}[/underline]\n" if use_rich else "-" * width
-    cmd_strings = f"{'[bright]' if use_rich else ''}{'\n'.join(command_strings)}{'[/bright]' if use_rich else ''}"
+    cmd_strings = "\n".join(command_strings)
+    cmd_strings = f"{'[bright]' if use_rich else ''}{cmd_strings}{'[/bright]' if use_rich else ''}"
     help_txt = f"\b\n{routine.help_text}\n{ruler}\b\n\n{cmd_strings}\n"
     grp = Command.group(help=help_txt, invoke_without_command=True)(locals()[name])
 
