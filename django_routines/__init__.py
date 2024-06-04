@@ -13,8 +13,8 @@ r"""
 
 import bisect
 import sys
+import typing as t
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, cast
 
 VERSION = (1, 0, 0)
 
@@ -24,8 +24,20 @@ __author__ = "Brian Kohan"
 __license__ = "MIT"
 __copyright__ = "Copyright 2024 Brian Kohan"
 
+__all__ = [
+    "ROUTINE_SETTING",
+    "RoutineCommand",
+    "Routine",
+    "routine",
+    "command",
+    "get_routine",
+]
+
 
 ROUTINE_SETTING = "ROUTINES"
+
+
+R = t.TypeVar("R")
 
 
 @dataclass
@@ -34,7 +46,7 @@ class RoutineCommand:
     Dataclass to hold the routine command information.
     """
 
-    command: Tuple[str, ...]
+    command: t.Tuple[str, ...]
     """
     The command and its arguments to run the routine, all strings or
     coercible to strings that the command will parse correctly.
@@ -46,20 +58,25 @@ class RoutineCommand:
     insertion order.
     """
 
-    switches: Tuple[str, ...] = tuple()
+    switches: t.Tuple[str, ...] = tuple()
     """
     The command will run only when one of these switches is active,
     or for all invocations of the routine if no switches are configured.
     """
 
-    options: Dict[str, Any] = field(default_factory=dict)
+    options: t.Dict[str, t.Any] = field(default_factory=dict)
     """
-    Any options to pass to the command via call_command.
+    t.Any options to pass to the command via call_command.
     """
 
 
-# todo - remove this and replace with key argument when support for python <3.10 dropped.
-def insort_right_with_key(a, x, key=lambda x: x):
+def _insort_right_with_key(a: t.List[R], x: R, key: t.Callable[[R], t.Any]) -> None:
+    """
+    A function that implements bisect.insort_right with a key callable on items.
+
+    todo: remove this and replace with key argument to bisect.insort_right when support for
+    python <3.10 dropped.
+    """
     transformed_list = [key(item) for item in a]
     transformed_x = key(x)
     insert_point = bisect.bisect_right(transformed_list, transformed_x)
@@ -82,25 +99,25 @@ class Routine:
     The help text to display for the routine.
     """
 
-    commands: List[RoutineCommand] = field(default_factory=list)
+    commands: t.List[RoutineCommand] = field(default_factory=list)
     """
     The commands to run in the routine.
     """
 
-    switch_helps: Dict[str, str] = field(default_factory=dict)
+    switch_helps: t.Dict[str, str] = field(default_factory=dict)
 
     def __len__(self):
         return len(self.commands)
 
     @property
-    def switches(self) -> Set[str]:
-        switches: Set[str] = set()
+    def switches(self) -> t.Set[str]:
+        switches: t.Set[str] = set()
         for command in self.commands:
             if command.switches:
                 switches.update(command.switches)
         return switches
 
-    def plan(self, switches: Set[str]) -> List[RoutineCommand]:
+    def plan(self, switches: t.Set[str]) -> t.List[RoutineCommand]:
         return [
             command
             for command in self.commands
@@ -111,7 +128,7 @@ class Routine:
     def command(self, command: RoutineCommand):
         # python >= 3.10
         # bisect.insort(self.commands, command, key=lambda cmd: cmd.priority)
-        insort_right_with_key(self.commands, command, key=lambda cmd: cmd.priority)
+        _insort_right_with_key(self.commands, command, key=lambda cmd: cmd.priority)
         return command
 
 
@@ -137,7 +154,7 @@ def get_routine(name: str) -> Routine:
 
 def routine(name: str, help_text: str = "", *commands: RoutineCommand, **switch_helps):
     """
-    Register a routine to the list of routines in settings to be run.
+    Register a routine to the t.List of routines in settings to be run.
 
     :param name: The name of the routine to register.
     :param help_text: The help text to display for the routine by the routines command.
@@ -155,7 +172,7 @@ def command(
     routine: str,
     *command: str,
     priority: int = RoutineCommand.priority,
-    switches: Optional[Sequence[str]] = RoutineCommand.switches,
+    switches: t.Optional[t.Sequence[str]] = RoutineCommand.switches,
     **options,
 ):
     """
@@ -172,7 +189,7 @@ def command(
         insertion order.
     :param switches: The command will run only when one of these switches is active,
         or for all invocations of the routine if no switches are configured.
-    :param options: Any options to pass to the command via call_command.
+    :param options: t.Any options to pass to the command via call_command.
     :return: The new command.
     """
     settings = sys._getframe(1).f_globals  # noqa: WPS437
@@ -180,6 +197,6 @@ def command(
     settings[ROUTINE_SETTING].setdefault(routine, Routine(routine, "", []))
     return settings[ROUTINE_SETTING][routine].command(
         RoutineCommand(
-            cast(Tuple[str], command), priority, tuple(switches or []), options
+            t.cast(t.Tuple[str], command), priority, tuple(switches or []), options
         )
     )

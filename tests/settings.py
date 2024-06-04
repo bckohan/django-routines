@@ -160,3 +160,11 @@ command("test", "track", "2", priority=0, switches=("initial", "demo"))
 command("test", "track", "3", priority=3, demo=2)
 command("test", "track", "4", priority=3, demo=6)
 command("test", "track", "5", priority=6, switches=["demo"])
+
+routine(
+    "bad",
+    _("Bad command test routine"),
+    RoutineCommand(("track", "0")),
+    RoutineCommand(("does_not_exist",)),
+    RoutineCommand(("track", "1")),
+)
