@@ -3,8 +3,10 @@ from pathlib import Path
 from django_routines import (
     routine,
     command,
+    Routine,
     RoutineCommand,
     get_routine,
+    routines,
 )
 from django.utils.translation import gettext_lazy as _
 
@@ -132,17 +134,16 @@ ROOT_URLCONF = "tests.urls"
 routine(
     "deploy",
     _("Deploy the site application into production."),
-    RoutineCommand(("migrate",), priority=1),
-    RoutineCommand(("collectstatic",), priority=5),
+    RoutineCommand(("makemigrations",), switches=["prepare"]),
+    RoutineCommand(("migrate",)),
+    RoutineCommand(("renderstatic",)),
+    RoutineCommand(("collectstatic",)),
     prepare=_("Prepare the deployment."),
     demo="Deploy the demo.",
 )
 
-command("deploy", "makemigrations", priority=0, switches=["prepare"])
-command("deploy", "renderstatic", priority=4)
-command(
-    "deploy", "loaddata", "./fixtures/initial_data.json", priority=6, switches=["demo"]
-)
+command("deploy", "shellcompletion", "install", switches=["initial"])
+command("deploy", "loaddata", "./fixtures/initial_data.json", switches=["demo"])
 
 assert get_routine("deploy").name == "deploy"
 
@@ -168,3 +169,11 @@ routine(
     RoutineCommand(("does_not_exist",)),
     RoutineCommand(("track", "1")),
 )
+
+
+names = set()
+for rtn in routines():
+    assert isinstance(rtn, Routine)
+    names.add(rtn.name)
+
+assert names == {"deploy", "test", "bad"}

@@ -4,7 +4,9 @@ import pytest
 
 from django.core.management import BaseCommand, call_command, CommandError
 from django_typer import get_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.conf import settings
+from django_routines import ROUTINE_SETTING, Routine, RoutineCommand
 import re
 
 from tests.django_routines_tests.management.commands.track import (
@@ -369,4 +371,380 @@ Commands:
         self.assertEqual(
             stdout.getvalue().strip().replace("\x08", ""),
             self.routine_test_help_no_rich.strip(),
+        )
+
+    def test_settings_format(self):
+        routines = getattr(settings, ROUTINE_SETTING)
+        self.assertEqual(
+            routines,
+            {
+                "bad": {
+                    "commands": [
+                        {
+                            "command": ("track", "0"),
+                            "options": {},
+                            "priority": 0,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("does_not_exist",),
+                            "options": {},
+                            "priority": 0,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("track", "1"),
+                            "options": {},
+                            "priority": 0,
+                            "switches": (),
+                        },
+                    ],
+                    "help_text": "Bad command test routine",
+                    "name": "bad",
+                    "switch_helps": {},
+                },
+                "deploy": {
+                    "commands": [
+                        {
+                            "command": ("makemigrations",),
+                            "options": {},
+                            "priority": 0,
+                            "switches": ["prepare"],
+                        },
+                        {
+                            "command": ("migrate",),
+                            "options": {},
+                            "priority": 0,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("renderstatic",),
+                            "options": {},
+                            "priority": 0,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("collectstatic",),
+                            "options": {},
+                            "priority": 0,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("shellcompletion", "install"),
+                            "options": {},
+                            "priority": 0,
+                            "switches": ("initial",),
+                        },
+                        {
+                            "command": ("loaddata", "./fixtures/initial_data.json"),
+                            "options": {},
+                            "priority": 0,
+                            "switches": ("demo",),
+                        },
+                    ],
+                    "help_text": "Deploy the site application into production.",
+                    "name": "deploy",
+                    "switch_helps": {
+                        "demo": "Deploy the demo.",
+                        "prepare": "Prepare the deployment.",
+                    },
+                },
+                "test": {
+                    "commands": [
+                        {
+                            "command": ("track", "2"),
+                            "options": {},
+                            "priority": 0,
+                            "switches": ("initial", "demo"),
+                        },
+                        {
+                            "command": ("track", "0"),
+                            "options": {"verbosity": 0},
+                            "priority": 1,
+                            "switches": ("initial",),
+                        },
+                        {
+                            "command": ("track", "3"),
+                            "options": {"demo": 2},
+                            "priority": 3,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("track", "4"),
+                            "options": {"demo": 6},
+                            "priority": 3,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("track", "1"),
+                            "options": {},
+                            "priority": 4,
+                            "switches": (),
+                        },
+                        {
+                            "command": ("track", "5"),
+                            "options": {},
+                            "priority": 6,
+                            "switches": ("demo",),
+                        },
+                    ],
+                    "help_text": "Test Routine 1",
+                    "name": "test",
+                    "switch_helps": {},
+                },
+            },
+        )
+
+
+@override_settings(
+    INSTALLED_APPS=[
+        "tests.django_routines_tests",
+        "django_routines",
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+    ]
+)
+class NoDjangoTyperInstalledTests(Tests):
+    pass
+
+
+@override_settings(
+    DJANGO_ROUTINES={
+        "bad": {
+            "commands": [
+                {"command": ("track", "0")},
+                {"command": ("does_not_exist",)},
+                {"command": ("track", "1")},
+            ],
+            "help_text": "Bad command test routine",
+            "name": "bad",
+        },
+        "deploy": {
+            "commands": [
+                {"command": ("makemigrations",), "switches": ["prepare"]},
+                {"command": ("migrate",)},
+                {"command": ("renderstatic",)},
+                {"command": ("collectstatic",)},
+                {"command": ("shellcompletion", "install"), "switches": ("initial",)},
+                {
+                    "command": ("loaddata", "./fixtures/initial_data.json"),
+                    "switches": ("demo",),
+                },
+            ],
+            "help_text": "Deploy the site application into production.",
+            "name": "deploy",
+            "switch_helps": {
+                "demo": "Deploy the demo.",
+                "prepare": "Prepare the deployment.",
+            },
+        },
+        "test": {
+            "commands": [
+                {"command": ("track", "2"), "switches": ("initial", "demo")},
+                {
+                    "command": ("track", "0"),
+                    "options": {"verbosity": 0},
+                    "priority": 1,
+                    "switches": ("initial",),
+                },
+                {"command": ("track", "3"), "options": {"demo": 2}, "priority": 3},
+                {"command": ("track", "4"), "options": {"demo": 6}, "priority": 3},
+                {"command": ("track", "1"), "priority": 4},
+                {"command": ("track", "5"), "priority": 6, "switches": ("demo",)},
+            ],
+            "help_text": "Test Routine 1",
+            "name": "test",
+        },
+    }
+)
+class SettingsAsDictTests(Tests):
+    def test_settings_format(self):
+        routines = getattr(settings, ROUTINE_SETTING)
+        self.assertEqual(
+            routines,
+            {
+                "bad": {
+                    "commands": [
+                        {"command": ("track", "0")},
+                        {"command": ("does_not_exist",)},
+                        {"command": ("track", "1")},
+                    ],
+                    "help_text": "Bad command test routine",
+                    "name": "bad",
+                },
+                "deploy": {
+                    "commands": [
+                        {"command": ("makemigrations",), "switches": ["prepare"]},
+                        {"command": ("migrate",)},
+                        {"command": ("renderstatic",)},
+                        {"command": ("collectstatic",)},
+                        {
+                            "command": ("shellcompletion", "install"),
+                            "switches": ("initial",),
+                        },
+                        {
+                            "command": ("loaddata", "./fixtures/initial_data.json"),
+                            "switches": ("demo",),
+                        },
+                    ],
+                    "help_text": "Deploy the site application into production.",
+                    "name": "deploy",
+                    "switch_helps": {
+                        "demo": "Deploy the demo.",
+                        "prepare": "Prepare the deployment.",
+                    },
+                },
+                "test": {
+                    "commands": [
+                        {"command": ("track", "2"), "switches": ("initial", "demo")},
+                        {
+                            "command": ("track", "0"),
+                            "options": {"verbosity": 0},
+                            "priority": 1,
+                            "switches": ("initial",),
+                        },
+                        {
+                            "command": ("track", "3"),
+                            "options": {"demo": 2},
+                            "priority": 3,
+                        },
+                        {
+                            "command": ("track", "4"),
+                            "options": {"demo": 6},
+                            "priority": 3,
+                        },
+                        {"command": ("track", "1"), "priority": 4},
+                        {
+                            "command": ("track", "5"),
+                            "priority": 6,
+                            "switches": ("demo",),
+                        },
+                    ],
+                    "help_text": "Test Routine 1",
+                    "name": "test",
+                },
+            },
+        )
+
+
+@override_settings(
+    DJANGO_ROUTINES={
+        "bad": Routine(
+            commands=[
+                RoutineCommand(command=("track", "0")),
+                RoutineCommand(command=("does_not_exist",)),
+                RoutineCommand(command=("track", "1")),
+            ],
+            help_text="Bad command test routine",
+            name="bad",
+        ),
+        "deploy": Routine(
+            commands=[
+                RoutineCommand(command=("makemigrations",), switches=["prepare"]),
+                RoutineCommand(command=("migrate",)),
+                RoutineCommand(command=("renderstatic",)),
+                RoutineCommand(command=("collectstatic",)),
+                RoutineCommand(
+                    command=("shellcompletion", "install"), switches=("initial",)
+                ),
+                RoutineCommand(
+                    command=("loaddata", "./fixtures/initial_data.json"),
+                    switches=("demo",),
+                ),
+            ],
+            help_text="Deploy the site application into production.",
+            name="deploy",
+            switch_helps={
+                "demo": "Deploy the demo.",
+                "prepare": "Prepare the deployment.",
+            },
+        ),
+        "test": Routine(
+            commands=[
+                RoutineCommand(command=("track", "2"), switches=("initial", "demo")),
+                RoutineCommand(
+                    command=("track", "0"),
+                    options={"verbosity": 0},
+                    priority=1,
+                    switches=("initial",),
+                ),
+                RoutineCommand(command=("track", "3"), options={"demo": 2}, priority=3),
+                RoutineCommand(command=("track", "4"), options={"demo": 6}, priority=3),
+                RoutineCommand(command=("track", "1"), priority=4),
+                RoutineCommand(command=("track", "5"), priority=6, switches=("demo",)),
+            ],
+            help_text="Test Routine 1",
+            name="test",
+        ),
+    }
+)
+class SettingsAsObjectsTests(Tests):
+    def test_settings_format(self):
+        routines = getattr(settings, ROUTINE_SETTING)
+        self.assertEqual(
+            routines,
+            {
+                "bad": Routine(
+                    commands=[
+                        RoutineCommand(command=("track", "0")),
+                        RoutineCommand(command=("does_not_exist",)),
+                        RoutineCommand(command=("track", "1")),
+                    ],
+                    help_text="Bad command test routine",
+                    name="bad",
+                ),
+                "deploy": Routine(
+                    commands=[
+                        RoutineCommand(
+                            command=("makemigrations",), switches=["prepare"]
+                        ),
+                        RoutineCommand(command=("migrate",)),
+                        RoutineCommand(command=("renderstatic",)),
+                        RoutineCommand(command=("collectstatic",)),
+                        RoutineCommand(
+                            command=("shellcompletion", "install"),
+                            switches=("initial",),
+                        ),
+                        RoutineCommand(
+                            command=("loaddata", "./fixtures/initial_data.json"),
+                            switches=("demo",),
+                        ),
+                    ],
+                    help_text="Deploy the site application into production.",
+                    name="deploy",
+                    switch_helps={
+                        "demo": "Deploy the demo.",
+                        "prepare": "Prepare the deployment.",
+                    },
+                ),
+                "test": Routine(
+                    commands=[
+                        RoutineCommand(
+                            command=("track", "2"), switches=("initial", "demo")
+                        ),
+                        RoutineCommand(
+                            command=("track", "0"),
+                            options={"verbosity": 0},
+                            priority=1,
+                            switches=("initial",),
+                        ),
+                        RoutineCommand(
+                            command=("track", "3"), options={"demo": 2}, priority=3
+                        ),
+                        RoutineCommand(
+                            command=("track", "4"), options={"demo": 6}, priority=3
+                        ),
+                        RoutineCommand(command=("track", "1"), priority=4),
+                        RoutineCommand(
+                            command=("track", "5"), priority=6, switches=("demo",)
+                        ),
+                    ],
+                    help_text="Test Routine 1",
+                    name="test",
+                ),
+            },
         )

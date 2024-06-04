@@ -3,14 +3,18 @@ from importlib.util import find_spec
 
 import click
 import typer
-from django.conf import settings
 from django.core.management import CommandError, call_command
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
 from django_typer import TyperCommand, get_command, initialize
 from django_typer.types import Verbosity
 
-from django_routines import ROUTINE_SETTING, Routine, RoutineCommand, get_routine
+from django_routines import (
+    Routine,
+    RoutineCommand,
+    get_routine,
+    routines,
+)
 
 width = 80
 use_rich = find_spec("rich") is not None
@@ -43,6 +47,10 @@ def {routine}(
 
 
 class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
+    """
+    A TyperCommand_
+    """
+
     help = _("Run batches of commands configured in settings.")
 
     verbosity: int = 1
@@ -132,7 +140,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
             self.secho(f"[{priority}] {cmd_str}{opt_str}{switches_str}")
 
 
-for name, routine in getattr(settings, ROUTINE_SETTING, {}).items():
+for routine in routines():
     switches = routine.switches
     switch_args = ", ".join(
         [
@@ -145,7 +153,7 @@ for name, routine in getattr(settings, ROUTINE_SETTING, {}).items():
         add_switches += f'\n    if all or {switch}: self.switches.append("{switch}")'
 
     cmd_code = COMMAND_TMPL.format(
-        routine=name,
+        routine=routine.name,
         switch_args=switch_args,
         add_switches=add_switches,
         all_help=_("Include all switched commands."),
@@ -186,7 +194,7 @@ for name, routine in getattr(settings, ROUTINE_SETTING, {}).items():
     )
     grp = Command.group(
         help=help_txt, short_help=routine.help_text, invoke_without_command=True
-    )(locals()[name])
+    )(locals()[routine.name])
 
     @grp.command(name="list", help=_("List the commands that will be run."))
     def list(self):

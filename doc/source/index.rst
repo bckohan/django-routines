@@ -53,3 +53,11 @@ into your settings files keeping your code base DRY_.
 :big:`Basic Example`
 
 .. todo:: Add a basic example
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   reference
+   changelog
