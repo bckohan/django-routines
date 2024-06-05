@@ -25,7 +25,7 @@ of commands that we typically run to generate package artifacts (like migrations
 javascript). The deploy routine will be a collection of commands we typically run when deploying
 the site for the first time on a new server or when we deploy version updates on the server.
 
-**Routines commands are run in the order they are registered, or by [priority](#priorities).**
+**Routine commands are run in the order they are registered, or by [priority](#priorities).**
 
 In our settings file we may define these routines like this:
 

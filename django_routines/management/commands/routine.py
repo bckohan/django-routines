@@ -48,7 +48,16 @@ def {routine}(
 
 class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
     """
-    A TyperCommand_
+    A TyperCommand_ that reads the DJANGO_ROUTINES setting from settings and
+    builds out a set of subcommands for each routine that when invoked will run
+    those routines in order. Each routine also has a subcommand called ``list``
+    that prints which commands will be executed and in what order given the
+    switches the user has selected.
+
+    .. note::
+
+        If --verbosity is supplied, the value will be passed via options to any
+        command in the routine that accepts it.
     """
 
     help = _("Run batches of commands configured in settings.")
@@ -73,6 +82,10 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
 
     @property
     def plan(self) -> t.List[RoutineCommand]:
+        """
+        The RoutineCommands that make up the execution plan for the currently
+        active routine and switches.
+        """
         assert self.routine
         return self.routine.plan(self.switches)
 
@@ -85,6 +98,12 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         )
 
     def _run_routine(self):
+        """
+        Execute the current routine plan. If verbosity is zero, do not print the
+        commands as they are run. Also use the stdout/stderr streams and color
+        configurion of the routine command for each of the commands in the execution
+        plan.
+        """
         assert self.routine
         for command in self.plan:
             if self.verbosity > 0:
@@ -115,6 +134,10 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
                 raise CommandError(f"Command not found: {command.command_name}")
 
     def _list(self) -> None:
+        """
+        List the commands that are part of the execution plan given the active
+        routine and switches.
+        """
         for command in self.plan:
             priority = str(command.priority)
             cmd_str = command.command_str

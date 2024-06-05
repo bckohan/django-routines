@@ -19,7 +19,7 @@ the site for the first time on a new server or when we deploy version updates on
 
 .. note::
 
-    Routines commands are run in the order they are registered, or by priority_.
+    Routine commands are run in the order they are registered, or by priority_.
 
 .. literalinclude:: ../../examples/readme.py
     :caption: settings.py
