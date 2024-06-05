@@ -88,10 +88,10 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         assert self.routine
         for command in self.plan:
             if self.verbosity > 0:
-                self.secho(" ".join(command.command), fg="cyan")
+                self.secho(command.command_str, fg="cyan")
             try:
                 cmd = get_command(
-                    command.command[0],
+                    command.command_name,
                     BaseCommand,
                     stdout=t.cast(t.IO[str], self.stdout._out),
                     stderr=t.cast(t.IO[str], self.stderr._out),
@@ -105,19 +105,19 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
                         "verbosity" in arg
                         for arg in getattr(cmd, "suppressed_base_arguments", [])
                     )
-                    and not any("--verbosity" in arg for arg in command.command[1:])
+                    and not any("--verbosity" in arg for arg in command.command_args)
                 ):
                     # only pass verbosity if it was passed to routines, not suppressed
                     # by the command class and not passed by the configured command
                     options = {"verbosity": self.verbosity, **options}
-                call_command(cmd, *command.command[1:], **options)
+                call_command(cmd, *command.command_args, **options)
             except KeyError:
-                raise CommandError(f"Command not found: {command.command[0]}")
+                raise CommandError(f"Command not found: {command.command_name}")
 
     def _list(self) -> None:
         for command in self.plan:
             priority = str(command.priority)
-            cmd_str = " ".join(command.command)
+            cmd_str = command.command_str
             switches_str = " | " if command.switches else ""
             opt_str = " ".join([f"{k}={v}" for k, v in command.options.items()])
             if self.force_color or not self.no_color:
@@ -162,7 +162,7 @@ for routine in routines():
     command_strings = []
     for command in routine.commands:
         priority = f"{'[green]' if use_rich else ''}{command.priority}{'[/green]' if use_rich else ''}"
-        cmd_str = f"{'[cyan]' if use_rich else ''}{' '.join(command.command)}{'[/cyan]' if use_rich else ''}"
+        cmd_str = f"{'[cyan]' if use_rich else ''}{command.command_str}{'[/cyan]' if use_rich else ''}"
         if command.options:
             if use_rich:
                 opt_str = " ".join(

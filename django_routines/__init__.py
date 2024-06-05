@@ -52,7 +52,7 @@ class RoutineCommand:
     Dataclass to hold the routine command information.
     """
 
-    command: t.Tuple[str, ...]
+    command: t.Union[str, t.Tuple[str, ...]]
     """
     The command and its arguments to run the routine, all strings or
     coercible to strings that the command will parse correctly.
@@ -74,6 +74,18 @@ class RoutineCommand:
     """
     t.Any options to pass to the command via call_command.
     """
+
+    @property
+    def command_name(self) -> str:
+        return self.command if isinstance(self.command, str) else self.command[0]
+
+    @property
+    def command_args(self) -> t.Tuple[str, ...]:
+        return tuple() if isinstance(self.command, str) else self.command[1:]
+
+    @property
+    def command_str(self) -> str:
+        return self.command if isinstance(self.command, str) else " ".join(self.command)
 
     @classmethod
     def from_dict(
@@ -161,7 +173,12 @@ class Routine:
         )
 
 
-def routine(name: str, help_text: str = "", *commands: RoutineCommand, **switch_helps):
+def routine(
+    name: str,
+    help_text: t.Union[str, Promise] = "",
+    *commands: RoutineCommand,
+    **switch_helps,
+):
     """
     Register a routine to the t.List of routines in settings to be run.
 
@@ -172,7 +189,24 @@ def routine(name: str, help_text: str = "", *commands: RoutineCommand, **switch_
     settings = sys._getframe(1).f_globals  # noqa: WPS437
     if not settings.get(ROUTINE_SETTING, {}):
         settings[ROUTINE_SETTING] = {}
-    routine = Routine(name, help_text, switch_helps=switch_helps)
+
+    existing: t.List[RoutineCommand] = []
+    try:
+        routine = get_routine(name)
+        help_text = (
+            help_text
+            # don't trigger translation - we're in settings!
+            if isinstance(help_text, Promise) or help_text
+            else routine.help_text
+        )
+        switch_helps = {**routine.switch_helps, **switch_helps}
+        existing = routine.commands
+    except KeyError:
+        pass
+    routine = Routine(
+        name, help_text=help_text, commands=existing, switch_helps=switch_helps
+    )
+
     for command in commands:
         routine.add(command)
     settings[ROUTINE_SETTING][name] = asdict(routine)
