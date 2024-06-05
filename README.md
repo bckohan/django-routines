@@ -27,6 +27,8 @@ the site for the first time on a new server or when we deploy version updates on
 
 **Routines commands are run in the order they are registered, or by [priority](#priorities).**
 
+In our settings file we may define these routines like this:
+
 ```python
 from django_routines import RoutineCommand, command, routine
 
