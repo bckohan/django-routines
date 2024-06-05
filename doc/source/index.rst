@@ -30,7 +30,7 @@ The routine command will read our settings file and generate two subcommands, on
 and one called package:
 
 .. typer:: django_routines.management.commands.routine.Command:typer_app:package
-    :prog: ./manage.py routine
+    :prog: ./manage.py routine package
     :theme: dark
     :convert-png: latex
 
@@ -47,7 +47,7 @@ Now we can run all of our package routines with one command:
 The deploy command has several switches that we can enable to run additional commands.
 
 .. typer:: django_routines.management.commands.routine.Command:typer_app:deploy
-    :prog: ./manage.py routine
+    :prog: ./manage.py routine deploy
     :theme: dark
     :convert-png: latex
 

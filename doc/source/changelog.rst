@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+v1.0.1
+======
+
+* `Help example images dont have the correct usage line. <https://github.com/bckohan/django-routines/issues/3>`_
+
 
 v1.0.0
 ======
