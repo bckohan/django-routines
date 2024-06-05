@@ -54,6 +54,8 @@ DJANGO_ROUTINES = None
 
 STATIC_URL = "static/"
 
+SECRET_KEY = "fake"
+
 routine(
     "deploy",
     _("Deploy the site application into production."),

@@ -32,3 +32,5 @@ MIDDLEWARE = [
 ]
 
 STATIC_URL = "static/"
+
+SECRET_KEY = "fake"
