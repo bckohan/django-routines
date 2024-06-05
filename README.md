@@ -152,7 +152,7 @@ When specifying arguments you may add them to the command tuple OR specify them 
 
 ```python
     # these two are equivalent
-    command("package", ("makemigrations", "--no-header"))
+    command("package", "makemigrations", "--no-header")
     command("package", "makemigrations", no_header=True)
 ```
 
