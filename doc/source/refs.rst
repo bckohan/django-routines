@@ -4,6 +4,8 @@
 .. _PyPI: https://pypi.python.org/pypi/django-routines
 .. _rich: https://rich.readthedocs.io/
 .. _django-routines: https://pypi.python.org/pypi/django-routines
+.. _django-typer: https://pypi.python.org/pypi/django-typer
+.. _django_typer: https://github.com/bckohan/django-typer
 .. _DRY: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 .. _TyperCommand: https://django-typer.readthedocs.io/en/latest/reference.html#django_typer.TyperCommand
 .. _django-split-settings: https://pypi.org/project/django-split-settings/

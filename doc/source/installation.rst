@@ -28,8 +28,8 @@ Installation
             'django_typer',  # optional!
         ]
 
-   *You only need to install django_typer as an app if you want to use the shellcompletion command
+   *You only need to install* django-typer_ *as an app if you want to use the shellcompletion command
    to* `enable tab-completion <https://django-typer.readthedocs.io/en/latest/shell_completion.html>`_
-   *or if you would like django-typer to install*
+   *or if you would like* django-typer_ *to install*
    `rich traceback rendering <https://django-typer.readthedocs.io/en/latest/howto.html#configure-rich-stack-traces>`_
    *for you - which it does by default if rich is also installed.*
