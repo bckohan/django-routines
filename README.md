@@ -16,7 +16,7 @@
 Configure batches of Django management commands in your settings files and run them all at once.
 For example, batch together your common database maintenance tasks, deployment routines or any
 other set of commands you need to run together. This helps single source general site maintenance
-into your settings files keeping your code base [DRY]().
+into your settings files keeping your code base [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
 
 ## Example
 
@@ -180,4 +180,4 @@ When specifying arguments you may add them to the command tuple OR specify them 
         ]
     ```
 
-   *You only need to install django_typer as an app if you want to use the shellcompletion command to* [enable tab-completion](https://django-typer.readthedocs.io/en/latest/shell_completion.html) *or if you would like django-typer to install* [rich traceback rendering](https://django-typer.readthedocs.io/en/latest/howto.html#configure-rich-stack-traces) *for you - which it does by default if rich is also installed.*
+   *You only need to install django_typer as an app if you want to use the shellcompletion command to [enable tab-completion](https://django-typer.readthedocs.io/en/latest/shell_completion.html) or if you would like django-typer to install [rich traceback rendering](https://django-typer.readthedocs.io/en/latest/howto.html#configure-rich-stack-traces) for you - which it does by default if rich is also installed.*
