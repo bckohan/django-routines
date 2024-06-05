@@ -1,16 +1,6 @@
 import os
 from pathlib import Path
-from django_routines import (
-    routine,
-    command,
-    Routine,
-    RoutineCommand,
-    get_routine,
-    routines,
-)
 from django.utils.translation import gettext_lazy as _
-
-_ = str
 
 # Set default terminal width for help outputs - necessary for
 # testing help output in CI environments.
@@ -131,51 +121,3 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SETTINGS_FILE = 1
 
 ROOT_URLCONF = "tests.urls"
-
-DJANGO_ROUTINES = None
-
-routine(
-    "deploy",
-    _("Deploy the site application into production."),
-    RoutineCommand(("makemigrations",), switches=["prepare"]),
-    RoutineCommand(("migrate",)),
-    RoutineCommand(("renderstatic",)),
-    RoutineCommand(("collectstatic",)),
-    prepare=_("Prepare the deployment."),
-    demo="Deploy the demo.",
-)
-
-command("deploy", "shellcompletion", "install", switches=["initial"])
-command("deploy", "loaddata", "./fixtures/initial_data.json", switches=["demo"])
-
-assert get_routine("deploy").name == "deploy"
-
-
-routine(
-    "test",
-    _("Test Routine 1"),
-    RoutineCommand(
-        ("track", "0"), priority=1, switches=("initial",), options={"verbosity": 0}
-    ),
-    RoutineCommand(("track", "1"), priority=4),
-)
-
-command("test", "track", "2", priority=0, switches=("initial", "demo"))
-command("test", "track", "3", priority=3, demo=2)
-command("test", "track", "4", priority=3, demo=6)
-command("test", "track", "5", priority=6, switches=["demo"])
-
-names = set()
-for rtn in routines():
-    assert isinstance(rtn, Routine)
-    names.add(rtn.name)
-
-assert names == {"deploy", "test"}
-
-routine(
-    "bad",
-    _("Bad command test routine"),
-    RoutineCommand(("track", "0")),
-    RoutineCommand(("does_not_exist",)),
-    RoutineCommand(("track", "1")),
-)

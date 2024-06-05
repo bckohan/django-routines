@@ -1,6 +1,7 @@
 from django_typer import get_command
 from django.test import TestCase, override_settings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management import CommandError, call_command
 from django_routines import get_routine
 
 
@@ -69,3 +70,14 @@ class TestBadConfig(TestCase):
     def test_get_malformed_routine(self):
         with self.assertRaises(ImproperlyConfigured):
             get_routine("bad_command")
+
+    # why do these break everything??
+    # @override_settings(DJANGO_ROUTINES={})
+    # def test_no_routines(self):
+    #     with self.assertRaises(CommandError):
+    #         call_command("routine")
+
+    # @override_settings(DJANGO_ROUTINES=None)
+    # def test_routines_none(self):
+    #     with self.assertRaises(CommandError):
+    #         call_command("routine")

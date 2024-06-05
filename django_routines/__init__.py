@@ -19,6 +19,7 @@ import typing as t
 from dataclasses import asdict, dataclass, field
 
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.functional import Promise
 
 VERSION = (1, 0, 0)
 
@@ -108,7 +109,7 @@ class Routine:
     The name of the routine.
     """
 
-    help_text: str
+    help_text: t.Union[str, Promise]
     """
     The help text to display for the routine.
     """
@@ -118,7 +119,7 @@ class Routine:
     The commands to run in the routine.
     """
 
-    switch_helps: t.Dict[str, str] = field(default_factory=dict)
+    switch_helps: t.Dict[str, t.Union[str, Promise]] = field(default_factory=dict)
 
     def __len__(self):
         return len(self.commands)
@@ -169,7 +170,8 @@ def routine(name: str, help_text: str = "", *commands: RoutineCommand, **switch_
     :param commands: The commands to run in the routine.
     """
     settings = sys._getframe(1).f_globals  # noqa: WPS437
-    settings.setdefault(ROUTINE_SETTING, {})
+    if not settings.get(ROUTINE_SETTING, {}):
+        settings[ROUTINE_SETTING] = {}
     routine = Routine(name, help_text, switch_helps=switch_helps)
     for command in commands:
         routine.add(command)
@@ -201,11 +203,12 @@ def command(
     :return: The new command.
     """
     settings = sys._getframe(1).f_globals  # noqa: WPS437
-    settings.setdefault(ROUTINE_SETTING, {})
-    routines = settings[ROUTINE_SETTING]
+    if not settings.get(ROUTINE_SETTING, {}):
+        settings[ROUTINE_SETTING] = {}
+    routine_dict = settings[ROUTINE_SETTING]
     routine_obj = (
-        Routine.from_dict(routines[routine])
-        if routine in routines
+        Routine.from_dict(routine_dict[routine])
+        if routine in routine_dict
         else Routine(routine, "", [])
     )
     new_cmd = routine_obj.add(
@@ -213,7 +216,7 @@ def command(
             t.cast(t.Tuple[str], command), priority, tuple(switches or []), options
         )
     )
-    settings[ROUTINE_SETTING][routine] = asdict(routine_obj)
+    routine_dict[routine] = asdict(routine_obj)
     return new_cmd
 
 
@@ -235,7 +238,7 @@ def get_routine(name: str) -> Routine:
 
     try:
         if not settings.configured:
-            Routine.from_dict(sys._getframe(1).f_globals[ROUTINE_SETTING][name])  # noqa: WPS437
+            Routine.from_dict(sys._getframe(1).f_globals.get(ROUTINE_SETTING, {})[name])  # noqa: WPS437
         return Routine.from_dict(getattr(settings, ROUTINE_SETTING, {})[name])
     except TypeError as err:
         raise ImproperlyConfigured(
@@ -252,10 +255,10 @@ def routines() -> t.Generator[Routine, None, None]:
     from django.conf import settings
 
     routines = (
-        sys._getframe(1).f_globals[ROUTINE_SETTING]  # noqa: WPS437
+        sys._getframe(1).f_globals.get(ROUTINE_SETTING, {})  # noqa: WPS437
         if not settings.configured
         else getattr(settings, ROUTINE_SETTING, {})
-    )
+    ) or {}
     for name, routine in routines.items():
         try:
             yield Routine.from_dict(routine)
