@@ -118,8 +118,10 @@ DJANGO_ROUTINES = {
         "name": "deploy",
         "switch_helps": {
             "demo": "Load the demo data.",
-            "initial": "Things to do on the very first deployment on a new server.",
-            "prepare": "Generate artifacts like migrations and transpiled javascript.",
+            "initial": "Things to do on the very first deployment on a new "
+                       "server.",
+            "prepare": "Generate artifacts like migrations and transpiled "
+                       "javascript.",
         },
     },
     "package": {
@@ -127,7 +129,8 @@ DJANGO_ROUTINES = {
             {"command": "makemigrations"},
             {"command": "renderstatic"},
         ],
-        "help_text": "Generate pre-package artifacts like migrations and transpiled javascript.",
+        "help_text": "Generate pre-package artifacts like migrations and "
+                     "transpiled javascript.",
         "name": "package",
     },
 }
