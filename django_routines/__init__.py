@@ -237,7 +237,7 @@ def command(
     :return: The new command.
     """
     settings = sys._getframe(1).f_globals  # noqa: WPS437
-    settings[ROUTINE_SETTING] = settings.get(ROUTINE_SETTING, {})
+    settings[ROUTINE_SETTING] = settings.get(ROUTINE_SETTING, {}) or {}
     routine_dict = settings[ROUTINE_SETTING]
     routine_obj = (
         Routine.from_dict(routine_dict[routine])
