@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+v1.0.2
+======
+
+* `Update import deprecation for django-typer 2.1+ <https://github.com/bckohan/django-routines/issues/4>`_
+
 v1.0.1
 ======
 

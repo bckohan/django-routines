@@ -6,7 +6,7 @@ import typer
 from django.core.management import CommandError, call_command
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
-from django_typer import TyperCommand, get_command, initialize
+from django_typer.management import TyperCommand, get_command, initialize
 from django_typer.types import Verbosity
 
 from django_routines import (

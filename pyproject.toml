@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-routines"
-version = "1.0.1"
+version = "1.0.2"
 description = "Define named groups of management commands in Django settings files for batched execution."
 authors = ["Brian Kohan <bckohan@gmail.com>"]
 license = "MIT"
@@ -42,7 +42,7 @@ exclude = ["tests"]
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
 Django = ">=3.2,<6.0"
-django-typer = "^2.0.2"
+django-typer = "^2.1.0"
 
 # this should track typer's rich dependency, so long as our console
 # patches still work - so be sure to test on the low end of the range
