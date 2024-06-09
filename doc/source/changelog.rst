@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+v1.1.0
+======
+
+* `Option to run management commands as subprocesses instead of in the same process space. <https://github.com/bckohan/django-routines/issues/6>`_
+
 v1.0.2
 ======
 

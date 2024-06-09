@@ -21,7 +21,7 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 0, 2)
+VERSION = (1, 1, 0)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
@@ -133,6 +133,11 @@ class Routine:
 
     switch_helps: t.Dict[str, t.Union[str, Promise]] = field(default_factory=dict)
 
+    subprocess: bool = False
+    """
+    If true run each of the commands in a subprocess.
+    """
+
     def __len__(self):
         return len(self.commands)
 
@@ -177,6 +182,7 @@ def routine(
     name: str,
     help_text: t.Union[str, Promise] = "",
     *commands: RoutineCommand,
+    subprocess: bool = False,
     **switch_helps,
 ):
     """

@@ -44,7 +44,11 @@ from .test_core import CoreTests
                     "switches": ("initial",),
                 },
                 {"command": ("track", "3"), "options": {"demo": 2}, "priority": 3},
-                {"command": ("track", "4"), "options": {"demo": 6}, "priority": 3},
+                {
+                    "command": ("track", "4"),
+                    "options": {"demo": 6, "flag": True},
+                    "priority": 3,
+                },
                 {"command": ("track", "1"), "priority": 4},
                 {"command": ("track", "5"), "priority": 6, "switches": ("demo",)},
             ],
@@ -106,7 +110,7 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         },
                         {
                             "command": ("track", "4"),
-                            "options": {"demo": 6},
+                            "options": {"demo": 6, "flag": True},
                             "priority": 3,
                         },
                         {"command": ("track", "1"), "priority": 4},

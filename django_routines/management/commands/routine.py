@@ -1,3 +1,6 @@
+import os
+import subprocess
+import sys
 import typing as t
 from importlib.util import find_spec
 
@@ -23,7 +26,6 @@ if use_rich:
 
     width = Console().width
 
-
 COMMAND_TMPL = """
 import sys
 if sys.version_info < (3, 9):
@@ -33,15 +35,20 @@ else:
 
 def {routine}(
     self,
-    context: typer.Context,
+    ctx: typer.Context,
+    subprocess: Annotated[bool, typer.Option("{subprocess_opt}", help="{subprocess_help}", show_default=False)] = {subprocess},
     all: Annotated[bool, typer.Option("--all", help="{all_help}")] = False,
     {switch_args}
 ):
     self.routine = "{routine}"
     self.switches = []
     {add_switches}
-    if not context.invoked_subcommand:
-        return self._run_routine()
+    subprocess = subprocess if (
+        ctx.get_parameter_source("subprocess")
+        is not click.core.ParameterSource.DEFAULT
+    ) else None
+    if not ctx.invoked_subcommand:
+        return self._run_routine(subprocess=subprocess)
     return self.{routine}
 """
 
@@ -70,6 +77,8 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
     _routine: t.Optional[Routine] = None
     _verbosity_passed: bool = False
 
+    manage_script: str = sys.argv[0]
+
     @property
     def routine(self) -> t.Optional[Routine]:
         return self._routine
@@ -90,48 +99,118 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         return self.routine.plan(self.switches)
 
     @initialize()
-    def init(self, ctx: typer.Context, verbosity: Verbosity = verbosity):
+    def init(
+        self,
+        ctx: typer.Context,
+        manage_script: t.Annotated[
+            str,
+            typer.Option(
+                help=_(
+                    "The manage script to use if running management commands as subprocesses."
+                )
+            ),
+        ] = manage_script,
+        verbosity: Verbosity = verbosity,
+    ):
         self.verbosity = verbosity
         self._pass_verbosity = (
             ctx.get_parameter_source("verbosity")
             is not click.core.ParameterSource.DEFAULT
         )
+        self.manage_script = manage_script
 
-    def _run_routine(self):
+    def _run_routine(self, subprocess: t.Optional[bool] = None):
         """
         Execute the current routine plan. If verbosity is zero, do not print the
         commands as they are run. Also use the stdout/stderr streams and color
-        configurion of the routine command for each of the commands in the execution
+        configuration of the routine command for each of the commands in the execution
         plan.
         """
         assert self.routine
         for command in self.plan:
+            if (self.routine.subprocess and subprocess is None) or subprocess:
+                self._subprocess(command)
+            else:
+                self._call_command(command)
+
+    def _call_command(self, command: RoutineCommand):
+        try:
+            cmd = get_command(
+                command.command_name,
+                BaseCommand,
+                stdout=t.cast(t.IO[str], self.stdout._out),
+                stderr=t.cast(t.IO[str], self.stderr._out),
+                force_color=self.force_color,
+                no_color=self.no_color,
+            )
+            options = command.options
+            if (
+                self._pass_verbosity
+                and not any(
+                    "verbosity" in arg
+                    for arg in getattr(cmd, "suppressed_base_arguments", [])
+                )
+                and not any("--verbosity" in arg for arg in command.command_args)
+            ):
+                # only pass verbosity if it was passed to routines, not suppressed
+                # by the command class and not passed by the configured command
+                options = {"verbosity": self.verbosity, **options}
             if self.verbosity > 0:
                 self.secho(command.command_str, fg="cyan")
-            try:
-                cmd = get_command(
-                    command.command_name,
-                    BaseCommand,
-                    stdout=t.cast(t.IO[str], self.stdout._out),
-                    stderr=t.cast(t.IO[str], self.stderr._out),
-                    force_color=self.force_color,
-                    no_color=self.no_color,
+            call_command(cmd, *command.command_args, **options)
+        except KeyError:
+            raise CommandError(f"Command not found: {command.command_name}")
+
+    def _subprocess(self, command: RoutineCommand):
+        options = []
+        if command.options:
+            # Make a good faith effort to convert options to cli compatible format
+            # this is not very reliable which is why commands should avoid use of
+            # options and instead use CLI strings
+            cmd = get_command(command.command_name, BaseCommand)
+            actions = getattr(
+                cmd.create_parser(self.manage_script, command.command_name),
+                "_actions",
+                [],
+            )
+            for opt, value in command.options.items():
+                for action in actions:
+                    opt_strs = getattr(action, "option_strings", [])
+                    if opt == getattr(action, "dest", None) and opt_strs:
+                        if isinstance(value, bool):
+                            if value:
+                                options.append(opt_strs[-1])
+                        else:
+                            options.append(f"--{opt}={str(value)}")
+                        break
+
+            if len(options) != len(command.options):
+                raise CommandError(
+                    _(
+                        "Failed to convert {command} options to CLI format: {unconverted}"
+                    ).format(command=command.command_name, unconverted=command.options)
                 )
-                options = command.options
-                if (
-                    self._pass_verbosity
-                    and not any(
-                        "verbosity" in arg
-                        for arg in getattr(cmd, "suppressed_base_arguments", [])
-                    )
-                    and not any("--verbosity" in arg for arg in command.command_args)
-                ):
-                    # only pass verbosity if it was passed to routines, not suppressed
-                    # by the command class and not passed by the configured command
-                    options = {"verbosity": self.verbosity, **options}
-                call_command(cmd, *command.command_args, **options)
-            except KeyError:
-                raise CommandError(f"Command not found: {command.command_name}")
+
+        args = [
+            *(
+                [sys.executable, self.manage_script]
+                if self.manage_script.endswith(".py")
+                else [self.manage_script]
+            ),
+            *(
+                [command.command]
+                if isinstance(command.command, str)
+                else command.command
+            ),
+            *options,
+        ]
+        if self.verbosity > 0:
+            self.secho(" ".join(args), fg="cyan")
+
+        result = subprocess.run(args, env=os.environ.copy(), capture_output=True)
+        self.stdout.write(result.stdout.decode())
+        self.stderr.write(result.stderr.decode())
+        return result.returncode
 
     def _list(self) -> None:
         """
@@ -142,11 +221,11 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
             priority = str(command.priority)
             cmd_str = command.command_str
             switches_str = " | " if command.switches else ""
-            opt_str = " ".join([f"{k}={v}" for k, v in command.options.items()])
+            opt_str = ", ".join([f"{k}={v}" for k, v in command.options.items()])
             if self.force_color or not self.no_color:
                 priority = click.style(priority, fg="green")
                 cmd_str = click.style(cmd_str, fg="cyan", bold=True)
-                opt_str = " ".join(
+                opt_str = ", ".join(
                     [
                         f"{click.style(k, 'blue')}={click.style(v, 'magenta')}"
                         for k, v in command.options.items()
@@ -179,7 +258,12 @@ for routine in routines():
         routine=routine.name,
         switch_args=switch_args,
         add_switches=add_switches,
+        subprocess_opt="--no-subprocess" if routine.subprocess else "--subprocess",
+        subprocess_help=_("Do not run commands as subprocesses.")
+        if routine.subprocess
+        else _("Run commands as subprocesses."),
         all_help=_("Include all switched commands."),
+        subprocess=routine.subprocess,
     )
 
     command_strings = []
@@ -188,14 +272,14 @@ for routine in routines():
         cmd_str = f"{'[cyan]' if use_rich else ''}{command.command_str}{'[/cyan]' if use_rich else ''}"
         if command.options:
             if use_rich:
-                opt_str = " ".join(
+                opt_str = ", ".join(
                     [
                         f"[blue]{k}[/blue]=[magenta]{v}[/magenta]"
                         for k, v in command.options.items()
                     ]
                 )
             else:
-                opt_str = " ".join([f"{k}={v}" for k, v in command.options.items()])
+                opt_str = ", ".join([f"{k}={v}" for k, v in command.options.items()])
             cmd_str += f" ({opt_str})"
         switches_str = " | " if command.switches else ""
         switches_str += ", ".join(

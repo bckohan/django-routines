@@ -84,7 +84,7 @@ routine(
 )
 
 command("test", "track", "3", priority=3, demo=2)
-command("test", "track", "4", priority=3, demo=6)
+command("test", "track", "4", priority=3, demo=6, flag=True)
 command("test", "track", "5", priority=6, switches=["demo"])
 
 names = set()

@@ -46,7 +46,11 @@ from .test_core import CoreTests
                     switches=("initial",),
                 ),
                 RoutineCommand(command=("track", "3"), options={"demo": 2}, priority=3),
-                RoutineCommand(command=("track", "4"), options={"demo": 6}, priority=3),
+                RoutineCommand(
+                    command=("track", "4"),
+                    options={"demo": 6, "flag": True},
+                    priority=3,
+                ),
                 RoutineCommand(command=("track", "1"), priority=4),
                 RoutineCommand(command=("track", "5"), priority=6, switches=("demo",)),
             ],
@@ -109,7 +113,9 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
                             command=("track", "3"), options={"demo": 2}, priority=3
                         ),
                         RoutineCommand(
-                            command=("track", "4"), options={"demo": 6}, priority=3
+                            command=("track", "4"),
+                            options={"demo": 6, "flag": True},
+                            priority=3,
                         ),
                         RoutineCommand(command=("track", "1"), priority=4),
                         RoutineCommand(
