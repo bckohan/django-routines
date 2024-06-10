@@ -508,14 +508,14 @@ class CoreTests(with_typehint(TestCase)):
         )
         self.assertEqual(result.returncode, 0)
         self.assertFalse(result.stderr)
-        self.assertEqual(result.stdout.decode().strip(), self.routine_help_rich.strip())
+        self.assertEqual(self.strip_ansi(result.stdout.decode()).strip(), self.routine_help_rich.strip())
 
         stdout = StringIO()
 
         routine = get_command("routine", TyperCommand, stdout=stdout, no_color=True)
         routine.print_help("./manage.py", "routine", "test")
         self.assertEqual(
-            stdout.getvalue().strip().replace("\x08", ""),
+            self.strip_ansi(stdout.getvalue()).strip().replace("\x08", ""),
             self.routine_test_help_rich.strip(),
         )
 
