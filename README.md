@@ -13,24 +13,26 @@
 [![Lint Status](https://github.com/bckohan/django-routines/workflows/lint/badge.svg)](https://github.com/bckohan/django-routines/actions/workflows/lint.yml)
 
 
-Configure batches of Django management commands in your settings files and run them all at once.
-For example, batch together your common database maintenance tasks, deployment routines or any
-other set of commands you need to run together. This helps single source general site maintenance
-into your settings files keeping your code base [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
+Configure batches of Django management commands in your settings files and run them all at once. For example, batch together your common database maintenance tasks, deployment routines or any other set of commands you need to run together. This helps single source general site maintenance into your settings files keeping your code base [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).
 
 ## Example
 
-Let's define two named routines, "package" and "deploy". The package routine will be a collection
-of commands that we typically run to generate package artifacts (like migrations and transpiled
-javascript). The deploy routine will be a collection of commands we typically run when deploying
-the site for the first time on a new server or when we deploy version updates on the server.
+Let's define two named routines, "package" and "deploy". The package routine will be a collection of commands that we typically run to generate package artifacts (like migrations and transpiled javascript). The deploy routine will be a collection of commands we typically run when deploying the site for the first time on a new server or when we deploy version updates on the server.
 
 **Routine commands are run in the order they are registered, or by [priority](#priorities).**
+
+There are two types of commands, management commands and system commands. The management commands will be called in the same process space as routine unless --subprocess is specified in which case they will use the same management script as routine was invoked with or whatever value you supply to --manage-script. System commands are always invoked as subprocesses.
 
 In our settings file we may define these routines like this:
 
 ```python
-from django_routines import RoutineCommand, command, routine
+from django_routines import (
+    ManagementCommand,
+    SystemCommand,
+    command,
+    system,
+    routine
+)
 
 # register routines and their help text
 routine(
@@ -43,19 +45,21 @@ routine(
 # you may register commands on a routine after defining a routine (or before!)
 command("package", "makemigrations")
 command("package", "renderstatic")
+system("package", "poetry", "build")
 
 routine(
     "deploy",
     "Deploy the site application into production.",
 
-    # you may also specify commands inline using the RoutineCommand dataclass
-    RoutineCommand(
+    # you may also specify commands inline using the ManagementCommand dataclass
+    ManagementCommand(
         ("routine", "package"), switches=["prepare"]
     ),  # routine commands can be other routines!
-    RoutineCommand("migrate"),
-    RoutineCommand("collectstatic"),
-    RoutineCommand(("shellcompletion", "install"), switches=["initial"]),
-    RoutineCommand(("loaddata", "./fixtures/demo.json"), switches=["demo"]),
+    ManagementCommand("migrate"),
+    ManagementCommand("collectstatic"),
+    ManagementCommand(("shellcompletion", "install"), switches=["initial"]),
+    ManagementCommand(("loaddata", "./fixtures/demo.json"), switches=["demo"]),
+    SystemCommand(("touch", "/path/to/wsgi.py")),
 
     # define switches that toggle commands on and off
     prepare="Generate artifacts like migrations and transpiled javascript.",
@@ -98,7 +102,7 @@ For example to deploy our demo on a new server we would run:
 
 ## Settings
 
-The [RoutineCommand](https://django-routines.readthedocs.io/en/latest/reference.html#django_routines.RoutineCommand) dataclass, [routine](https://django-routines.readthedocs.io/en/latest/reference.html#django_routines.routine) and [command](https://django-routines.readthedocs.io/en/latest/reference.html#django_routines.command) helper functions in the example above make it easier for us to work with the native configuration format which is a dictionary structure defined in the ``DJANGO_ROUTINES`` setting attribute. For example the above configuration is equivalent to:
+The [ManagementCommand](https://django-routines.readthedocs.io/en/latest/reference.html#django_routines.ManagementCommand) dataclass, [routine](https://django-routines.readthedocs.io/en/latest/reference.html#django_routines.routine) and [command](https://django-routines.readthedocs.io/en/latest/reference.html#django_routines.command) helper functions in the example above make it easier for us to work with the native configuration format which is a dictionary structure defined in the ``DJANGO_ROUTINES`` setting attribute. For example the above configuration is equivalent to:
 
 ```python
 DJANGO_ROUTINES = {
@@ -115,6 +119,7 @@ DJANGO_ROUTINES = {
                 "command": ("loaddata", "./fixtures/demo.json"),
                 "switches": ["demo"],
             },
+            {"command": ("touch", "/path/to/wsgi.py"), "kind": "system"},
         ],
         "help_text": "Deploy the site application into production.",
         "name": "deploy",
@@ -130,6 +135,7 @@ DJANGO_ROUTINES = {
         "commands": [
             {"command": "makemigrations"},
             {"command": "renderstatic"},
+            {"command": ("poetry", "build"), "kind": "system"},
         ],
         "help_text": "Generate pre-package artifacts like migrations and "
                      "transpiled javascript.",
@@ -186,3 +192,7 @@ When specifying arguments you may add them to the command tuple OR specify them 
     ```
 
    *You only need to install [django_typer](https://github.com/bckohan/django-typer) as an app if you want to use the shellcompletion command to [enable tab-completion](https://django-typer.readthedocs.io/en/latest/shell_completion.html) or if you would like django-typer to install [rich traceback rendering](https://django-typer.readthedocs.io/en/latest/howto.html#configure-rich-stack-traces) for you - which it does by default if rich is also installed.*
+
+## Rationale
+
+When does it make sense to configure routines in Django settings? Its generally convenient to group common management pathways into easily discoverable and executable aggregations of subroutines. This is usually done in supporting shell scripts or just files and in most cases that is appropriate. If your goal is to keep your Django deployment as tight and self contained as possible and the deployment is not generally very complex, using django-routines can make a lot of sense. It can eliminate extra dependencies on a shell scripting environment or just files and can keep this logic packaged with your installable wheel.
