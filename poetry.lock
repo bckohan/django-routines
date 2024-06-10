@@ -755,13 +755,13 @@ typing-extensions = "*"
 
 [[package]]
 name = "django-typer"
-version = "2.1.1"
+version = "2.1.2"
 description = "Use Typer to define the CLI for your Django management commands."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "django_typer-2.1.1-py3-none-any.whl", hash = "sha256:dec999a034d63ab289c10f5cc21b1dcf39c0d4582bd5b514eec55fb15b55ba23"},
-    {file = "django_typer-2.1.1.tar.gz", hash = "sha256:258e2212fd28e4e8682c9eadfe82bc4dacb5783bf4256c0afde4949d57f1390b"},
+    {file = "django_typer-2.1.2-py3-none-any.whl", hash = "sha256:61fda54e03b004a7f3b8096c31742d17a57c180bcf82dc0e92ba113d01f3de4c"},
+    {file = "django_typer-2.1.2.tar.gz", hash = "sha256:05f0908b55ea36386c99d4dceebe1ef5d9a401b4aa77c628c31a4bf3f7a0fe2a"},
 ]
 
 [package.dependencies]
