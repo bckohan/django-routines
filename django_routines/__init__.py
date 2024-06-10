@@ -74,6 +74,19 @@ class _RoutineCommand(ABC):
     or for all invocations of the routine if no switches are configured.
     """
 
+    # pre_hook: t.Optional[t.Callable[[Command], t.Optional[bool]]] = None
+    """
+    A function to run before the command is run. The function should take the command instance and
+    may return True to skip the command.
+    """
+
+    # post_hook: t.Optional[t.Callable[[Command, t.Any], t.Any]] = None
+    """
+    A function to run after the command has been run. The function should take the command instance
+    and the result of the function which will be whatever call_command returns if run in the same
+    process, or the result object returned by subprocess.run() if run in a subprocess.
+    """
+
     @property
     @abstractmethod
     def kind(self) -> str:
