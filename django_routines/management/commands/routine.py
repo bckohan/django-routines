@@ -1,3 +1,4 @@
+import importlib
 import os
 import subprocess
 import sys
@@ -162,6 +163,8 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
             if self.verbosity > 0:
                 self.secho(command.command_str, fg="cyan")
             call_command(cmd, *command.command_args, **options)
+            if command.command_name == "makemigrations":
+                importlib.invalidate_caches()
         except KeyError:
             raise CommandError(f"Command not found: {command.command_name}")
 
@@ -217,38 +220,11 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         if self.verbosity > 0:
             self.secho(" ".join(args), fg="cyan")
 
-        # result = subprocess.run(args, env=os.environ.copy(), capture_output=True)
-        # self.stdout.write(result.stdout.decode())
-        # self.stderr.write(result.stderr.decode())
-
-        with subprocess.Popen(
-            args,
-            env=os.environ.copy(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        ) as proc:
-            assert proc.stdout
-            assert proc.stderr
-            while True:
-                output = proc.stdout.readline()
-                if output:
-                    self.stdout.write(output)
-                    self.stdout.flush()
-                error = proc.stderr.readline()
-                if error:
-                    self.stderr.write(error)
-                    self.stderr.flush()
-
-                if output == "" and error == "" and proc.poll() is not None:
-                    break
-
-            if proc.returncode != 0:
-                for line in proc.stderr:
-                    self.stderr.write(line)
-                    self.stderr.flush()
-
-            return proc.returncode
+        # todo make this async
+        result = subprocess.run(args, env=os.environ.copy(), capture_output=True)
+        self.stdout.write(result.stdout.decode())
+        self.stderr.write(result.stderr.decode())
+        return result.returncode
 
     def _list(self) -> None:
         """
