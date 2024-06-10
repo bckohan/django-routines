@@ -508,7 +508,10 @@ class CoreTests(with_typehint(TestCase)):
         )
         self.assertEqual(result.returncode, 0)
         self.assertFalse(result.stderr)
-        self.assertEqual(self.strip_ansi(result.stdout.decode()).strip(), self.routine_help_rich.strip())
+        self.assertEqual(
+            self.strip_ansi(result.stdout.decode()).strip(),
+            self.routine_help_rich.strip(),
+        )
 
         stdout = StringIO()
 
