@@ -16,6 +16,7 @@ and then run them in sequence by name using the provied ``routine`` command.
 import bisect
 import sys
 import typing as t
+from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 
 from django.core.exceptions import ImproperlyConfigured
@@ -31,7 +32,8 @@ __copyright__ = "Copyright 2024 Brian Kohan"
 
 __all__ = [
     "ROUTINE_SETTING",
-    "RoutineCommand",
+    "ManagementCommand",
+    "SystemCommand",
     "Routine",
     "routine",
     "command",
@@ -44,12 +46,14 @@ ROUTINE_SETTING = "DJANGO_ROUTINES"
 
 
 R = t.TypeVar("R")
+CommandTypes = t.Union[t.Type["ManagementCommand"], t.Type["SystemCommand"]]
+Command = t.Union["ManagementCommand", "SystemCommand"]
 
 
 @dataclass
-class RoutineCommand:
+class _RoutineCommand(ABC):
     """
-    Dataclass to hold the routine command information.
+    A base Dataclass to hold the routine command information.
     """
 
     command: t.Union[str, t.Tuple[str, ...]]
@@ -64,16 +68,16 @@ class RoutineCommand:
     insertion order.
     """
 
-    switches: t.Tuple[str, ...] = tuple()
+    switches: t.Union[t.List[str], t.Tuple[str, ...]] = tuple()
     """
     The command will run only when one of these switches is active,
     or for all invocations of the routine if no switches are configured.
     """
 
-    options: t.Dict[str, t.Any] = field(default_factory=dict)
-    """
-    t.Any options to pass to the command via call_command.
-    """
+    @property
+    @abstractmethod
+    def kind(self) -> str:
+        """The kind of this command (i.e. management or system)."""
 
     @property
     def command_name(self) -> str:
@@ -89,12 +93,48 @@ class RoutineCommand:
 
     @classmethod
     def from_dict(
-        cls, obj: t.Union["RoutineCommand", t.Dict[str, t.Any]]
-    ) -> "RoutineCommand":
+        cls,
+        obj: t.Union[Command, t.Dict[str, t.Any]],
+    ) -> Command:
         """
         Return a RoutineCommand object from a dictionary representing it.
         """
-        return obj if isinstance(obj, RoutineCommand) else RoutineCommand(**obj)
+        if isinstance(obj, dict):
+            cmd_cls: CommandTypes = ManagementCommand
+            if obj.get("kind", None) == "system":
+                cmd_cls = SystemCommand
+            return cmd_cls(**{k: v for k, v in obj.items() if k != "kind"})
+        return obj
+
+    def to_dict(self) -> t.Dict[str, t.Any]:
+        return {**asdict(self), "kind": self.kind}
+
+
+@dataclass
+class ManagementCommand(_RoutineCommand):
+    options: t.Dict[str, t.Any] = field(default_factory=dict)
+    """
+    t.Any options to pass to the command via call_command. Not valid for SystemCommands
+    """
+
+    @property
+    def kind(self) -> str:
+        return "management"
+
+
+# this alias is for backwards compat and will be removed in 2.0
+RoutineCommand = ManagementCommand
+
+
+@dataclass
+class SystemCommand(_RoutineCommand):
+    """
+    A RoutineCommand that represents a system command instead of a management command.
+    """
+
+    @property
+    def kind(self) -> str:
+        return "system"
 
 
 def _insort_right_with_key(a: t.List[R], x: R, key: t.Callable[[R], t.Any]) -> None:
@@ -126,7 +166,7 @@ class Routine:
     The help text to display for the routine.
     """
 
-    commands: t.List[RoutineCommand] = field(default_factory=list)
+    commands: t.List[Command] = field(default_factory=list)
     """
     The commands to run in the routine.
     """
@@ -149,7 +189,7 @@ class Routine:
                 switches.update(command.switches)
         return sorted(switches)
 
-    def plan(self, switches: t.Set[str]) -> t.List[RoutineCommand]:
+    def plan(self, switches: t.Set[str]) -> t.List[Command]:
         return [
             command
             for command in self.commands
@@ -157,7 +197,7 @@ class Routine:
             or any(switch in switches for switch in command.switches)
         ]
 
-    def add(self, command: RoutineCommand):
+    def add(self, command: Command):
         # python >= 3.10
         # bisect.insort(self.commands, command, key=lambda cmd: cmd.priority)
         _insort_right_with_key(
@@ -172,16 +212,32 @@ class Routine:
         """
         if isinstance(obj, Routine):
             return obj
+        commands: t.List[Command] = []
+        for cmd in obj.get("commands", []):
+            _insort_right_with_key(
+                commands,
+                _RoutineCommand.from_dict(cmd),
+                key=lambda cmd: cmd.priority or 0,
+            )
         return Routine(
             **{attr: val for attr, val in obj.items() if attr != "commands"},
-            commands=[RoutineCommand.from_dict(cmd) for cmd in obj.get("commands", [])],
+            commands=commands,
         )
+
+    def to_dict(self) -> t.Dict[str, t.Any]:
+        return {
+            "name": self.name,
+            "help_text": self.help_text,
+            "commands": [cmd.to_dict() for cmd in self.commands],
+            "switch_helps": self.switch_helps,
+            "subprocess": self.subprocess,
+        }
 
 
 def routine(
     name: str,
     help_text: t.Union[str, Promise] = "",
-    *commands: RoutineCommand,
+    *commands: Command,
     subprocess: bool = False,
     **switch_helps,
 ):
@@ -196,7 +252,7 @@ def routine(
     if not settings.get(ROUTINE_SETTING, {}):
         settings[ROUTINE_SETTING] = {}
 
-    existing: t.List[RoutineCommand] = []
+    existing: t.List[Command] = []
     try:
         routine = get_routine(name)
         help_text = (
@@ -210,12 +266,43 @@ def routine(
     except KeyError:
         pass
     routine = Routine(
-        name, help_text=help_text, commands=existing, switch_helps=switch_helps
+        name,
+        help_text=help_text,
+        commands=existing,
+        switch_helps=switch_helps,
+        subprocess=subprocess,
     )
 
     for command in commands:
         routine.add(command)
-    settings[ROUTINE_SETTING][name] = asdict(routine)
+
+    settings[ROUTINE_SETTING][name] = routine.to_dict()
+
+
+def _add_command(
+    command_type: CommandTypes,
+    routine: str,
+    *command: str,
+    priority: int = _RoutineCommand.priority,
+    switches: t.Optional[t.Sequence[str]] = _RoutineCommand.switches,
+    **options,
+):
+    settings = sys._getframe(2).f_globals  # noqa: WPS437
+    settings[ROUTINE_SETTING] = settings.get(ROUTINE_SETTING, {}) or {}
+    routine_dict = settings[ROUTINE_SETTING]
+    routine_obj = (
+        Routine.from_dict(routine_dict[routine])
+        if routine in routine_dict
+        else Routine(routine, "", [])
+    )
+    extra = {"options": options} if command_type is ManagementCommand else {}
+    new_cmd = routine_obj.add(
+        command_type(
+            t.cast(t.Tuple[str], command), priority, tuple(switches or []), **extra
+        )
+    )
+    routine_dict[routine] = routine_obj.to_dict()
+    return new_cmd
 
 
 def command(
@@ -226,7 +313,7 @@ def command(
     **options,
 ):
     """
-    Add a routine to the list of routines in settings to be run.
+    Add a command to the named routine in settings to be run.
 
     .. note::
 
@@ -242,21 +329,41 @@ def command(
     :param options: t.Any options to pass to the command via call_command.
     :return: The new command.
     """
-    settings = sys._getframe(1).f_globals  # noqa: WPS437
-    settings[ROUTINE_SETTING] = settings.get(ROUTINE_SETTING, {}) or {}
-    routine_dict = settings[ROUTINE_SETTING]
-    routine_obj = (
-        Routine.from_dict(routine_dict[routine])
-        if routine in routine_dict
-        else Routine(routine, "", [])
+    return _add_command(
+        ManagementCommand,
+        routine,
+        *command,
+        priority=priority,
+        switches=switches,
+        **options,
     )
-    new_cmd = routine_obj.add(
-        RoutineCommand(
-            t.cast(t.Tuple[str], command), priority, tuple(switches or []), options
-        )
+
+
+def system(
+    routine: str,
+    *command: str,
+    priority: int = _RoutineCommand.priority,
+    switches: t.Optional[t.Sequence[str]] = _RoutineCommand.switches,
+):
+    """
+    Add a system command to the named routine in settings to be run.
+
+    .. note::
+
+        You must call this function from a settings file.
+
+    :param routine: The name of the routine the command belongs to.
+    :param command: The command and its arguments to run the routine, all strings or
+        coercible to strings that the command will parse correctly.
+    :param priority: The order of the command in the routine. Priority ties will be run in
+        insertion order (defaults to zero).
+    :param switches: The command will run only when one of these switches is active,
+        or for all invocations of the routine if no switches are configured.
+    :return: The new command.
+    """
+    return _add_command(
+        SystemCommand, routine, *command, priority=priority, switches=switches
     )
-    routine_dict[routine] = asdict(routine_obj)
-    return new_cmd
 
 
 def get_routine(name: str) -> Routine:

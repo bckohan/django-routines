@@ -13,11 +13,19 @@ from django_typer.management import TyperCommand, get_command, initialize
 from django_typer.types import Verbosity
 
 from django_routines import (
+    ManagementCommand,
     Routine,
-    RoutineCommand,
+    SystemCommand,
     get_routine,
     routines,
 )
+
+if sys.version_info < (3, 9):
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated
+
+RCommand = t.Union[ManagementCommand, SystemCommand]
 
 width = 80
 use_rich = find_spec("rich") is not None
@@ -27,12 +35,6 @@ if use_rich:
     width = Console().width
 
 COMMAND_TMPL = """
-import sys
-if sys.version_info < (3, 9):
-    from typing_extensions import Annotated
-else:
-    from typing import Annotated
-
 def {routine}(
     self,
     ctx: typer.Context,
@@ -90,9 +92,9 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         )
 
     @property
-    def plan(self) -> t.List[RoutineCommand]:
+    def plan(self) -> t.List[RCommand]:
         """
-        The RoutineCommands that make up the execution plan for the currently
+        The Commands that make up the execution plan for the currently
         active routine and switches.
         """
         assert self.routine
@@ -102,7 +104,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
     def init(
         self,
         ctx: typer.Context,
-        manage_script: t.Annotated[
+        manage_script: Annotated[
             str,
             typer.Option(
                 help=_(
@@ -128,12 +130,14 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         """
         assert self.routine
         for command in self.plan:
-            if (self.routine.subprocess and subprocess is None) or subprocess:
+            if isinstance(command, SystemCommand) or (
+                (self.routine.subprocess and subprocess is None) or subprocess
+            ):
                 self._subprocess(command)
             else:
                 self._call_command(command)
 
-    def _call_command(self, command: RoutineCommand):
+    def _call_command(self, command: ManagementCommand):
         try:
             cmd = get_command(
                 command.command_name,
@@ -161,49 +165,55 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         except KeyError:
             raise CommandError(f"Command not found: {command.command_name}")
 
-    def _subprocess(self, command: RoutineCommand):
+    def _subprocess(self, command: RCommand):
         options = []
-        if command.options:
-            # Make a good faith effort to convert options to cli compatible format
-            # this is not very reliable which is why commands should avoid use of
-            # options and instead use CLI strings
-            cmd = get_command(command.command_name, BaseCommand)
-            actions = getattr(
-                cmd.create_parser(self.manage_script, command.command_name),
-                "_actions",
-                [],
-            )
-            for opt, value in command.options.items():
-                for action in actions:
-                    opt_strs = getattr(action, "option_strings", [])
-                    if opt == getattr(action, "dest", None) and opt_strs:
-                        if isinstance(value, bool):
-                            if value:
-                                options.append(opt_strs[-1])
-                        else:
-                            options.append(f"--{opt}={str(value)}")
-                        break
-
-            if len(options) != len(command.options):
-                raise CommandError(
-                    _(
-                        "Failed to convert {command} options to CLI format: {unconverted}"
-                    ).format(command=command.command_name, unconverted=command.options)
+        if isinstance(command, ManagementCommand):
+            if command.options:
+                # Make a good faith effort to convert options to cli compatible format
+                # this is not very reliable which is why commands should avoid use of
+                # options and instead use CLI strings
+                cmd = get_command(command.command_name, BaseCommand)
+                actions = getattr(
+                    cmd.create_parser(self.manage_script, command.command_name),
+                    "_actions",
+                    [],
                 )
+                for opt, value in command.options.items():
+                    for action in actions:
+                        opt_strs = getattr(action, "option_strings", [])
+                        if opt == getattr(action, "dest", None) and opt_strs:
+                            if isinstance(value, bool):
+                                if value:
+                                    options.append(opt_strs[-1])
+                            else:
+                                options.append(f"--{opt}={str(value)}")
+                            break
 
-        args = [
-            *(
-                [sys.executable, self.manage_script]
-                if self.manage_script.endswith(".py")
-                else [self.manage_script]
-            ),
-            *(
-                [command.command]
-                if isinstance(command.command, str)
-                else command.command
-            ),
-            *options,
-        ]
+                if len(options) != len(command.options):
+                    raise CommandError(
+                        _(
+                            "Failed to convert {command} options to CLI format: {unconverted}"
+                        ).format(
+                            command=command.command_name, unconverted=command.options
+                        )
+                    )
+
+            args = [
+                *(
+                    [sys.executable, self.manage_script]
+                    if self.manage_script.endswith(".py")
+                    else [self.manage_script]
+                ),
+                *(
+                    [command.command]
+                    if isinstance(command.command, str)
+                    else command.command
+                ),
+                *options,
+            ]
+        else:
+            args = [command.command_name, *command.command_args]
+
         if self.verbosity > 0:
             self.secho(" ".join(args), fg="cyan")
 
@@ -221,15 +231,23 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
             priority = str(command.priority)
             cmd_str = command.command_str
             switches_str = " | " if command.switches else ""
-            opt_str = ", ".join([f"{k}={v}" for k, v in command.options.items()])
+            opt_str = (
+                ", ".join([f"{k}={v}" for k, v in command.options.items()])
+                if isinstance(command, ManagementCommand)
+                else ""
+            )
             if self.force_color or not self.no_color:
                 priority = click.style(priority, fg="green")
                 cmd_str = click.style(cmd_str, fg="cyan", bold=True)
-                opt_str = ", ".join(
-                    [
-                        f"{click.style(k, 'blue')}={click.style(v, 'magenta')}"
-                        for k, v in command.options.items()
-                    ]
+                opt_str = (
+                    ", ".join(
+                        [
+                            f"{click.style(k, 'blue')}={click.style(v, 'magenta')}"
+                            for k, v in command.options.items()
+                        ]
+                    )
+                    if isinstance(command, ManagementCommand)
+                    else ""
                 )
                 switches_str += ", ".join(
                     click.style(switch, fg="yellow")
@@ -270,7 +288,7 @@ for routine in routines():
     for command in routine.commands:
         priority = f"{'[green]' if use_rich else ''}{command.priority}{'[/green]' if use_rich else ''}"
         cmd_str = f"{'[cyan]' if use_rich else ''}{command.command_str}{'[/cyan]' if use_rich else ''}"
-        if command.options:
+        if isinstance(command, ManagementCommand) and command.options:
             if use_rich:
                 opt_str = ", ".join(
                     [

@@ -1,7 +1,12 @@
+import os
 from django.test import TestCase, override_settings
-from django_routines import ROUTINE_SETTING, Routine, RoutineCommand
+from django_routines import ROUTINE_SETTING, Routine, RoutineCommand, SystemCommand
 from django.conf import settings
 from .test_core import CoreTests
+from . import system_cmd
+from pathlib import Path
+
+system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
 
 
 @override_settings(
@@ -53,6 +58,14 @@ from .test_core import CoreTests
                 ),
                 RoutineCommand(command=("track", "1"), priority=4),
                 RoutineCommand(command=("track", "5"), priority=6, switches=("demo",)),
+                SystemCommand(
+                    command=(str(system_cmd), "sys 1"),
+                    priority=7,
+                ),
+                SystemCommand(
+                    command=(str(system_cmd), "sys 2"),
+                    priority=8,
+                ),
             ],
             help_text="Test Routine 1",
             name="test",
@@ -120,6 +133,14 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
                         RoutineCommand(command=("track", "1"), priority=4),
                         RoutineCommand(
                             command=("track", "5"), priority=6, switches=("demo",)
+                        ),
+                        SystemCommand(
+                            command=(str(system_cmd), "sys 1"),
+                            priority=7,
+                        ),
+                        SystemCommand(
+                            command=(str(system_cmd), "sys 2"),
+                            priority=8,
                         ),
                     ],
                     help_text="Test Routine 1",

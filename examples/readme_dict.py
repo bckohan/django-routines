@@ -14,6 +14,7 @@ DJANGO_ROUTINES = {
                 "command": ("loaddata", "./fixtures/demo.json"),
                 "switches": ["demo"],
             },
+            {"command": ("touch", "/path/to/wsgi.py"), "kind": "system"},
         ],
         "help_text": "Deploy the site application into production.",
         "name": "deploy",
@@ -29,6 +30,7 @@ DJANGO_ROUTINES = {
         "commands": [
             {"command": "makemigrations"},
             {"command": "renderstatic"},
+            {"command": ("poetry", "build"), "kind": "system"},
         ],
         "help_text": "Generate pre-package artifacts like migrations and "
                      "transpiled javascript.",

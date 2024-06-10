@@ -79,29 +79,33 @@ class CoreTests(with_typehint(TestCase)):
         if subprocess:
             command.append("--subprocess")
         out = StringIO()
-        call_command(*command, stdout=out)
+        err = StringIO()
+        call_command(*command, stdout=out, stderr=err)
         expected = [3, 4, 1]
+        sys_expected = ["sys 1", "sys 2"]
         if verbosity is None or verbosity > 0:
             for line, exp in zip(
-                self.lines(out.getvalue(), no_color=no_color), expected
+                self.lines(out.getvalue(), no_color=no_color),
+                [
+                    *[f"track {exp}" for exp in expected],
+                    *[f"system_cmd.py {exp}" for exp in sys_expected],
+                ],
             ):
-                self.assertTrue(f"track {exp}" in line)
+                self.assertTrue(exp in line)
         else:
-            self.assertFalse(out.getvalue().strip())
+            self.assertTrue("track" not in out.getvalue().strip())
+            self.assertTrue("system_cmd" not in out.getvalue().strip())
 
         if subprocess:
             self.assertFalse(invoked)
             self.assertFalse(passed_options)
-            results = json.loads(track_file.read_text())
+        results = json.loads(track_file.read_text())
 
         self.assertEqual(
-            results["invoked"]
-            if subprocess
-            else results["invoked"]
-            if subprocess
-            else invoked,
-            expected,
+            results["invoked"] if subprocess else invoked,
+            expected + sys_expected if subprocess else expected,
         )
+        self.assertEqual(results["invoked"], [*expected, *sys_expected])
         self.assertEqual(
             (results["passed_options"] if subprocess else passed_options)[0]["demo"], 2
         )
@@ -124,18 +128,27 @@ class CoreTests(with_typehint(TestCase)):
         expected = [2, 0, 3, 4, 1, 5]
         if verbosity is None or verbosity > 0:
             for line, exp in zip(
-                self.lines(out.getvalue(), no_color=no_color), expected
+                self.lines(out.getvalue(), no_color=no_color),
+                [
+                    *[f"track {exp}" for exp in expected],
+                    *[f"system_cmd.py {exp}" for exp in sys_expected],
+                ],
             ):
-                self.assertTrue(f"track {exp}" in line)
+                self.assertTrue(exp in line)
         else:
-            self.assertFalse(out.getvalue().strip())
+            self.assertTrue("track" not in out.getvalue().strip())
+            self.assertTrue("system_cmd" not in out.getvalue().strip())
 
         if subprocess:
             self.assertFalse(invoked)
             self.assertFalse(passed_options)
-            results = json.loads(track_file.read_text())
+        results = json.loads(track_file.read_text())
 
-        self.assertEqual(results["invoked"] if subprocess else invoked, expected)
+        self.assertEqual(
+            results["invoked"] if subprocess else invoked,
+            expected + sys_expected if subprocess else expected,
+        )
+        self.assertEqual(results["invoked"], [*expected, *sys_expected])
         self.assertEqual(
             (results["passed_options"] if subprocess else passed_options)[1][
                 "verbosity"
@@ -165,18 +178,27 @@ class CoreTests(with_typehint(TestCase)):
         expected = [2, 3, 4, 1, 5]
         if verbosity is None or verbosity > 0:
             for line, exp in zip(
-                self.lines(out.getvalue(), no_color=no_color), expected
+                self.lines(out.getvalue(), no_color=no_color),
+                [
+                    *[f"track {exp}" for exp in expected],
+                    *[f"system_cmd.py {exp}" for exp in sys_expected],
+                ],
             ):
-                self.assertTrue(f"track {exp}" in line)
+                self.assertTrue(exp in line)
         else:
-            self.assertFalse(out.getvalue().strip())
+            self.assertTrue("track" not in out.getvalue().strip())
+            self.assertTrue("system_cmd" not in out.getvalue().strip())
 
         if subprocess:
             self.assertFalse(invoked)
             self.assertFalse(passed_options)
-            results = json.loads(track_file.read_text())
+        results = json.loads(track_file.read_text())
 
-        self.assertEqual(results["invoked"] if subprocess else invoked, expected)
+        self.assertEqual(
+            results["invoked"] if subprocess else invoked,
+            expected + sys_expected if subprocess else expected,
+        )
+        self.assertEqual(results["invoked"], [*expected, *sys_expected])
         self.assertEqual(
             (results["passed_options"] if subprocess else passed_options)[1]["demo"], 2
         )
@@ -199,18 +221,27 @@ class CoreTests(with_typehint(TestCase)):
         expected = [2, 0, 3, 4, 1, 5]
         if verbosity is None or verbosity > 0:
             for line, exp in zip(
-                self.lines(out.getvalue(), no_color=no_color), expected
+                self.lines(out.getvalue(), no_color=no_color),
+                [
+                    *[f"track {exp}" for exp in expected],
+                    *[f"system_cmd.py {exp}" for exp in sys_expected],
+                ],
             ):
-                self.assertTrue(f"track {exp}" in line)
+                self.assertTrue(exp in line)
         else:
-            self.assertFalse(out.getvalue().strip())
+            self.assertTrue("track" not in out.getvalue().strip())
+            self.assertTrue("system_cmd" not in out.getvalue().strip())
 
         if subprocess:
             self.assertFalse(invoked)
             self.assertFalse(passed_options)
-            results = json.loads(track_file.read_text())
+        results = json.loads(track_file.read_text())
 
-        self.assertEqual(results["invoked"] if subprocess else invoked, expected)
+        self.assertEqual(
+            results["invoked"] if subprocess else invoked,
+            expected + sys_expected if subprocess else expected,
+        )
+        self.assertEqual(results["invoked"], [*expected, *sys_expected])
         self.assertEqual(
             (results["passed_options"] if subprocess else passed_options)[1][
                 "verbosity"
@@ -240,18 +271,27 @@ class CoreTests(with_typehint(TestCase)):
         expected = [2, 0, 3, 4, 1]
         if verbosity is None or verbosity > 0:
             for line, exp in zip(
-                self.lines(out.getvalue(), no_color=no_color), expected
+                self.lines(out.getvalue(), no_color=no_color),
+                [
+                    *[f"track {exp}" for exp in expected],
+                    *[f"system_cmd.py {exp}" for exp in sys_expected],
+                ],
             ):
-                self.assertTrue(f"track {exp}" in line)
+                self.assertTrue(exp in line)
         else:
-            self.assertFalse(out.getvalue().strip())
+            self.assertTrue("track" not in out.getvalue().strip())
+            self.assertTrue("system_cmd" not in out.getvalue().strip())
 
         if subprocess:
             self.assertFalse(invoked)
             self.assertFalse(passed_options)
-            results = json.loads(track_file.read_text())
+        results = json.loads(track_file.read_text())
 
-        self.assertEqual(results["invoked"] if subprocess else invoked, expected)
+        self.assertEqual(
+            results["invoked"] if subprocess else invoked,
+            expected + sys_expected if subprocess else expected,
+        )
+        self.assertEqual(results["invoked"], [*expected, *sys_expected])
         self.assertEqual(
             (results["passed_options"] if subprocess else passed_options)[1][
                 "verbosity"
@@ -303,6 +343,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
                 "[6] track 5 | demo",
+                "[7] tests/system_cmd.py sys 1",
+                "[8] tests/system_cmd.py sys 2",
             ],
         )
 
@@ -311,7 +353,13 @@ class CoreTests(with_typehint(TestCase)):
         plan = self.lines(out.getvalue(), no_color=no_color)
         self.assertEqual(
             plan,
-            ["[3] track 3 (demo=2)", "[3] track 4 (demo=6, flag=True)", "[4] track 1"],
+            [
+                "[3] track 3 (demo=2)",
+                "[3] track 4 (demo=6, flag=True)",
+                "[4] track 1",
+                "[7] tests/system_cmd.py sys 1",
+                "[8] tests/system_cmd.py sys 2",
+            ],
         )
 
         out = StringIO()
@@ -325,6 +373,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
                 "[6] track 5 | demo",
+                "[7] tests/system_cmd.py sys 1",
+                "[8] tests/system_cmd.py sys 2",
             ],
         )
 
@@ -340,6 +390,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
                 "[6] track 5 | demo",
+                "[7] tests/system_cmd.py sys 1",
+                "[8] tests/system_cmd.py sys 2",
             ],
         )
 
@@ -354,6 +406,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 3 (demo=2)",
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
+                "[7] tests/system_cmd.py sys 1",
+                "[8] tests/system_cmd.py sys 2",
             ],
         )
 
@@ -425,6 +479,8 @@ class CoreTests(with_typehint(TestCase)):
  [3] track 4 (demo=6, flag=True)                                                
  [4] track 1                                                                    
  [6] track 5 | demo                                                             
+ [7] tests/system_cmd.py sys 1                                                  
+ [8] tests/system_cmd.py sys 2                                                  
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --subprocess          Run commands as subprocesses.                          │
@@ -505,6 +561,8 @@ Usage: ./manage.py routine test [OPTIONS] COMMAND [ARGS]...
   [3] track 4 (demo=6, flag=True)
   [4] track 1
   [6] track 5 | demo
+  [7] tests/system_cmd.py sys 1
+  [8] tests/system_cmd.py sys 2
 
 Options:
   --subprocess  Run commands as subprocesses.
@@ -547,126 +605,158 @@ Commands:
 
     def test_settings_format(self):
         routines = getattr(settings, ROUTINE_SETTING)
+
         self.assertEqual(
-            routines,
+            routines["bad"],
             {
-                "bad": {
-                    "commands": [
-                        {
-                            "command": ("track", "0"),
-                            "options": {},
-                            "priority": 0,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("does_not_exist",),
-                            "options": {},
-                            "priority": 0,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("track", "1"),
-                            "options": {},
-                            "priority": 0,
-                            "switches": (),
-                        },
-                    ],
-                    "help_text": "Bad command test routine",
-                    "name": "bad",
-                    "switch_helps": {},
-                    "subprocess": False,
-                },
-                "deploy": {
-                    "commands": [
-                        {
-                            "command": ("makemigrations",),
-                            "options": {},
-                            "priority": 0,
-                            "switches": ["prepare"],
-                        },
-                        {
-                            "command": ("migrate",),
-                            "options": {},
-                            "priority": 0,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("renderstatic",),
-                            "options": {},
-                            "priority": 0,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("collectstatic",),
-                            "options": {},
-                            "priority": 0,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("shellcompletion", "install"),
-                            "options": {},
-                            "priority": 0,
-                            "switches": ("initial",),
-                        },
-                        {
-                            "command": ("loaddata", "./fixtures/initial_data.json"),
-                            "options": {},
-                            "priority": 0,
-                            "switches": ("demo",),
-                        },
-                    ],
-                    "help_text": "Deploy the site application into production.",
-                    "name": "deploy",
-                    "switch_helps": {
-                        "demo": "Deploy the demo.",
-                        "prepare": "Prepare the deployment.",
+                "commands": [
+                    {
+                        "command": ("track", "0"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
                     },
-                    "subprocess": False,
+                    {
+                        "command": ("does_not_exist",),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("track", "1"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
+                    },
+                ],
+                "help_text": "Bad command test routine",
+                "name": "bad",
+                "switch_helps": {},
+                "subprocess": False,
+            },
+        )
+        self.assertEqual(
+            routines["deploy"],
+            {
+                "commands": [
+                    {
+                        "command": ("makemigrations",),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": ["prepare"],
+                    },
+                    {
+                        "command": ("migrate",),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("renderstatic",),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("collectstatic",),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("shellcompletion", "install"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": ("initial",),
+                    },
+                    {
+                        "command": ("loaddata", "./fixtures/initial_data.json"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": ("demo",),
+                    },
+                ],
+                "help_text": "Deploy the site application into production.",
+                "name": "deploy",
+                "switch_helps": {
+                    "demo": "Deploy the demo.",
+                    "prepare": "Prepare the deployment.",
                 },
-                "test": {
-                    "commands": [
-                        {
-                            "command": ("track", "2"),
-                            "options": {},
-                            "priority": 0,
-                            "switches": ("initial", "demo"),
-                        },
-                        {
-                            "command": ("track", "0"),
-                            "options": {"verbosity": 0},
-                            "priority": 1,
-                            "switches": ("initial",),
-                        },
-                        {
-                            "command": ("track", "3"),
-                            "options": {"demo": 2},
-                            "priority": 3,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("track", "4"),
-                            "options": {"demo": 6, "flag": True},
-                            "priority": 3,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("track", "1"),
-                            "options": {},
-                            "priority": 4,
-                            "switches": (),
-                        },
-                        {
-                            "command": ("track", "5"),
-                            "options": {},
-                            "priority": 6,
-                            "switches": ("demo",),
-                        },
-                    ],
-                    "help_text": "Test Routine 1",
-                    "name": "test",
-                    "switch_helps": {},
-                    "subprocess": False,
-                },
+                "subprocess": False,
+            },
+        )
+        self.assertEqual(
+            routines["test"],
+            {
+                "commands": [
+                    {
+                        "command": ("track", "2"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": ("initial", "demo"),
+                    },
+                    {
+                        "command": ("track", "0"),
+                        "kind": "management",
+                        "options": {"verbosity": 0},
+                        "priority": 1,
+                        "switches": ("initial",),
+                    },
+                    {
+                        "command": ("track", "3"),
+                        "kind": "management",
+                        "options": {"demo": 2},
+                        "priority": 3,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("track", "4"),
+                        "kind": "management",
+                        "options": {"demo": 6, "flag": True},
+                        "priority": 3,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("track", "1"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 4,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("track", "5"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 6,
+                        "switches": ("demo",),
+                    },
+                    {
+                        "command": ("tests/system_cmd.py", "sys 1"),
+                        "kind": "system",
+                        "priority": 7,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("tests/system_cmd.py", "sys 2"),
+                        "kind": "system",
+                        "priority": 8,
+                        "switches": (),
+                    },
+                ],
+                "help_text": "Test Routine 1",
+                "name": "test",
+                "switch_helps": {},
+                "subprocess": False,
             },
         )
 

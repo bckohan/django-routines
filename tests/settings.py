@@ -3,12 +3,20 @@ from pathlib import Path
 from django_routines import (
     routine,
     command,
+    system,
     Routine,
     RoutineCommand,
+    SystemCommand,
     get_routine,
     routines,
 )
+from tests import track_file, system_cmd
 from django.utils.translation import gettext_lazy as _
+
+track_file = str(track_file.relative_to(Path(os.getcwd())))
+system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
+
+USE_TZ = True
 
 
 # Set default terminal width for help outputs - necessary for
@@ -81,11 +89,14 @@ routine(
         ("track", "0"), priority=1, switches=("initial",), options={"verbosity": 0}
     ),
     RoutineCommand(("track", "1"), priority=4),
+    SystemCommand((system_cmd, "sys 2"), priority=8),
 )
 
 command("test", "track", "3", priority=3, demo=2)
 command("test", "track", "4", priority=3, demo=6, flag=True)
 command("test", "track", "5", priority=6, switches=["demo"])
+system("test", system_cmd, "sys 1", priority=7)
+
 
 names = set()
 for rtn in routines():

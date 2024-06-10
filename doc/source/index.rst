@@ -21,6 +21,13 @@ the site for the first time on a new server or when we deploy version updates on
 
     Routine commands are run in the order they are registered, or by priority_.
 
+There are two types of commands, management commands and system commands. The management commands
+will be called in the same process space as routine unless --subprocess is specified in which case
+they will use the same management script as routine was invoked with or whatever value you supply
+to --manage-script. System commands are always invoked as subprocesses.
+
+In our settings file we may define these routines like this:
+
 .. literalinclude:: ../../examples/readme.py
     :caption: settings.py
     :linenos:
@@ -68,7 +75,7 @@ For example to deploy our demo on a new server we would run:
 
 :big:`Settings`
 
-The :class:`~django_routines.RoutineCommand` dataclass, :func:`django_routines.routine` and
+The :class:`~django_routines.ManagementCommand` dataclass, :func:`django_routines.routine` and
 :func:`django_routines.command` helper functions in the example above make it easier for us to
 work with the native configuration format which is a dictionary structure defined in the
 ``DJANGO_ROUTINES`` setting attribute. For example the above configuration is equivalent to:
