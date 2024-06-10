@@ -80,6 +80,8 @@ Now we can run all of our package routines with one command:
     ...
     renderstatic
     ...
+    poetry build
+    ...
 ```
 
 The deploy command has several switches that we can enable to run additional commands.
@@ -98,6 +100,7 @@ For example to deploy our demo on a new server we would run:
     ...
     loaddata ./fixtures/demo.json
     ...
+    touch /path/to/wsgi.py
 ```
 
 ## Settings
