@@ -192,3 +192,7 @@ When specifying arguments you may add them to the command tuple OR specify them 
     ```
 
    *You only need to install [django_typer](https://github.com/bckohan/django-typer) as an app if you want to use the shellcompletion command to [enable tab-completion](https://django-typer.readthedocs.io/en/latest/shell_completion.html) or if you would like django-typer to install [rich traceback rendering](https://django-typer.readthedocs.io/en/latest/howto.html#configure-rich-stack-traces) for you - which it does by default if rich is also installed.*
+
+## Rationale
+
+When does it make sense to configure routines in Django settings? Its generally convenient to group common management pathways into easily discoverable and executable aggregations of subroutines. This is usually done in supporting shell scripts or just files and in most cases that is appropriate. If your goal is to keep your Django deployment as tight and self contained as possible and the deployment is not generally very complex, using django-routines can make a lot of sense. It can eliminate extra dependencies on a shell scripting environment or just files and can keep this logic packaged with your installable wheel.

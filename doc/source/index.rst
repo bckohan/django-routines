@@ -114,6 +114,19 @@ options in the style that will be passed to call_command_:
 
     Lazy translations work as help_text for routines and switches.
 
+
+.. _rationale:
+
+:big:`Rationale`
+
+When does it make sense to configure routines in Django settings? Its generally convenient to group
+common management pathways into easily discoverable and executable aggregations of subroutines.
+This is usually done in supporting shell scripts or just files and in most cases that is
+appropriate. If your goal is to keep your Django deployment as tight and self contained as possible
+and the deployment is not generally very complex, using django-routines can make a lot of sense. It
+can eliminate extra dependencies on a shell scripting environment or just files and can keep this
+logic packaged with your installable wheel.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

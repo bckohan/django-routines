@@ -6,6 +6,7 @@ v1.1.0
 ======
 
 * `Invalidate importlib caches if command is makemigrations. <https://github.com/bckohan/django-routines/issues/13>`_
+* `Rationale for why settings is a good place to put routines. <https://github.com/bckohan/django-routines/issues/8>`_
 * `Command type for system commands (i.e. non-management commands) to be run as subprocesses <https://github.com/bckohan/django-routines/issues/7>`_
 * `Option to run management commands as subprocesses instead of in the same process space. <https://github.com/bckohan/django-routines/issues/6>`_
 
