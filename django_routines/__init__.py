@@ -50,6 +50,14 @@ CommandTypes = t.Union[t.Type["ManagementCommand"], t.Type["SystemCommand"]]
 Command = t.Union["ManagementCommand", "SystemCommand"]
 
 
+def to_symbol(name: str) -> str:
+    return name.lstrip("-").replace("-", "_")
+
+
+def to_cli_option(name: str) -> str:
+    return f'--{to_symbol(name).replace("_", "-")}'
+
+
 @dataclass
 class _RoutineCommand(ABC):
     """
@@ -87,6 +95,9 @@ class _RoutineCommand(ABC):
     # and the result of the function which will be whatever call_command returns if run in the same
     # process, or the result object returned by subprocess.run() if run in a subprocess.
     # """
+
+    def __post_init__(self):
+        self.switches = tuple([to_symbol(switch) for switch in self.switches])
 
     @property
     @abstractmethod
@@ -192,6 +203,12 @@ class Routine:
     If true run each of the commands in a subprocess.
     """
 
+    def __post_init__(self):
+        self.name = to_symbol(self.name)
+        self.switch_helps = {
+            to_symbol(switch): hlp for switch, hlp in self.switch_helps.items()
+        }
+
     def __len__(self):
         return len(self.commands)
 
@@ -290,7 +307,22 @@ def routine(
     for command in commands:
         routine.add(command)
 
-    settings[ROUTINE_SETTING][name] = routine.to_dict()
+    settings[ROUTINE_SETTING][routine.name] = routine.to_dict()
+
+
+def _get_routine(routine_name: str, routines: t.Dict[str, t.Any]) -> Routine:
+    """
+    Routine may undergo some normalization, we account for that here when trying
+    to fetch them.
+    """
+    try:
+        routine_name = to_symbol(routine_name)
+        return routines[routine_name]
+    except KeyError:
+        for name, routine in routines.items():
+            if to_symbol(name).lower() == routine_name.lower():
+                return routine
+        raise
 
 
 def _add_command(
@@ -304,11 +336,10 @@ def _add_command(
     settings = sys._getframe(2).f_globals  # noqa: WPS437
     settings[ROUTINE_SETTING] = settings.get(ROUTINE_SETTING, {}) or {}
     routine_dict = settings[ROUTINE_SETTING]
-    routine_obj = (
-        Routine.from_dict(routine_dict[routine])
-        if routine in routine_dict
-        else Routine(routine, "", [])
-    )
+    try:
+        routine_obj = Routine.from_dict(_get_routine(routine, routine_dict))
+    except KeyError:
+        routine_obj = Routine(routine, "", [])
     extra = {"options": options} if command_type is ManagementCommand else {}
     new_cmd = routine_obj.add(
         command_type(
@@ -398,8 +429,12 @@ def get_routine(name: str) -> Routine:
 
     try:
         if not settings.configured:
-            Routine.from_dict(sys._getframe(1).f_globals.get(ROUTINE_SETTING, {})[name])  # noqa: WPS437
-        return Routine.from_dict(getattr(settings, ROUTINE_SETTING, {})[name])
+            Routine.from_dict(
+                _get_routine(name, sys._getframe(1).f_globals.get(ROUTINE_SETTING, {}))
+            )  # noqa: WPS437
+        return Routine.from_dict(
+            _get_routine(name, getattr(settings, ROUTINE_SETTING, {}))
+        )
     except TypeError as err:
         raise ImproperlyConfigured(
             f"{ROUTINE_SETTING} routine {name} is malformed."

@@ -112,3 +112,15 @@ routine(
     RoutineCommand(("does_not_exist",)),
     RoutineCommand(("track", "1")),
 )
+
+routine(
+    "--test-hyphen",
+    "Test that hyphens dont mess everything up.",
+    RoutineCommand(("track", "1"), switches=["--hyphen-ok", "hyphen-ok-prefix"]),
+    RoutineCommand(("track", "2")),
+    RoutineCommand(("track", "3"), switches=["hyphen-ok"]),
+    RoutineCommand(("track", "4")),
+    RoutineCommand(("track", "5"), switches=("hyphen-ok", "--hyphen-ok_prefix")),
+    hyphen_ok="Test hyphen.",
+    hyphen_ok_prefix="Test hyphen with -- prefix.",
+)

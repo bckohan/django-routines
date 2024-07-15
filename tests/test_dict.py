@@ -70,6 +70,27 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
             "help_text": "Test Routine 1",
             "name": "test",
         },
+        "test-hyphen": {
+            "commands": [
+                {
+                    "command": ("track", "1"),
+                    "switches": ["--hyphen-ok", "hyphen-ok-prefix"],
+                },
+                {"command": ("track", "2")},
+                {"command": ("track", "3"), "switches": ("hyphen-ok",)},
+                {"command": ("track", "4")},
+                {
+                    "command": ("track", "5"),
+                    "switches": ("hyphen-ok", "--hyphen-ok-prefix"),
+                },
+            ],
+            "help_text": "Test that hyphens dont mess everything up.",
+            "name": "test-hyphen",
+            "switch_helps": {
+                "hyphen-ok": "Test hyphen.",
+                "--hyphen-ok-prefix": "Test hyphen with -- prefix.",
+            },
+        },
     }
 )
 class SettingsAsDictTests(CoreTests, TestCase):
@@ -147,6 +168,27 @@ class SettingsAsDictTests(CoreTests, TestCase):
                     ],
                     "help_text": "Test Routine 1",
                     "name": "test",
+                },
+                "test-hyphen": {
+                    "commands": [
+                        {
+                            "command": ("track", "1"),
+                            "switches": ["--hyphen-ok", "hyphen-ok-prefix"],
+                        },
+                        {"command": ("track", "2")},
+                        {"command": ("track", "3"), "switches": ("hyphen-ok",)},
+                        {"command": ("track", "4")},
+                        {
+                            "command": ("track", "5"),
+                            "switches": ("hyphen-ok", "--hyphen-ok-prefix"),
+                        },
+                    ],
+                    "help_text": "Test that hyphens dont mess everything up.",
+                    "name": "test-hyphen",
+                    "switch_helps": {
+                        "hyphen-ok": "Test hyphen.",
+                        "--hyphen-ok-prefix": "Test hyphen with -- prefix.",
+                    },
                 },
             },
         )
