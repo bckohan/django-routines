@@ -19,6 +19,8 @@ from django_routines import (
     SystemCommand,
     get_routine,
     routines,
+    to_cli_option,
+    to_symbol,
 )
 
 if sys.version_info < (3, 9):
@@ -36,7 +38,7 @@ if use_rich:
     width = Console().width
 
 COMMAND_TMPL = """
-def {routine}(
+def {routine_func}(
     self,
     ctx: typer.Context,
     subprocess: Annotated[bool, typer.Option("{subprocess_opt}", help="{subprocess_help}", show_default=False)] = {subprocess},
@@ -52,7 +54,7 @@ def {routine}(
     ) else None
     if not ctx.invoked_subcommand:
         return self._run_routine(subprocess=subprocess)
-    return self.{routine}
+    return self.{routine_func}
 """
 
 
@@ -254,11 +256,16 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
                     else ""
                 )
                 switches_str += ", ".join(
-                    click.style(switch, fg="yellow")
+                    click.style(to_cli_option(switch).lstrip("-"), fg="yellow")
                     for switch in (command.switches or [])
                 )
             else:
-                switches_str += ", ".join(command.switches or [])
+                switches_str += ", ".join(
+                    [
+                        to_cli_option(switch).lstrip("-")
+                        for switch in (command.switches or [])
+                    ]
+                )
 
             opt_str = f" ({opt_str})" if opt_str else ""
             self.secho(f"[{priority}] {cmd_str}{opt_str}{switches_str}")
@@ -268,15 +275,18 @@ for routine in routines():
     switches = routine.switches
     switch_args = ", ".join(
         [
-            f"{switch}: Annotated[bool, typer.Option('--{switch}', help='{routine.switch_helps.get(switch, '')}')] = False"
+            f"{to_symbol(switch)}: Annotated[bool, typer.Option('{to_cli_option(switch)}', help='{routine.switch_helps.get(switch, '')}')] = False"
             for switch in switches
         ]
     )
     add_switches = ""
     for switch in switches:
-        add_switches += f'\n    if all or {switch}: self.switches.append("{switch}")'
+        add_switches += (
+            f'\n    if all or {to_symbol(switch)}: self.switches.append("{switch}")'
+        )
 
     cmd_code = COMMAND_TMPL.format(
+        routine_func=to_symbol(routine.name),
         routine=routine.name,
         switch_args=switch_args,
         add_switches=add_switches,
@@ -305,7 +315,7 @@ for routine in routines():
             cmd_str += f" ({opt_str})"
         switches_str = " | " if command.switches else ""
         switches_str += ", ".join(
-            f"{'[yellow]' if use_rich else ''}{switch}{'[/yellow]' if use_rich else ''}"
+            f"{'[yellow]' if use_rich else ''}{to_cli_option(switch).lstrip("-")}{'[/yellow]' if use_rich else ''}"
             for switch in (command.switches or [])
         )
         command_strings.append(f"[{priority}] {cmd_str}{switches_str}")
@@ -322,8 +332,11 @@ for routine in routines():
         f"{lb}{routine.help_text}\n{ruler}{lb}{'' if use_rich else lb}{cmd_strings}\n"
     )
     grp = Command.group(
-        help=help_txt, short_help=routine.help_text, invoke_without_command=True
-    )(locals()[routine.name])
+        name=routine.name.replace("_", "-"),
+        help=help_txt,
+        short_help=routine.help_text,
+        invoke_without_command=True,
+    )(locals()[to_symbol(routine.name)])
 
     @grp.command(name="list", help=_("List the commands that will be run."))
     def list(self):

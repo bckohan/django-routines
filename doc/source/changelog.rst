@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+v1.1.1
+======
+
+* `Allow hyphens (-) in switches. <https://github.com/bckohan/django-routines/issues/17>`_
+
 v1.1.0
 ======
 

@@ -411,6 +411,61 @@ class CoreTests(with_typehint(TestCase)):
             ],
         )
 
+    def test_hyphen_list(self, no_color=True):
+        if no_color:
+            command = ("routine", "--no-color", "test-hyphen")
+        else:
+            command = ("routine", "--force-color", "test-hyphen")
+
+        out = StringIO()
+        call_command(*command, "--all", "list", stdout=out)
+        plan = self.lines(out.getvalue(), no_color=no_color)
+        self.assertEqual(
+            plan,
+            [
+                "[0] track 1 | hyphen-ok, hyphen-ok-prefix",
+                "[0] track 2",
+                "[0] track 3 | hyphen-ok",
+                "[0] track 4",
+                "[0] track 5 | hyphen-ok, hyphen-ok-prefix",
+            ],
+        )
+
+        out = StringIO()
+        call_command(*command, "list", stdout=out)
+        plan = self.lines(out.getvalue(), no_color=no_color)
+        self.assertEqual(
+            plan,
+            ["[0] track 2", "[0] track 4"],
+        )
+
+        out = StringIO()
+        call_command(*command, "--hyphen-ok", "list", stdout=out)
+        plan = self.lines(out.getvalue(), no_color=no_color)
+        self.assertEqual(
+            plan,
+            [
+                "[0] track 1 | hyphen-ok, hyphen-ok-prefix",
+                "[0] track 2",
+                "[0] track 3 | hyphen-ok",
+                "[0] track 4",
+                "[0] track 5 | hyphen-ok, hyphen-ok-prefix",
+            ],
+        )
+
+        out = StringIO()
+        call_command(*command, "--hyphen-ok-prefix", "list", stdout=out)
+        plan = self.lines(out.getvalue(), no_color=no_color)
+        self.assertEqual(
+            plan,
+            [
+                "[0] track 1 | hyphen-ok, hyphen-ok-prefix",
+                "[0] track 2",
+                "[0] track 4",
+                "[0] track 5 | hyphen-ok, hyphen-ok-prefix",
+            ],
+        )
+
     def test_list_color(self):
         self.test_list(no_color=False)
 
@@ -460,9 +515,10 @@ class CoreTests(with_typehint(TestCase)):
 │ --skip-checks                                 Skip system checks.            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ bad      Bad command test routine                                            │
-│ deploy   Deploy the site application into production.                        │
-│ test     Test Routine 1                                                      │
+│ bad           Bad command test routine                                       │
+│ deploy        Deploy the site application into production.                   │
+│ test          Test Routine 1                                                 │
+│ test-hyphen   Test that hyphens dont mess everything up.                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 """
 
@@ -547,9 +603,10 @@ Options:
   --help                     Show this message and exit.
 
 Commands:
-  bad     Bad command test routine
-  deploy  Deploy the site application into production.
-  test    Test Routine 1
+  bad          Bad command test routine
+  deploy       Deploy the site application into production.
+  test         Test Routine 1
+  test-hyphen  Test that hyphens dont mess everything up.
 """
 
     routine_test_help_no_rich = """
@@ -608,7 +665,6 @@ Commands:
 
     def test_settings_format(self):
         routines = getattr(settings, ROUTINE_SETTING)
-
         self.assertEqual(
             routines["bad"],
             {
@@ -650,7 +706,7 @@ Commands:
                         "kind": "management",
                         "options": {},
                         "priority": 0,
-                        "switches": ["prepare"],
+                        "switches": ("prepare",),
                     },
                     {
                         "command": ("migrate",),
@@ -760,6 +816,55 @@ Commands:
                 "name": "test",
                 "switch_helps": {},
                 "subprocess": False,
+            },
+        )
+        self.assertEqual(
+            routines["test_hyphen"],
+            {
+                "commands": [
+                    {
+                        "command": ("track", "1"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": ("hyphen_ok", "hyphen_ok_prefix"),
+                    },
+                    {
+                        "command": ("track", "2"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("track", "3"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": ("hyphen_ok",),
+                    },
+                    {
+                        "command": ("track", "4"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": (),
+                    },
+                    {
+                        "command": ("track", "5"),
+                        "kind": "management",
+                        "options": {},
+                        "priority": 0,
+                        "switches": ("hyphen_ok", "hyphen_ok_prefix"),
+                    },
+                ],
+                "help_text": "Test that hyphens dont mess everything up.",
+                "name": "test_hyphen",
+                "subprocess": False,
+                "switch_helps": {
+                    "hyphen_ok": "Test hyphen.",
+                    "hyphen_ok_prefix": "Test hyphen with -- prefix.",
+                },
             },
         )
 

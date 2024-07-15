@@ -31,7 +31,7 @@ In our settings file we may define these routines like this:
 .. literalinclude:: ../../examples/readme.py
     :caption: settings.py
     :linenos:
-    :lines: 2-33
+    :lines: 2-41
 
 The routine command will read our settings file and generate two subcommands, one called deploy
 and one called package:
@@ -85,7 +85,7 @@ work with the native configuration format which is a dictionary structure define
 .. literalinclude:: ../../examples/readme_dict.py
     :caption: settings.py
     :linenos:
-    :lines: 2-33
+    :lines: 2-39
 
 
 .. _priority:
