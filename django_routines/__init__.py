@@ -22,7 +22,7 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 1, 0)
+VERSION = (1, 1, 1)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
