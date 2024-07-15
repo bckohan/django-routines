@@ -2,36 +2,36 @@
 Change Log
 ==========
 
-v1.1.2
-======
+v1.1.2 (15-JUL-2024)
+====================
 
 * `Support Django 5.1 <https://github.com/bckohan/django-routines/issues/19>`_
 
-v1.1.1
-======
+v1.1.1 (15-JUL-2024)
+====================
 
 * `Allow hyphens (-) in switches. <https://github.com/bckohan/django-routines/issues/17>`_
 
-v1.1.0
-======
+v1.1.0 (10-JUN-2024)
+====================
 
 * `Invalidate importlib caches if command is makemigrations. <https://github.com/bckohan/django-routines/issues/13>`_
 * `Rationale for why settings is a good place to put routines. <https://github.com/bckohan/django-routines/issues/8>`_
 * `Command type for system commands (i.e. non-management commands) to be run as subprocesses <https://github.com/bckohan/django-routines/issues/7>`_
 * `Option to run management commands as subprocesses instead of in the same process space. <https://github.com/bckohan/django-routines/issues/6>`_
 
-v1.0.2
-======
+v1.0.2 (05-JUN-2024)
+====================
 
 * `Update import deprecation for django-typer 2.1+ <https://github.com/bckohan/django-routines/issues/4>`_
 
-v1.0.1
-======
+v1.0.1 (05-JUN-2024)
+====================
 
 * `Help example images dont have the correct usage line. <https://github.com/bckohan/django-routines/issues/3>`_
 
 
-v1.0.0
-======
+v1.0.0 (05-JUN-2024)
+====================
 
 * Initial production/stable release.
