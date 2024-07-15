@@ -315,7 +315,7 @@ for routine in routines():
             cmd_str += f" ({opt_str})"
         switches_str = " | " if command.switches else ""
         switches_str += ", ".join(
-            f"{'[yellow]' if use_rich else ''}{to_cli_option(switch).lstrip("-")}{'[/yellow]' if use_rich else ''}"
+            f"{'[yellow]' if use_rich else ''}{to_cli_option(switch).lstrip('-')}{'[/yellow]' if use_rich else ''}"
             for switch in (command.switches or [])
         )
         command_strings.append(f"[{priority}] {cmd_str}{switches_str}")
