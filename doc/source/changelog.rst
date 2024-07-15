@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+v1.1.2
+======
+
+* `Support Django 5.1 <https://github.com/bckohan/django-routines/issues/19>`_
+
 v1.1.1
 ======
 

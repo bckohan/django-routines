@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-routines"
-version = "1.1.1"
+version = "1.1.2"
 description = "Define named groups of management commands in Django settings files for batched execution."
 authors = ["Brian Kohan <bckohan@gmail.com>"]
 license = "MIT"
@@ -19,6 +19,7 @@ classifiers = [
     "Framework :: Django :: 4.1",
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
