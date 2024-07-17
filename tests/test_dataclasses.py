@@ -135,9 +135,7 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["import"],
             Routine(
                 commands=[
-                    RoutineCommand(
-                        command=("track", "2"), switches=("import", "demo")
-                    ),
+                    RoutineCommand(command=("track", "2"), switches=("import", "demo")),
                     RoutineCommand(
                         command=("track", "0"),
                         options={"verbosity": 0},

@@ -14,8 +14,8 @@ and then run them in sequence by name using the provied ``routine`` command.
 """
 
 import bisect
-import sys
 import keyword
+import sys
 import typing as t
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
@@ -51,7 +51,7 @@ CommandTypes = t.Union[t.Type["ManagementCommand"], t.Type["SystemCommand"]]
 Command = t.Union["ManagementCommand", "SystemCommand"]
 
 
-def to_symbol(name: str, check_keyword: bool=False) -> str:
+def to_symbol(name: str, check_keyword: bool = False) -> str:
     symbol = name.lstrip("-").replace("-", "_")
     if check_keyword and symbol.lower() in keyword.kwlist:
         return f"{symbol}_"

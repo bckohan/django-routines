@@ -281,9 +281,7 @@ for routine in routines():
     )
     add_switches = ""
     for switch in switches:
-        add_switches += (
-            f'\n    if all or {to_symbol(switch, check_keyword=True)}: self.switches.append("{switch}")'
-        )
+        add_switches += f'\n    if all or {to_symbol(switch, check_keyword=True)}: self.switches.append("{switch}")'
 
     cmd_code = COMMAND_TMPL.format(
         routine_func=to_symbol(routine.name, check_keyword=True),
