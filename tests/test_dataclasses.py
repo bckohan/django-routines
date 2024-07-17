@@ -68,7 +68,7 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 ),
             ],
             help_text="Test Routine 1",
-            name="test",
+            name="import",
         ),
         "--test-hyphen": Routine(
             commands=[
@@ -164,7 +164,7 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
                     ),
                 ],
                 help_text="Test Routine 1",
-                name="test",
+                name="import",
             ),
         )
         self.assertEqual(
