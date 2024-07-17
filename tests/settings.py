@@ -75,27 +75,27 @@ routine(
     demo="Deploy the demo.",
 )
 
-command("deploy", "shellcompletion", "install", switches=["initial"])
+command("deploy", "shellcompletion", "install", switches=["import"])
 command("deploy", "loaddata", "./fixtures/initial_data.json", switches=["demo"])
 
 assert get_routine("deploy").name == "deploy"
 
 
-command("test", "track", "2", priority=0, switches=("initial", "demo"))
+command("import", "track", "2", priority=0, switches=("import", "demo"))
 routine(
-    "test",
+    "import",
     _("Test Routine 1"),
     RoutineCommand(
-        ("track", "0"), priority=1, switches=("initial",), options={"verbosity": 0}
+        ("track", "0"), priority=1, switches=("import",), options={"verbosity": 0}
     ),
     RoutineCommand(("track", "1"), priority=4),
     SystemCommand((system_cmd, "sys 2"), priority=8),
 )
 
-command("test", "track", "3", priority=3, demo=2)
-command("test", "track", "4", priority=3, demo=6, flag=True)
-command("test", "track", "5", priority=6, switches=["demo"])
-system("test", system_cmd, "sys 1", priority=7)
+command("import", "track", "3", priority=3, demo=2)
+command("import", "track", "4", priority=3, demo=6, flag=True)
+command("import", "track", "5", priority=6, switches=["demo"])
+system("import", system_cmd, "sys 1", priority=7)
 
 
 names = set()
@@ -103,7 +103,7 @@ for rtn in routines():
     assert isinstance(rtn, Routine)
     names.add(rtn.name)
 
-assert names == {"deploy", "test"}
+assert names == {"deploy", "import"}
 
 routine(
     "bad",

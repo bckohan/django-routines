@@ -26,7 +26,7 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 {"command": ("migrate",)},
                 {"command": ("renderstatic",)},
                 {"command": ("collectstatic",)},
-                {"command": ("shellcompletion", "install"), "switches": ("initial",)},
+                {"command": ("shellcompletion", "install"), "switches": ("import",)},
                 {
                     "command": ("loaddata", "./fixtures/initial_data.json"),
                     "switches": ("demo",),
@@ -39,14 +39,14 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 "prepare": "Prepare the deployment.",
             },
         },
-        "test": {
+        "import": {
             "commands": [
-                {"command": ("track", "2"), "switches": ("initial", "demo")},
+                {"command": ("track", "2"), "switches": ("import", "demo")},
                 {
                     "command": ("track", "0"),
                     "options": {"verbosity": 0},
                     "priority": 1,
-                    "switches": ("initial",),
+                    "switches": ("import",),
                 },
                 {"command": ("track", "3"), "options": {"demo": 2}, "priority": 3},
                 {
@@ -68,7 +68,7 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 },
             ],
             "help_text": "Test Routine 1",
-            "name": "test",
+            "name": "import",
         },
         "test-hyphen": {
             "commands": [
@@ -116,7 +116,7 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         {"command": ("collectstatic",)},
                         {
                             "command": ("shellcompletion", "install"),
-                            "switches": ("initial",),
+                            "switches": ("import",),
                         },
                         {
                             "command": ("loaddata", "./fixtures/initial_data.json"),
@@ -130,14 +130,14 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         "prepare": "Prepare the deployment.",
                     },
                 },
-                "test": {
+                "import": {
                     "commands": [
-                        {"command": ("track", "2"), "switches": ("initial", "demo")},
+                        {"command": ("track", "2"), "switches": ("import", "demo")},
                         {
                             "command": ("track", "0"),
                             "options": {"verbosity": 0},
                             "priority": 1,
-                            "switches": ("initial",),
+                            "switches": ("import",),
                         },
                         {
                             "command": ("track", "3"),
@@ -167,7 +167,7 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         },
                     ],
                     "help_text": "Test Routine 1",
-                    "name": "test",
+                    "name": "import",
                 },
                 "test-hyphen": {
                     "commands": [
