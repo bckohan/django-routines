@@ -613,7 +613,7 @@ Commands:
 Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...
 
   Test Routine 1
-  -----------------------------------
+  ----------------------------------
   
   [0] track 2 | import, demo
   [1] track 0 (verbosity=0) | import
@@ -658,10 +658,9 @@ Commands:
 
         routine = get_command("routine", TyperCommand, stdout=stdout, no_color=True)
         routine.print_help("./manage.py", "routine", "import")
-        self.assertEqual(
-            stdout.getvalue().strip().replace("\x08", ""),
-            self.routine_test_help_no_rich.strip(),
-        )
+        printed = stdout.getvalue().strip().replace("\x08", "")
+        expected = self.routine_test_help_no_rich.strip()
+        self.assertEqual(printed, expected)
 
     def test_settings_format(self):
         routines = getattr(settings, ROUTINE_SETTING)
