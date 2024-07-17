@@ -275,18 +275,16 @@ for routine in routines():
     switches = routine.switches
     switch_args = ", ".join(
         [
-            f"{to_symbol(switch)}: Annotated[bool, typer.Option('{to_cli_option(switch)}', help='{routine.switch_helps.get(switch, '')}')] = False"
+            f"{to_symbol(switch, check_keyword=True)}: Annotated[bool, typer.Option('{to_cli_option(switch)}', help='{routine.switch_helps.get(switch, '')}')] = False"
             for switch in switches
         ]
     )
     add_switches = ""
     for switch in switches:
-        add_switches += (
-            f'\n    if all or {to_symbol(switch)}: self.switches.append("{switch}")'
-        )
+        add_switches += f'\n    if all or {to_symbol(switch, check_keyword=True)}: self.switches.append("{switch}")'
 
     cmd_code = COMMAND_TMPL.format(
-        routine_func=to_symbol(routine.name),
+        routine_func=to_symbol(routine.name, check_keyword=True),
         routine=routine.name,
         switch_args=switch_args,
         add_switches=add_switches,
@@ -336,7 +334,7 @@ for routine in routines():
         help=help_txt,
         short_help=routine.help_text,
         invoke_without_command=True,
-    )(locals()[to_symbol(routine.name)])
+    )(locals()[to_symbol(routine.name, check_keyword=True)])
 
     @grp.command(name="list", help=_("List the commands that will be run."))
     def list(self):

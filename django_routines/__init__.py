@@ -14,6 +14,7 @@ and then run them in sequence by name using the provied ``routine`` command.
 """
 
 import bisect
+import keyword
 import sys
 import typing as t
 from abc import ABC, abstractmethod
@@ -22,7 +23,7 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 1, 2)
+VERSION = (1, 1, 3)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
@@ -50,12 +51,15 @@ CommandTypes = t.Union[t.Type["ManagementCommand"], t.Type["SystemCommand"]]
 Command = t.Union["ManagementCommand", "SystemCommand"]
 
 
-def to_symbol(name: str) -> str:
-    return name.lstrip("-").replace("-", "_")
+def to_symbol(name: str, check_keyword: bool = False) -> str:
+    symbol = name.lstrip("-").replace("-", "_")
+    if check_keyword and symbol.lower() in keyword.kwlist:
+        return f"{symbol}_"
+    return symbol
 
 
 def to_cli_option(name: str) -> str:
-    return f'--{to_symbol(name).replace("_", "-")}'
+    return f'--{to_symbol(name, check_keyword=False).replace("_", "-")}'
 
 
 @dataclass

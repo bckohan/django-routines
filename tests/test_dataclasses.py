@@ -27,7 +27,7 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 RoutineCommand(command=("renderstatic",)),
                 RoutineCommand(command=("collectstatic",)),
                 RoutineCommand(
-                    command=("shellcompletion", "install"), switches=("initial",)
+                    command=("shellcompletion", "install"), switches=("import",)
                 ),
                 RoutineCommand(
                     command=("loaddata", "./fixtures/initial_data.json"),
@@ -41,14 +41,14 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 "prepare": "Prepare the deployment.",
             },
         ),
-        "test": Routine(
+        "import": Routine(
             commands=[
-                RoutineCommand(command=("track", "2"), switches=("initial", "demo")),
+                RoutineCommand(command=("track", "2"), switches=("import", "demo")),
                 RoutineCommand(
                     command=("track", "0"),
                     options={"verbosity": 0},
                     priority=1,
-                    switches=("initial",),
+                    switches=("import",),
                 ),
                 RoutineCommand(command=("track", "3"), options={"demo": 2}, priority=3),
                 RoutineCommand(
@@ -116,7 +116,7 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
                     RoutineCommand(command=("collectstatic",)),
                     RoutineCommand(
                         command=("shellcompletion", "install"),
-                        switches=("initial",),
+                        switches=("import",),
                     ),
                     RoutineCommand(
                         command=("loaddata", "./fixtures/initial_data.json"),
@@ -132,17 +132,15 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             ),
         )
         self.assertEqual(
-            routines["test"],
+            routines["import"],
             Routine(
                 commands=[
-                    RoutineCommand(
-                        command=("track", "2"), switches=("initial", "demo")
-                    ),
+                    RoutineCommand(command=("track", "2"), switches=("import", "demo")),
                     RoutineCommand(
                         command=("track", "0"),
                         options={"verbosity": 0},
                         priority=1,
-                        switches=("initial",),
+                        switches=("import",),
                     ),
                     RoutineCommand(
                         command=("track", "3"), options={"demo": 2}, priority=3

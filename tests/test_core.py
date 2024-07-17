@@ -74,7 +74,7 @@ class CoreTests(with_typehint(TestCase)):
             *(["--manage-script", "./manage.py"] if subprocess else []),
             ("--no-color" if no_color else "--force-color"),
             *(("--verbosity", str(verbosity)) if verbosity is not None else tuple()),
-            "test",
+            "import",
         ]
         if subprocess:
             command.append("--subprocess")
@@ -217,7 +217,7 @@ class CoreTests(with_typehint(TestCase)):
         track_file.write_text(json.dumps(clear_results))
 
         out = StringIO()
-        call_command(*command, "--demo", "--initial", stdout=out)
+        call_command(*command, "--demo", "--import", stdout=out)
         expected = [2, 0, 3, 4, 1, 5]
         if verbosity is None or verbosity > 0:
             for line, exp in zip(
@@ -267,7 +267,7 @@ class CoreTests(with_typehint(TestCase)):
         track_file.write_text(json.dumps(clear_results))
 
         out = StringIO()
-        call_command(*command, "--initial", stdout=out)
+        call_command(*command, "--import", stdout=out)
         expected = [2, 0, 3, 4, 1]
         if verbosity is None or verbosity > 0:
             for line, exp in zip(
@@ -327,9 +327,9 @@ class CoreTests(with_typehint(TestCase)):
 
     def test_list(self, no_color=True):
         if no_color:
-            command = ("routine", "--no-color", "test")
+            command = ("routine", "--no-color", "import")
         else:
-            command = ("routine", "--force-color", "test")
+            command = ("routine", "--force-color", "import")
 
         out = StringIO()
         call_command(*command, "--all", "list", stdout=out)
@@ -337,8 +337,8 @@ class CoreTests(with_typehint(TestCase)):
         self.assertEqual(
             plan,
             [
-                "[0] track 2 | initial, demo",
-                "[1] track 0 (verbosity=0) | initial",
+                "[0] track 2 | import, demo",
+                "[1] track 0 (verbosity=0) | import",
                 "[3] track 3 (demo=2)",
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
@@ -368,7 +368,7 @@ class CoreTests(with_typehint(TestCase)):
         self.assertEqual(
             plan,
             [
-                "[0] track 2 | initial, demo",
+                "[0] track 2 | import, demo",
                 "[3] track 3 (demo=2)",
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
@@ -379,13 +379,13 @@ class CoreTests(with_typehint(TestCase)):
         )
 
         out = StringIO()
-        call_command(*command, "--demo", "--initial", "list", stdout=out)
+        call_command(*command, "--demo", "--import", "list", stdout=out)
         plan = self.lines(out.getvalue(), no_color=no_color)
         self.assertEqual(
             plan,
             [
-                "[0] track 2 | initial, demo",
-                "[1] track 0 (verbosity=0) | initial",
+                "[0] track 2 | import, demo",
+                "[1] track 0 (verbosity=0) | import",
                 "[3] track 3 (demo=2)",
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
@@ -396,13 +396,13 @@ class CoreTests(with_typehint(TestCase)):
         )
 
         out = StringIO()
-        call_command(*command, "--initial", "list", stdout=out)
+        call_command(*command, "--import", "list", stdout=out)
         plan = self.lines(out.getvalue(), no_color=no_color)
         self.assertEqual(
             plan,
             [
-                "[0] track 2 | initial, demo",
-                "[1] track 0 (verbosity=0) | initial",
+                "[0] track 2 | import, demo",
+                "[1] track 0 (verbosity=0) | import",
                 "[3] track 3 (demo=2)",
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
@@ -517,20 +517,20 @@ class CoreTests(with_typehint(TestCase)):
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ bad           Bad command test routine                                       │
 │ deploy        Deploy the site application into production.                   │
-│ test          Test Routine 1                                                 │
+│ import        Test Routine 1                                                 │
 │ test-hyphen   Test that hyphens dont mess everything up.                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 """
 
     routine_test_help_rich = """
- Usage: ./manage.py routine test [OPTIONS] COMMAND [ARGS]...                    
+ Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...                  
                                                                                 
                                                                                 
  Test Routine 1                                                                 
                                                                                 
                                                                                 
- [0] track 2 | initial, demo                                                    
- [1] track 0 (verbosity=0) | initial                                            
+ [0] track 2 | import, demo                                                     
+ [1] track 0 (verbosity=0) | import                                             
  [3] track 3 (demo=2)                                                           
  [3] track 4 (demo=6, flag=True)                                                
  [4] track 1                                                                    
@@ -542,7 +542,7 @@ class CoreTests(with_typehint(TestCase)):
 │ --subprocess          Run commands as subprocesses.                          │
 │ --all                 Include all switched commands.                         │
 │ --demo                                                                       │
-│ --initial                                                                    │
+│ --import                                                                     │
 │ --help                Show this message and exit.                            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
@@ -572,7 +572,7 @@ class CoreTests(with_typehint(TestCase)):
         stdout = StringIO()
 
         routine = get_command("routine", TyperCommand, stdout=stdout, no_color=True)
-        routine.print_help("./manage.py", "routine", "test")
+        routine.print_help("./manage.py", "routine", "import")
         self.assertEqual(
             self.strip_ansi(stdout.getvalue()).strip().replace("\x08", ""),
             self.routine_test_help_rich.strip(),
@@ -605,18 +605,18 @@ Options:
 Commands:
   bad          Bad command test routine
   deploy       Deploy the site application into production.
-  test         Test Routine 1
+  import       Test Routine 1
   test-hyphen  Test that hyphens dont mess everything up.
 """
 
     routine_test_help_no_rich = """
-Usage: ./manage.py routine test [OPTIONS] COMMAND [ARGS]...
+Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...
 
   Test Routine 1
-  -----------------------------------
+  ----------------------------------
   
-  [0] track 2 | initial, demo
-  [1] track 0 (verbosity=0) | initial
+  [0] track 2 | import, demo
+  [1] track 0 (verbosity=0) | import
   [3] track 3 (demo=2)
   [3] track 4 (demo=6, flag=True)
   [4] track 1
@@ -628,7 +628,7 @@ Options:
   --subprocess  Run commands as subprocesses.
   --all         Include all switched commands.
   --demo
-  --initial
+  --import
   --help        Show this message and exit.
 
 Commands:
@@ -657,11 +657,10 @@ Commands:
         stdout = StringIO()
 
         routine = get_command("routine", TyperCommand, stdout=stdout, no_color=True)
-        routine.print_help("./manage.py", "routine", "test")
-        self.assertEqual(
-            stdout.getvalue().strip().replace("\x08", ""),
-            self.routine_test_help_no_rich.strip(),
-        )
+        routine.print_help("./manage.py", "routine", "import")
+        printed = stdout.getvalue().strip().replace("\x08", "")
+        expected = self.routine_test_help_no_rich.strip()
+        self.assertEqual(printed, expected)
 
     def test_settings_format(self):
         routines = getattr(settings, ROUTINE_SETTING)
@@ -734,7 +733,7 @@ Commands:
                         "kind": "management",
                         "options": {},
                         "priority": 0,
-                        "switches": ("initial",),
+                        "switches": ("import",),
                     },
                     {
                         "command": ("loaddata", "./fixtures/initial_data.json"),
@@ -754,7 +753,7 @@ Commands:
             },
         )
         self.assertEqual(
-            routines["test"],
+            routines["import"],
             {
                 "commands": [
                     {
@@ -762,14 +761,14 @@ Commands:
                         "kind": "management",
                         "options": {},
                         "priority": 0,
-                        "switches": ("initial", "demo"),
+                        "switches": ("import", "demo"),
                     },
                     {
                         "command": ("track", "0"),
                         "kind": "management",
                         "options": {"verbosity": 0},
                         "priority": 1,
-                        "switches": ("initial",),
+                        "switches": ("import",),
                     },
                     {
                         "command": ("track", "3"),
@@ -813,7 +812,7 @@ Commands:
                     },
                 ],
                 "help_text": "Test Routine 1",
-                "name": "test",
+                "name": "import",
                 "switch_helps": {},
                 "subprocess": False,
             },

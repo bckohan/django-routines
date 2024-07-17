@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+v1.1.3 (17-JUL-2024)
+====================
+
+* `Allow routine names that conflict with python keywords (i.e. import) <https://github.com/bckohan/django-routines/issues/21>`_
+
 v1.1.2 (15-JUL-2024)
 ====================
 
