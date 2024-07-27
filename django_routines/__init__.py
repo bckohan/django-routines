@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 1, 3)
+VERSION = (1, 2, 0)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
@@ -207,6 +207,16 @@ class Routine:
     If true run each of the commands in a subprocess.
     """
 
+    atomic: bool = False
+    """
+    Run all commands in the same transaction.
+    """
+
+    continue_on_error: bool = False
+    """
+    Keep going if a command fails.
+    """
+
     def __post_init__(self):
         self.name = to_symbol(self.name)
         self.switch_helps = {
@@ -266,6 +276,8 @@ class Routine:
             "commands": [cmd.to_dict() for cmd in self.commands],
             "switch_helps": self.switch_helps,
             "subprocess": self.subprocess,
+            "atomic": self.atomic,
+            "continue_on_error": self.continue_on_error,
         }
 
 
@@ -274,6 +286,8 @@ def routine(
     help_text: t.Union[str, Promise] = "",
     *commands: Command,
     subprocess: bool = False,
+    atomic: bool = False,
+    continue_on_error: bool = False,
     **switch_helps,
 ):
     """
@@ -306,6 +320,8 @@ def routine(
         commands=existing,
         switch_helps=switch_helps,
         subprocess=subprocess,
+        atomic=atomic,
+        continue_on_error=continue_on_error,
     )
 
     for command in commands:

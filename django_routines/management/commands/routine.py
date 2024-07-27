@@ -3,12 +3,14 @@ import os
 import subprocess
 import sys
 import typing as t
+from contextlib import contextmanager
 from importlib.util import find_spec
 
 import click
 import typer
 from django.core.management import CommandError, call_command
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.utils.translation import gettext as _
 from django_typer.management import TyperCommand, get_command, initialize
 from django_typer.types import Verbosity
@@ -42,6 +44,8 @@ def {routine_func}(
     self,
     ctx: typer.Context,
     subprocess: Annotated[bool, typer.Option("{subprocess_opt}", help="{subprocess_help}", show_default=False)] = {subprocess},
+    atomic: Annotated[bool, typer.Option("{atomic_opt}", help="{atomic_help}", show_default=False)] = {atomic},
+    continue_on_error: Annotated[bool, typer.Option("{continue_opt}", help="{continue_help}", show_default=False)] = {continue_on_error},
     all: Annotated[bool, typer.Option("--all", help="{all_help}")] = False,
     {switch_args}
 ):
@@ -52,8 +56,20 @@ def {routine_func}(
         ctx.get_parameter_source("subprocess")
         is not click.core.ParameterSource.DEFAULT
     ) else None
+    atomic = atomic if (
+        ctx.get_parameter_source("atomic")
+        is not click.core.ParameterSource.DEFAULT
+    ) else None
+    continue_on_error = continue_on_error if (
+        ctx.get_parameter_source("continue_on_error")
+        is not click.core.ParameterSource.DEFAULT
+    ) else None
     if not ctx.invoked_subcommand:
-        return self._run_routine(subprocess=subprocess)
+        return self._run_routine(
+            subprocess=subprocess,
+            atomic=atomic,
+            continue_on_error=continue_on_error
+        )
     return self.{routine_func}
 """
 
@@ -124,7 +140,12 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         )
         self.manage_script = manage_script
 
-    def _run_routine(self, subprocess: t.Optional[bool] = None):
+    def _run_routine(
+        self,
+        subprocess: t.Optional[bool] = None,
+        atomic: t.Optional[bool] = None,
+        continue_on_error: t.Optional[bool] = None,
+    ):
         """
         Execute the current routine plan. If verbosity is zero, do not print the
         commands as they are run. Also use the stdout/stderr streams and color
@@ -132,13 +153,29 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         plan.
         """
         assert self.routine
-        for command in self.plan:
-            if isinstance(command, SystemCommand) or (
-                (self.routine.subprocess and subprocess is None) or subprocess
-            ):
-                self._subprocess(command)
-            else:
-                self._call_command(command)
+
+        @contextmanager
+        def noop():
+            yield
+
+        subprocess = subprocess if subprocess is not None else self.routine.subprocess
+        is_atomic = atomic if atomic is not None else self.routine.atomic
+        continue_on_error = (
+            continue_on_error
+            if continue_on_error is not None
+            else self.routine.continue_on_error
+        )
+        ctx = transaction.atomic if is_atomic else noop
+        with ctx():  # type: ignore
+            for command in self.plan:
+                try:
+                    if isinstance(command, SystemCommand) or subprocess:
+                        self._subprocess(command)
+                    else:
+                        self._call_command(command)
+                except Exception as e:
+                    if not continue_on_error:
+                        raise e
 
     def _call_command(self, command: ManagementCommand):
         try:
@@ -226,6 +263,12 @@ class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
         result = subprocess.run(args, env=os.environ.copy(), capture_output=True)
         self.stdout.write(result.stdout.decode())
         self.stderr.write(result.stderr.decode())
+        if result.returncode > 0:
+            raise CommandError(
+                _(
+                    "Subprocess command failed: {command} with return code {code}"
+                ).format(command=" ".join(args), code=result.returncode)
+            )
         return result.returncode
 
     def _list(self) -> None:
@@ -289,11 +332,27 @@ for routine in routines():
         switch_args=switch_args,
         add_switches=add_switches,
         subprocess_opt="--no-subprocess" if routine.subprocess else "--subprocess",
-        subprocess_help=_("Do not run commands as subprocesses.")
-        if routine.subprocess
-        else _("Run commands as subprocesses."),
-        all_help=_("Include all switched commands."),
+        subprocess_help=(
+            _("Do not run commands as subprocesses.")
+            if routine.subprocess
+            else _("Run commands as subprocesses.")
+        ),
         subprocess=routine.subprocess,
+        atomic_opt="--non-atomic" if routine.atomic else "--atomic",
+        atomic_help=(
+            _("Do not run all commands in the same transaction.")
+            if routine.atomic
+            else _("Run all commands in the same transaction.")
+        ),
+        atomic=routine.atomic,
+        continue_opt="--halt" if routine.continue_on_error else "--continue",
+        continue_help=(
+            _("Halt if any command fails.")
+            if routine.continue_on_error
+            else _("Continue through the routine if any commands fail.")
+        ),
+        continue_on_error=routine.continue_on_error,
+        all_help=_("Include all switched commands."),
     )
 
     command_strings = []
@@ -320,7 +379,7 @@ for routine in routines():
 
     exec(cmd_code)
 
-    if not use_rich:
+    if not use_rich and command_strings:
         width = max([len(cmd) for cmd in command_strings])
     ruler = f"[underline]{' ' * width}[/underline]\n" if use_rich else "-" * width
     cmd_strings = "\n".join(command_strings)

@@ -167,6 +167,15 @@ When specifying arguments you may add them to the command tuple OR specify them 
     command("package", "makemigrations", no_header=True)
 ```
 
+## Execution Controls
+
+There are several switches that can be used to control the execution of routines. Pass these parameters when you define the Routine.
+
+- ``atomic``: Run the routine in a transaction.
+- ``continue_on_error``: Continue running the routine even if a command fails.
+
+The default routine behavior for these execution controls can be overridden on the command line.
+
 
 ## Installation
 

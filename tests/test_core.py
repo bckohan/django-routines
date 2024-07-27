@@ -3,6 +3,7 @@ from importlib.util import find_spec
 import pytest
 import sys
 from typing import Type, TYPE_CHECKING, TypeVar
+from tests.django_routines_tests.models import TestModel
 
 from django.core.management import call_command, CommandError
 from django_typer.management import get_command, TyperCommand
@@ -19,6 +20,7 @@ from pathlib import Path
 from tests.django_routines_tests.management.commands.track import (
     invoked,
     passed_options,
+    TestError,
 )
 
 
@@ -45,11 +47,13 @@ class CoreTests(with_typehint(TestCase)):
     def setUp(self):
         if track_file.is_file():
             os.remove(track_file)
+        TestModel.objects.create(id=0, name="Brian")
         super().setUp()
 
     def tearDown(self):
         if track_file.is_file():
             os.remove(track_file)
+        TestModel.objects.all().delete()
         super().setUp()
 
     def strip_ansi(self, text):
@@ -515,10 +519,13 @@ class CoreTests(with_typehint(TestCase)):
 │ --skip-checks                                 Skip system checks.            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ bad           Bad command test routine                                       │
-│ deploy        Deploy the site application into production.                   │
-│ import        Test Routine 1                                                 │
-│ test-hyphen   Test that hyphens dont mess everything up.                     │
+│ atomic-fail     Atomic test routine failure.                                 │
+│ atomic-pass     Atomic test routine.                                         │
+│ bad             Bad command test routine                                     │
+│ deploy          Deploy the site application into production.                 │
+│ import          Test Routine 1                                               │
+│ test-continue   Test continue option.                                        │
+│ test-hyphen     Test that hyphens dont mess everything up.                   │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 """
 
@@ -540,6 +547,8 @@ class CoreTests(with_typehint(TestCase)):
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --subprocess          Run commands as subprocesses.                          │
+│ --atomic              Run all commands in the same transaction.              │
+│ --continue            Continue through the routine if any commands fail.     │
 │ --all                 Include all switched commands.                         │
 │ --demo                                                                       │
 │ --import                                                                     │
@@ -564,10 +573,9 @@ class CoreTests(with_typehint(TestCase)):
         )
         self.assertEqual(result.returncode, 0)
         self.assertFalse(result.stderr)
-        self.assertEqual(
-            self.strip_ansi(result.stdout.decode()).strip(),
-            self.routine_help_rich.strip(),
-        )
+        hlp_txt = self.strip_ansi(result.stdout.decode()).strip()
+        expected = self.routine_help_rich.strip()
+        self.assertEqual(hlp_txt, expected)
 
         stdout = StringIO()
 
@@ -603,10 +611,13 @@ Options:
   --help                     Show this message and exit.
 
 Commands:
-  bad          Bad command test routine
-  deploy       Deploy the site application into production.
-  import       Test Routine 1
-  test-hyphen  Test that hyphens dont mess everything up.
+  atomic-fail    Atomic test routine failure.
+  atomic-pass    Atomic test routine.
+  bad            Bad command test routine
+  deploy         Deploy the site application into production.
+  import         Test Routine 1
+  test-continue  Test continue option.
+  test-hyphen    Test that hyphens dont mess everything up.
 """
 
     routine_test_help_no_rich = """
@@ -626,6 +637,8 @@ Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --subprocess  Run commands as subprocesses.
+  --atomic      Run all commands in the same transaction.
+  --continue    Continue through the routine if any commands fail.
   --all         Include all switched commands.
   --demo
   --import
@@ -694,6 +707,8 @@ Commands:
                 "name": "bad",
                 "switch_helps": {},
                 "subprocess": False,
+                "atomic": False,
+                "continue_on_error": False,
             },
         )
         self.assertEqual(
@@ -750,6 +765,8 @@ Commands:
                     "prepare": "Prepare the deployment.",
                 },
                 "subprocess": False,
+                "atomic": False,
+                "continue_on_error": False,
             },
         )
         self.assertEqual(
@@ -815,6 +832,8 @@ Commands:
                 "name": "import",
                 "switch_helps": {},
                 "subprocess": False,
+                "atomic": False,
+                "continue_on_error": False,
             },
         )
         self.assertEqual(
@@ -860,12 +879,52 @@ Commands:
                 "help_text": "Test that hyphens dont mess everything up.",
                 "name": "test_hyphen",
                 "subprocess": False,
+                "atomic": False,
+                "continue_on_error": False,
                 "switch_helps": {
                     "hyphen_ok": "Test hyphen.",
                     "hyphen_ok_prefix": "Test hyphen with -- prefix.",
                 },
             },
         )
+
+    def test_non_atomic(self):
+        call_command("routine", "atomic-pass")
+        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(TestModel.objects.get(id=1).name, "Name4")
+        self.assertEqual(TestModel.objects.count(), 2)
+
+    def test_force_nonatomic(self):
+        call_command("routine", "atomic-pass", "--non-atomic")
+        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(TestModel.objects.get(id=1).name, "Name4")
+        self.assertEqual(TestModel.objects.count(), 2)
+
+    def test_atomic_fail(self):
+        with self.assertRaises(TestError):
+            call_command("routine", "atomic-fail")
+        self.assertEqual(TestModel.objects.get(id=0).name, "Brian")
+        self.assertEqual(TestModel.objects.count(), 1)
+
+    def test_force_nonatomic_fail(self):
+        with self.assertRaises(TestError):
+            call_command("routine", "atomic-fail", "--non-atomic")
+        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(TestModel.objects.count(), 1)
+
+    def test_force_atomic_continue_fail(self):
+        call_command("routine", "atomic-fail", "--continue")
+        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(TestModel.objects.count(), 1)
+
+    def test_continue_on_error(self):
+        call_command("routine", "test-continue")
+        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
+
+    def test_force_halt_on_error(self):
+        with self.assertRaises(TestError):
+            call_command("routine", "test-continue", "--halt")
+        self.assertEqual(TestModel.objects.get(id=0).name, "Name1")
 
 
 class Test(CoreTests, TestCase):

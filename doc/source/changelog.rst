@@ -2,6 +2,13 @@
 Change Log
 ==========
 
+v1.2.0 (27-JUL-2024)
+====================
+
+* `Option to run routine within a transaction. <https://github.com/bckohan/django-routines/issues/24>`_
+* `Option to fail fast or proceed on failures. <https://github.com/bckohan/django-routines/issues/10>`_
+
+
 v1.1.3 (17-JUL-2024)
 ====================
 

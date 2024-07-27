@@ -89,6 +89,38 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 "--hyphen-ok-prefix": "Test hyphen with -- prefix.",
             },
         ),
+        "atomic_pass": Routine(
+            commands=[
+                RoutineCommand(command=("edit", "0", "Name1")),
+                RoutineCommand(command=("edit", "0", "Name2")),
+                RoutineCommand(command=("edit", "0", "Name3")),
+                RoutineCommand(command=("edit", "1", "Name4")),
+            ],
+            name="atomic_pass",
+            help_text="Atomic test routine.",
+            atomic=True,
+        ),
+        "atomic_fail": Routine(
+            commands=[
+                RoutineCommand(command=("edit", "0", "Name1")),
+                RoutineCommand(command=("edit", "0", "Name2")),
+                RoutineCommand(command=("edit", "0", "Name3")),
+                RoutineCommand(command=("edit", "1", "Name4", "--raise")),
+            ],
+            name="atomic_fail",
+            help_text="Atomic test routine failure.",
+            atomic=True,
+        ),
+        "test_continue": Routine(
+            commands=[
+                RoutineCommand(command=("edit", "0", "Name1")),
+                RoutineCommand(command=("edit", "0", "Name2", "--raise")),
+                RoutineCommand(command=("edit", "0", "Name3")),
+            ],
+            name="test_continue",
+            help_text="Test continue option.",
+            continue_on_error=True,
+        ),
     }
 )
 class SettingsAsObjectsTests(CoreTests, TestCase):
@@ -187,5 +219,49 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
                     "hyphen_ok": "Test hyphen.",
                     "hyphen_ok_prefix": "Test hyphen with -- prefix.",
                 },
+            ),
+        )
+
+        self.assertEqual(
+            routines["atomic_pass"],
+            Routine(
+                commands=[
+                    RoutineCommand(command=("edit", "0", "Name1")),
+                    RoutineCommand(command=("edit", "0", "Name2")),
+                    RoutineCommand(command=("edit", "0", "Name3")),
+                    RoutineCommand(command=("edit", "1", "Name4")),
+                ],
+                name="atomic_pass",
+                help_text="Atomic test routine.",
+                atomic=True,
+            ),
+        )
+
+        self.assertEqual(
+            routines["atomic_fail"],
+            Routine(
+                commands=[
+                    RoutineCommand(command=("edit", "0", "Name1")),
+                    RoutineCommand(command=("edit", "0", "Name2")),
+                    RoutineCommand(command=("edit", "0", "Name3")),
+                    RoutineCommand(command=("edit", "1", "Name4", "--raise")),
+                ],
+                name="atomic_fail",
+                help_text="Atomic test routine failure.",
+                atomic=True,
+            ),
+        )
+
+        self.assertEqual(
+            routines["test_continue"],
+            Routine(
+                commands=[
+                    RoutineCommand(command=("edit", "0", "Name1")),
+                    RoutineCommand(command=("edit", "0", "Name2", "--raise")),
+                    RoutineCommand(command=("edit", "0", "Name3")),
+                ],
+                name="test_continue",
+                help_text="Test continue option.",
+                continue_on_error=True,
             ),
         )

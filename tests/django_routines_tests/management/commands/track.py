@@ -7,11 +7,16 @@ invoked = []
 passed_options = []
 
 
+class TestError(Exception):
+    pass
+
+
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("id", type=int)
         parser.add_argument("--demo", type=int)
         parser.add_argument("--flag", action="store_true", default=False)
+        parser.add_argument("--raise", action="store_true", default=False)
 
     def handle(self, *args, **options):
         global invoked
@@ -23,4 +28,6 @@ class Command(BaseCommand):
         track = json.loads(track_file.read_text())
         track["invoked"].append(options["id"])
         track["passed_options"].append(options)
-        track_file.write_text(json.dumps(track))
+        track_file.write_text(json.dumps(track, indent=4))
+        if options["raise"]:
+            raise TestError("Kill the op.")

@@ -60,6 +60,8 @@ MIDDLEWARE = [
 
 DJANGO_ROUTINES = None
 
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 STATIC_URL = "static/"
 
 SECRET_KEY = "fake"
@@ -123,4 +125,33 @@ routine(
     RoutineCommand(("track", "5"), switches=("hyphen-ok", "--hyphen-ok_prefix")),
     hyphen_ok="Test hyphen.",
     hyphen_ok_prefix="Test hyphen with -- prefix.",
+)
+
+routine(
+    "atomic_pass",
+    "Atomic test routine.",
+    RoutineCommand(command=("edit", "0", "Name1")),
+    RoutineCommand(command=("edit", "0", "Name2")),
+    RoutineCommand(command=("edit", "0", "Name3")),
+    RoutineCommand(command=("edit", "1", "Name4")),
+    atomic=True,
+)
+
+routine(
+    "atomic_fail",
+    "Atomic test routine failure.",
+    RoutineCommand(command=("edit", "0", "Name1")),
+    RoutineCommand(command=("edit", "0", "Name2")),
+    RoutineCommand(command=("edit", "0", "Name3")),
+    RoutineCommand(command=("edit", "1", "Name4", "--raise")),
+    atomic=True,
+)
+
+routine(
+    "test_continue",
+    "Test continue option.",
+    RoutineCommand(command=("edit", "0", "Name1")),
+    RoutineCommand(command=("edit", "0", "Name2", "--raise")),
+    RoutineCommand(command=("edit", "0", "Name3")),
+    continue_on_error=True,
 )

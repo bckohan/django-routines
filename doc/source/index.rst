@@ -117,6 +117,19 @@ options in the style that will be passed to call_command_:
     Lazy translations work as help_text for routines and switches.
 
 
+.. _execution_controls:
+
+:big:`Execution Controls`
+
+There are several switches that can be used to control the execution of routines. Pass
+these parameters when you define the Routine.
+
+- ``atomic``: Run the routine in a transaction.
+- ``continue_on_error``: Continue running the routine even if a command fails.
+
+The default routine behavior for these execution controls can be overridden on the command
+line.
+
 .. _rationale:
 
 :big:`Rationale`
