@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+v1.2.1 (26-AUG-2024)
+====================
+
+* Fixed `Switch rtd theme to furo. <https://github.com/bckohan/django-render-static/issues/27>`_
+* Fixed `Support python 3.13 <https://github.com/bckohan/django-render-static/issues/26>`_
+
 v1.2.0 (27-JUL-2024)
 ====================
 
