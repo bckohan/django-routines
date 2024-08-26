@@ -3,7 +3,7 @@ from importlib.util import find_spec
 import pytest
 import sys
 from typing import Type, TYPE_CHECKING, TypeVar
-from tests.django_routines_tests.models import TestModel
+from tests.django_routines_tests.models import TestModel as _TestModel
 
 from django.core.management import call_command, CommandError
 from django_typer.management import get_command, TyperCommand
@@ -47,13 +47,13 @@ class CoreTests(with_typehint(TestCase)):
     def setUp(self):
         if track_file.is_file():
             os.remove(track_file)
-        TestModel.objects.create(id=0, name="Brian")
+        _TestModel.objects.create(id=0, name="Brian")
         super().setUp()
 
     def tearDown(self):
         if track_file.is_file():
             os.remove(track_file)
-        TestModel.objects.all().delete()
+        _TestModel.objects.all().delete()
         super().setUp()
 
     def strip_ansi(self, text):
@@ -890,41 +890,41 @@ Commands:
 
     def test_non_atomic(self):
         call_command("routine", "atomic-pass")
-        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
-        self.assertEqual(TestModel.objects.get(id=1).name, "Name4")
-        self.assertEqual(TestModel.objects.count(), 2)
+        self.assertEqual(_TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(_TestModel.objects.get(id=1).name, "Name4")
+        self.assertEqual(_TestModel.objects.count(), 2)
 
     def test_force_nonatomic(self):
         call_command("routine", "atomic-pass", "--non-atomic")
-        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
-        self.assertEqual(TestModel.objects.get(id=1).name, "Name4")
-        self.assertEqual(TestModel.objects.count(), 2)
+        self.assertEqual(_TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(_TestModel.objects.get(id=1).name, "Name4")
+        self.assertEqual(_TestModel.objects.count(), 2)
 
     def test_atomic_fail(self):
         with self.assertRaises(TestError):
             call_command("routine", "atomic-fail")
-        self.assertEqual(TestModel.objects.get(id=0).name, "Brian")
-        self.assertEqual(TestModel.objects.count(), 1)
+        self.assertEqual(_TestModel.objects.get(id=0).name, "Brian")
+        self.assertEqual(_TestModel.objects.count(), 1)
 
     def test_force_nonatomic_fail(self):
         with self.assertRaises(TestError):
             call_command("routine", "atomic-fail", "--non-atomic")
-        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
-        self.assertEqual(TestModel.objects.count(), 1)
+        self.assertEqual(_TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(_TestModel.objects.count(), 1)
 
     def test_force_atomic_continue_fail(self):
         call_command("routine", "atomic-fail", "--continue")
-        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
-        self.assertEqual(TestModel.objects.count(), 1)
+        self.assertEqual(_TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(_TestModel.objects.count(), 1)
 
     def test_continue_on_error(self):
         call_command("routine", "test-continue")
-        self.assertEqual(TestModel.objects.get(id=0).name, "Name3")
+        self.assertEqual(_TestModel.objects.get(id=0).name, "Name3")
 
     def test_force_halt_on_error(self):
         with self.assertRaises(TestError):
             call_command("routine", "test-continue", "--halt")
-        self.assertEqual(TestModel.objects.get(id=0).name, "Name1")
+        self.assertEqual(_TestModel.objects.get(id=0).name, "Name1")
 
 
 class Test(CoreTests, TestCase):
