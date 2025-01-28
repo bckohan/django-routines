@@ -59,7 +59,7 @@ def to_symbol(name: str, check_keyword: bool = False) -> str:
 
 
 def to_cli_option(name: str) -> str:
-    return f'--{to_symbol(name, check_keyword=False).replace("_", "-")}'
+    return f"--{to_symbol(name, check_keyword=False).replace('_', '-')}"
 
 
 @dataclass
