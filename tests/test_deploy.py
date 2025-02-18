@@ -11,6 +11,6 @@ class TestDeploy(TestCase):
     def test_deploy_routine(self):
         out = StringIO()
         err = StringIO()
-        call_command("routine", "deploy", stdout=out, stderr=err)
+        call_command("routine", "deploy", "--prepare", stdout=out, stderr=err)
         self.assertTrue(out.getvalue())
         self.assertFalse(err.getvalue().strip())
