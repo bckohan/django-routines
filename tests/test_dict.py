@@ -25,7 +25,7 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
                 {"command": ("makemigrations",), "switches": ["prepare"]},
                 {"command": ("migrate",)},
                 {"command": ("renderstatic",)},
-                {"command": ("collectstatic",)},
+                {"command": "collectstatic", "options": {"interactive": False}},
                 {"command": ("shellcompletion", "install"), "switches": ("import",)},
                 {
                     "command": ("loaddata", "./fixtures/initial_data.json"),
@@ -220,7 +220,7 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         {"command": ("makemigrations",), "switches": ["prepare"]},
                         {"command": ("migrate",)},
                         {"command": ("renderstatic",)},
-                        {"command": ("collectstatic",)},
+                        {"command": "collectstatic", "options": {"interactive": False}},
                         {
                             "command": ("shellcompletion", "install"),
                             "switches": ("import",),

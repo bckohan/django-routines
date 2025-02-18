@@ -29,6 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Application definition
 
 INSTALLED_APPS = [
+    "render_static",
     "tests.django_routines_tests",
     "django_routines",
     "django_typer",
@@ -72,7 +73,7 @@ routine(
     RoutineCommand(("makemigrations",), switches=["prepare"]),
     RoutineCommand(("migrate",)),
     RoutineCommand(("renderstatic",)),
-    RoutineCommand(("collectstatic",)),
+    RoutineCommand("collectstatic", options={"interactive": False}),
     prepare=_("Prepare the deployment."),
     demo="Deploy the demo.",
 )

@@ -782,9 +782,9 @@ Commands:
                         "switches": (),
                     },
                     {
-                        "command": ("collectstatic",),
+                        "command": "collectstatic",
                         "kind": "management",
-                        "options": {},
+                        "options": {"interactive": False},
                         "priority": 0,
                         "switches": (),
                     },

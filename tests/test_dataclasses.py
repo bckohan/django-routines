@@ -25,7 +25,7 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
                 RoutineCommand(command=("makemigrations",), switches=["prepare"]),
                 RoutineCommand(command=("migrate",)),
                 RoutineCommand(command=("renderstatic",)),
-                RoutineCommand(command=("collectstatic",)),
+                RoutineCommand(command="collectstatic", options={"interactive": False}),
                 RoutineCommand(
                     command=("shellcompletion", "install"), switches=("import",)
                 ),
@@ -145,7 +145,9 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
                     RoutineCommand(command=("makemigrations",), switches=["prepare"]),
                     RoutineCommand(command=("migrate",)),
                     RoutineCommand(command=("renderstatic",)),
-                    RoutineCommand(command=("collectstatic",)),
+                    RoutineCommand(
+                        command="collectstatic", options={"interactive": False}
+                    ),
                     RoutineCommand(
                         command=("shellcompletion", "install"),
                         switches=("import",),

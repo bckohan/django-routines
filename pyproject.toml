@@ -73,6 +73,7 @@ ruff = "^0.9"
 django-stubs = ">=5.0.2"
 mypy = ">=1.10.0"
 pre-commit = "^4.0.1"
+django-render-static = "^3.2.1"
 
 
 [tool.poetry.group.docs]
