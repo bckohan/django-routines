@@ -6,7 +6,7 @@ from pathlib import Path
 from .test_core import CoreTests
 from . import system_cmd
 
-system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
+system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
 
 
 @override_settings(
@@ -57,12 +57,12 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 {"command": ("track", "1"), "priority": 4},
                 {"command": ("track", "5"), "priority": 6, "switches": ("demo",)},
                 {
-                    "command": (system_cmd, "sys 2"),
+                    "command": (*system_cmd, "sys 2"),
                     "priority": 8,
                     "kind": "system",
                 },
                 {
-                    "command": (system_cmd, "sys 1"),
+                    "command": (*system_cmd, "sys 1"),
                     "priority": 7,
                     "kind": "system",
                 },
@@ -263,12 +263,12 @@ class SettingsAsDictTests(CoreTests, TestCase):
                             "switches": ("demo",),
                         },
                         {
-                            "command": (system_cmd, "sys 2"),
+                            "command": (*system_cmd, "sys 2"),
                             "priority": 8,
                             "kind": "system",
                         },
                         {
-                            "command": (system_cmd, "sys 1"),
+                            "command": (*system_cmd, "sys 1"),
                             "priority": 7,
                             "kind": "system",
                         },

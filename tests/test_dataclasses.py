@@ -6,7 +6,7 @@ from .test_core import CoreTests
 from . import system_cmd
 from pathlib import Path
 
-system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
+system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
 
 
 @override_settings(
@@ -59,11 +59,11 @@ system_cmd = str(system_cmd.relative_to(Path(os.getcwd())))
                 RoutineCommand(command=("track", "1"), priority=4),
                 RoutineCommand(command=("track", "5"), priority=6, switches=("demo",)),
                 SystemCommand(
-                    command=(str(system_cmd), "sys 1"),
+                    command=(*system_cmd, "sys 1"),
                     priority=7,
                 ),
                 SystemCommand(
-                    command=(str(system_cmd), "sys 2"),
+                    command=(*system_cmd, "sys 2"),
                     priority=8,
                 ),
             ],
@@ -187,11 +187,11 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
                         command=("track", "5"), priority=6, switches=("demo",)
                     ),
                     SystemCommand(
-                        command=(str(system_cmd), "sys 1"),
+                        command=(*system_cmd, "sys 1"),
                         priority=7,
                     ),
                     SystemCommand(
-                        command=(str(system_cmd), "sys 2"),
+                        command=(*system_cmd, "sys 2"),
                         priority=8,
                     ),
                 ],
