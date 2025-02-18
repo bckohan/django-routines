@@ -509,9 +509,10 @@ class CoreTests(with_typehint(TestCase)):
 │ --pythonpath         PATH                     A directory to add to the      │
 │                                               Python path, e.g.              │
 │                                               "/home/djangoprojects/myproje… │
-│                                               [default: None]                │
 │ --traceback                                   Raise on CommandError          │
 │                                               exceptions                     │
+│ --show-locals                                 Print local variables in       │
+│                                               tracebacks.                    │
 │ --no-color                                    Don't colorize the command     │
 │                                               output.                        │
 │ --force-color                                 Force colorization of the      │
@@ -519,13 +520,13 @@ class CoreTests(with_typehint(TestCase)):
 │ --skip-checks                                 Skip system checks.            │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ atomic-fail     Atomic test routine failure.                                 │
-│ atomic-pass     Atomic test routine.                                         │
-│ bad             Bad command test routine                                     │
 │ deploy          Deploy the site application into production.                 │
 │ import          Test Routine 1                                               │
-│ test-continue   Test continue option.                                        │
+│ bad             Bad command test routine                                     │
 │ test-hyphen     Test that hyphens dont mess everything up.                   │
+│ atomic-pass     Atomic test routine.                                         │
+│ atomic-fail     Atomic test routine failure.                                 │
+│ test-continue   Test continue option.                                        │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 """
 
@@ -571,7 +572,9 @@ class CoreTests(with_typehint(TestCase)):
             env=os.environ.copy(),
             capture_output=True,
         )
-        self.assertEqual(result.returncode, 0)
+        self.assertEqual(
+            result.returncode, 0, (result.stderr or result.stdout).decode()
+        )
         self.assertFalse(result.stderr)
         hlp_txt = self.strip_ansi(result.stdout.decode()).strip()
         expected = self.routine_help_rich.strip()
@@ -611,13 +614,13 @@ Options:
   --help                     Show this message and exit.
 
 Commands:
-  atomic-fail    Atomic test routine failure.
-  atomic-pass    Atomic test routine.
-  bad            Bad command test routine
   deploy         Deploy the site application into production.
   import         Test Routine 1
-  test-continue  Test continue option.
+  bad            Bad command test routine
   test-hyphen    Test that hyphens dont mess everything up.
+  atomic-pass    Atomic test routine.
+  atomic-fail    Atomic test routine failure.
+  test-continue  Test continue option.
 """
 
     routine_test_help_no_rich = """

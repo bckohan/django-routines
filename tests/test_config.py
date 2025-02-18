@@ -1,4 +1,4 @@
-from django_typer import get_command
+from django_typer.management import get_command
 from django.test import TestCase, override_settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import CommandError, call_command

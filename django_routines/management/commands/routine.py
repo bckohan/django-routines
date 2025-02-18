@@ -5,6 +5,7 @@ import sys
 import typing as t
 from contextlib import contextmanager
 from importlib.util import find_spec
+from typing import Annotated
 
 import click
 import typer
@@ -12,7 +13,11 @@ from django.core.management import CommandError, call_command
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.translation import gettext as _
-from django_typer.management import TyperCommand, get_command, initialize
+from django_typer.management import (
+    TyperCommand,
+    get_command,
+    initialize,
+)
 from django_typer.types import Verbosity
 
 from django_routines import (
@@ -24,11 +29,6 @@ from django_routines import (
     to_cli_option,
     to_symbol,
 )
-
-if sys.version_info < (3, 9):
-    from typing_extensions import Annotated
-else:
-    from typing import Annotated
 
 RCommand = t.Union[ManagementCommand, SystemCommand]
 
@@ -74,7 +74,7 @@ def {routine_func}(
 """
 
 
-class Command(TyperCommand, rich_markup_mode="rich"):  # type: ignore
+class Command(TyperCommand, rich_markup_mode="rich"):
     """
     A TyperCommand_ that reads the DJANGO_ROUTINES setting from settings and
     builds out a set of subcommands for each routine that when invoked will run

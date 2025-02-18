@@ -2,6 +2,13 @@
 Change Log
 ==========
 
+
+v1.3.0 (2024-02-17)
+===================
+
+* Implemented `Remove support for python 3.8 <https://github.com/bckohan/django-render-static/issues/30>`_
+* Implemented `Upgrade to django-typer 3.x <https://github.com/bckohan/django-render-static/issues/29>`_
+
 v1.2.1 (26-AUG-2024)
 ====================
 

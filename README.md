@@ -9,8 +9,9 @@
 [![PyPI status](https://img.shields.io/pypi/status/django-routines.svg)](https://pypi.python.org/pypi/django-routines)
 [![Documentation Status](https://readthedocs.org/projects/django-routines/badge/?version=latest)](http://django-routines.readthedocs.io/?badge=latest/)
 [![Code Cov](https://codecov.io/gh/bckohan/django-routines/branch/main/graph/badge.svg?token=0IZOKN2DYL)](https://codecov.io/gh/bckohan/django-routines)
-[![Test Status](https://github.com/bckohan/django-routines/workflows/test/badge.svg)](https://github.com/bckohan/django-routines/actions/workflows/test.yml)
-[![Lint Status](https://github.com/bckohan/django-routines/workflows/lint/badge.svg)](https://github.com/bckohan/django-routines/actions/workflows/lint.yml)
+[![Test Status](https://github.com/bckohan/django-routines/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/bckohan/django-routines/actions/workflows/test.yml?query=branch:main)
+[![Lint Status](https://github.com/bckohan/django-routines/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/bckohan/django-routines/actions/workflows/lint.yml?query=branch:main)
+[![Published on Django Packages](https://img.shields.io/badge/Published%20on-Django%20Packages-0c3c26)](https://djangopackages.org/packages/p/django-routines/)
 
 
 Configure batches of Django management commands in your settings files and run them all at once. For example, batch together your common database maintenance tasks, deployment routines or any other set of commands you need to run together. This helps single source general site maintenance into your settings files keeping your code base [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself).

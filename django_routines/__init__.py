@@ -23,13 +23,13 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 2, 1)
+VERSION = (1, 3, 0)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
 __author__ = "Brian Kohan"
 __license__ = "MIT"
-__copyright__ = "Copyright 2024 Brian Kohan"
+__copyright__ = "Copyright 2024-2025 Brian Kohan"
 
 __all__ = [
     "ROUTINE_SETTING",
