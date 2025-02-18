@@ -109,6 +109,7 @@ sphinx = true
 [tool.pytest.ini_options]
 # py.test options:
 DJANGO_SETTINGS_MODULE = "tests.settings"
+PYTHONIOENCODING = "utf-8"
 python_files = "test_*.py"
 norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ shellcompletion"
 env = [

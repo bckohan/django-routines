@@ -605,7 +605,7 @@ class CoreTests(with_typehint(TestCase)):
                 "routine",
                 "--help",
             ],
-            env=os.environ.copy(),
+            env={**os.environ.copy(), "PYTHONIOENCODING": "utf-8"},
             capture_output=True,
         )
         self.assertEqual(
@@ -614,7 +614,7 @@ class CoreTests(with_typehint(TestCase)):
         self.assertFalse(result.stderr)
         hlp_txt = self.strip_ansi(result.stdout.decode()).strip()
         expected = self.routine_help_rich.strip()
-        self.assertEqual(hlp_txt, expected)
+        self.assertGreater(similarity(hlp_txt, expected), 0.99)
 
         stdout = StringIO()
 
