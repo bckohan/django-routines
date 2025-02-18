@@ -220,18 +220,21 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                     "_actions",
                     [],
                 )
+                expected_opts = len(command.options)
                 for opt, value in command.options.items():
                     for action in actions:
                         opt_strs = getattr(action, "option_strings", [])
                         if opt == getattr(action, "dest", None) and opt_strs:
                             if isinstance(value, bool):
-                                if value:
+                                if value is not getattr(action, "default", None):
                                     options.append(opt_strs[-1])
+                                else:
+                                    expected_opts -= 1
                             else:
                                 options.append(f"--{opt}={str(value)}")
                             break
 
-                if len(options) != len(command.options):
+                if len(options) != expected_opts:
                     raise CommandError(
                         _(
                             "Failed to convert {command} options to CLI format: {unconverted}"
@@ -259,10 +262,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         if self.verbosity > 0:
             self.secho(" ".join(args), fg="cyan")
 
-        # todo make this async
-        result = subprocess.run(args, env=os.environ.copy(), capture_output=True)
-        self.stdout.write(result.stdout.decode())
-        self.stderr.write(result.stderr.decode())
+        result = subprocess.run(args, env=os.environ.copy())
         if result.returncode > 0:
             raise CommandError(
                 _(
