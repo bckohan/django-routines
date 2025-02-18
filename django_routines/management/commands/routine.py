@@ -35,7 +35,7 @@ RCommand = t.Union[ManagementCommand, SystemCommand]
 width = 80
 use_rich = find_spec("rich") is not None
 if use_rich:
-    from rich.console import Console
+    from rich.console import Console  # pyright: ignore[reportMissingImports]
 
     width = Console().width
 
