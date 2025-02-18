@@ -88,7 +88,7 @@ open-docs:
 docs: build-docs-html open-docs
 
 # serve the documentation, with auto-reload
-docs-live:
+docs-live: install-docs
     poetry run sphinx-autobuild doc/source doc/build --open-browser --watch django_routines --port 8000 --delay 1
 
 # check the documentation links for broken links
