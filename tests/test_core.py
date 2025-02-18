@@ -347,8 +347,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
                 "[6] track 5 | demo",
-                "[7] tests/system_cmd.py sys 1",
-                "[8] tests/system_cmd.py sys 2",
+                f"[7] tests{os.sep}system_cmd.py sys 1",
+                f"[8] tests{os.sep}system_cmd.py sys 2",
             ],
         )
 
@@ -361,8 +361,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 3 (demo=2)",
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
-                "[7] tests/system_cmd.py sys 1",
-                "[8] tests/system_cmd.py sys 2",
+                f"[7] tests{os.sep}system_cmd.py sys 1",
+                f"[8] tests{os.sep}system_cmd.py sys 2",
             ],
         )
 
@@ -377,8 +377,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
                 "[6] track 5 | demo",
-                "[7] tests/system_cmd.py sys 1",
-                "[8] tests/system_cmd.py sys 2",
+                f"[7] tests{os.sep}system_cmd.py sys 1",
+                f"[8] tests{os.sep}system_cmd.py sys 2",
             ],
         )
 
@@ -394,8 +394,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
                 "[6] track 5 | demo",
-                "[7] tests/system_cmd.py sys 1",
-                "[8] tests/system_cmd.py sys 2",
+                f"[7] tests{os.sep}system_cmd.py sys 1",
+                f"[8] tests{os.sep}system_cmd.py sys 2",
             ],
         )
 
@@ -410,8 +410,8 @@ class CoreTests(with_typehint(TestCase)):
                 "[3] track 3 (demo=2)",
                 "[3] track 4 (demo=6, flag=True)",
                 "[4] track 1",
-                "[7] tests/system_cmd.py sys 1",
-                "[8] tests/system_cmd.py sys 2",
+                f"[7] tests{os.sep}system_cmd.py sys 1",
+                f"[8] tests{os.sep}system_cmd.py sys 2",
             ],
         )
 
@@ -530,7 +530,7 @@ class CoreTests(with_typehint(TestCase)):
 ╰──────────────────────────────────────────────────────────────────────────────╯
 """
 
-    routine_test_help_rich = """
+    routine_test_help_rich = f"""
  Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...                  
                                                                                 
                                                                                 
@@ -543,8 +543,8 @@ class CoreTests(with_typehint(TestCase)):
  [3] track 4 (demo=6, flag=True)                                                
  [4] track 1                                                                    
  [6] track 5 | demo                                                             
- [7] tests/system_cmd.py sys 1                                                  
- [8] tests/system_cmd.py sys 2                                                  
+ [7] tests{os.sep}system_cmd.py sys 1                                                  
+ [8] tests{os.sep}system_cmd.py sys 2                                                  
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --subprocess          Run commands as subprocesses.                          │
@@ -623,7 +623,7 @@ Commands:
   test-continue  Test continue option.
 """
 
-    routine_test_help_no_rich = """
+    routine_test_help_no_rich = f"""
 Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...
 
   Test Routine 1
@@ -635,8 +635,8 @@ Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...
   [3] track 4 (demo=6, flag=True)
   [4] track 1
   [6] track 5 | demo
-  [7] tests/system_cmd.py sys 1
-  [8] tests/system_cmd.py sys 2
+  [7] tests{os.sep}system_cmd.py sys 1
+  [8] tests{os.sep}system_cmd.py sys 2
 
 Options:
   --subprocess  Run commands as subprocesses.
