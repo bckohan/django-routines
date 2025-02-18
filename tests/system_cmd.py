@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent))
 from tests import track_file
 import json
-import sys
+
 
 if __name__ == "__main__":
     if not track_file.is_file():
