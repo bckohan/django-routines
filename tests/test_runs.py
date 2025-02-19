@@ -82,7 +82,7 @@ def test_subprocess_opt_error():
 
 
 if platform.system() == "Windows":
-    from pywinpty import PtyProcess
+    from winpty import PtyProcess
     import time
 
     def test_option_toggle():
@@ -92,8 +92,8 @@ if platform.system() == "Windows":
                 "./manage.py",
                 "routine",
                 "--settings",
-                "tests.settings_subproc_opt_error",
-                "subproc-opt-error",
+                "tests.settings_option_toggle",
+                "option-on",
                 "--subprocess",
             ],
             text=True,
@@ -110,20 +110,18 @@ if platform.system() == "Windows":
                     "routine",
                     "--settings",
                     "tests.settings_option_toggle",
-                    "option-on",
+                    "option-off",
                     "--subprocess",
                 ]
             )
         )
         time.sleep(3)
         initial_output = proc.read(1024)
-        assert "Type 'yes' to continue, or 'no' to cancel:" in initial_output.decode(
-            "utf-8", errors="ignore"
-        )
+        assert "Type 'yes' to continue, or 'no' to cancel:" in initial_output
         proc.write("yes\r\n")
         time.sleep(3)
         dir_output = proc.read(4096)
-        assert "static files copied." in dir_output.decode("utf-8", errors="ignore")
+        assert "static files copied." in dir_output
 else:
 
     def test_option_toggle():
