@@ -130,7 +130,7 @@ addopts = [
 [tool.coverage.run]
 omit = ["tests/**/*.py"]
 branch = true
-source = ["tests"]
+source = ["django_routines"]
 concurrency = ["multiprocessing"]
 parallel = true
 relative_files = true
