@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 3, 0)
+VERSION = (1, 4, 0)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
@@ -297,7 +297,7 @@ def routine(
     :param help_text: The help text to display for the routine by the routines command.
     :param commands: The commands to run in the routine.
     """
-    settings = sys._getframe(1).f_globals  # noqa: WPS437
+    settings = sys._getframe(1).f_globals
     if not settings.get(ROUTINE_SETTING, {}):
         settings[ROUTINE_SETTING] = {}
 
@@ -353,7 +353,7 @@ def _add_command(
     switches: t.Optional[t.Sequence[str]] = _RoutineCommand.switches,
     **options,
 ):
-    settings = sys._getframe(2).f_globals  # noqa: WPS437
+    settings = sys._getframe(2).f_globals
     settings[ROUTINE_SETTING] = settings.get(ROUTINE_SETTING, {}) or {}
     routine_dict = settings[ROUTINE_SETTING]
     try:
@@ -451,7 +451,7 @@ def get_routine(name: str) -> Routine:
         if not settings.configured:
             Routine.from_dict(
                 _get_routine(name, sys._getframe(1).f_globals.get(ROUTINE_SETTING, {}))
-            )  # noqa: WPS437
+            )
         return Routine.from_dict(
             _get_routine(name, getattr(settings, ROUTINE_SETTING, {}))
         )
@@ -470,7 +470,7 @@ def routines() -> t.Generator[Routine, None, None]:
     from django.conf import settings
 
     routines = (
-        sys._getframe(1).f_globals.get(ROUTINE_SETTING, {})  # noqa: WPS437
+        sys._getframe(1).f_globals.get(ROUTINE_SETTING, {})
         if not settings.configured
         else getattr(settings, ROUTINE_SETTING, {})
     ) or {}

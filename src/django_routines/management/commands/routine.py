@@ -76,10 +76,10 @@ def {routine_func}(
 
 class Command(TyperCommand, rich_markup_mode="rich"):
     """
-    A TyperCommand_ that reads the DJANGO_ROUTINES setting from settings and
-    builds out a set of subcommands for each routine that when invoked will run
-    those routines in order. Each routine also has a subcommand called ``list``
-    that prints which commands will be executed and in what order given the
+    A :class:`~django_typer.management.TyperCommand` that reads the DJANGO_ROUTINES
+    setting from settings and builds out a set of subcommands for each routine that when
+    invoked will run those routines in order. Each routine also has a subcommand called
+    ``list`` that prints which commands will be executed and in what order given the
     switches the user has selected.
 
     .. note::

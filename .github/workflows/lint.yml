@@ -1,6 +1,7 @@
 name: lint
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   push:
@@ -24,8 +25,7 @@ jobs:
         django-version:
           - '3.2' # LTS April 2024
           - '4.2' # LTS April 2026
-          - '5.0' # April 2025
-          - '5.1' # December 2025
+          - '5.2' # LTS April 2028
         exclude:
           - python-version: '3.9'
             django-version: '4.2'
@@ -34,7 +34,7 @@ jobs:
           - python-version: '3.13'
             django-version: '3.2'
           - python-version: '3.9'
-            django-version: '5.1'
+            django-version: '5.2'
 
     env:
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
@@ -52,8 +52,9 @@ jobs:
         uses: extractions/setup-just@v3
       - name: Install Dependencies
         run: |
-          just init ${{ steps.sp.outputs.python-path }} install-docs
-          just pin-dependency Django~=${{ matrix.django-version }}.0
+          just setup ${{ steps.sp.outputs.python-path }}
+          just test-lock "Django~=${{ matrix.django-version }}.0"
+          just install
       - name: Install Emacs
         if: ${{ github.event.inputs.debug == 'true' }}
         run: |

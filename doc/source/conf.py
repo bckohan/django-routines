@@ -1,17 +1,15 @@
 import os
 import shutil
 import sys
-from datetime import datetime
 from pathlib import Path
 
 import django
 
-import django_routines
-
+sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(str(Path(__file__).parent.parent / "tests"))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "examples.readme")
 django.setup()
-
-sys.path.append(str(Path(__file__).parent.parent / "tests"))
+import django_routines
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -31,12 +29,9 @@ sys.path.append(str(Path(__file__).parent.parent / "tests"))
 
 
 # -- Project information -----------------------------------------------------
-
-project = "django_routines"
-copyright = f"2024-{datetime.now().year}, Brian Kohan"
-author = "Brian Kohan"
-
-# The full version, including alpha/beta/rc tags
+project = django_routines.__title__
+copyright = django_routines.__copyright__
+author = django_routines.__author__
 release = django_routines.__version__
 
 
@@ -46,6 +41,8 @@ release = django_routines.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinxcontrib_django',
+    'sphinx.ext.intersphinx',
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinxcontrib.typer"
@@ -86,6 +83,15 @@ todo_include_todos = True
 latex_engine = "xelatex"
 
 suppress_warnings = ["app.add_directive"]
+
+intersphinx_mapping = {
+    "django": (
+        "https://docs.djangoproject.com/en/stable",
+        "https://docs.djangoproject.com/en/stable/_objects/",
+    ),
+    "django-typer": ("https://django-typer.readthedocs.io/en/stable", None),
+    "python": ('https://docs.python.org/3', None)
+}
 
 
 def setup(app):

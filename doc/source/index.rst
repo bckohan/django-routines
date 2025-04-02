@@ -37,15 +37,15 @@ The routine command will read our settings file and generate two subcommands, on
 and one called package:
 
 .. typer:: django_routines.management.commands.routine.Command:typer_app:package
-    :prog: ./manage.py routine package
+    :prog: django-admin routine package
     :theme: dark
     :convert-png: latex
 
 Now we can run all of our package routines with one command:
 
-.. code-block:: console
+.. code-block:: bash
 
-    ?> ./manage.py routine package
+    ?> django-admin routine package
     makemigrations
     ...
     renderstatic
@@ -56,15 +56,15 @@ Now we can run all of our package routines with one command:
 The deploy command has several switches that we can enable to run additional commands.
 
 .. typer:: django_routines.management.commands.routine.Command:typer_app:deploy
-    :prog: ./manage.py routine deploy
+    :prog: django-admin routine deploy
     :theme: dark
     :convert-png: latex
 
 For example to deploy our demo on a new server we would run:
 
-.. code-block:: console
+.. code-block:: bash
 
-    ?> ./manage.py routine deploy --initial --demo
+    ?> django-admin routine deploy --initial --demo
     migrate
     ...
     collectstatic
@@ -104,7 +104,7 @@ priorities to make sure commands defined in a de-coupled way run in the correct 
 :big:`Options`
 
 When specifying arguments you may add them to the command tuple OR specify them as named
-options in the style that will be passed to call_command_:
+options in the style that will be passed to :func:`~django.core.management.call_command`:
 
 .. code-block:: python
 

@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+v1.4.0 (2024-04-02)
+===================
+
+* Implemented `Use intersphinx for cross doc references <https://github.com/bckohan/django-render-static/issues/33>`_
+* Implemented `Switch from poetry -> uv <https://github.com/bckohan/django-render-static/issues/32>`_
+* Implemented `Support Django 5.2 <https://github.com/bckohan/django-render-static/issues/31>`_
 
 v1.3.0 (2024-02-18)
 ===================
