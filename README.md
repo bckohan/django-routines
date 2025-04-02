@@ -7,7 +7,7 @@
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/django-routines.svg)](https://pypi.python.org/pypi/django-routines/)
 [![PyPI djversions](https://img.shields.io/pypi/djversions/django-routines.svg)](https://pypi.org/project/django-routines/)
 [![PyPI status](https://img.shields.io/pypi/status/django-routines.svg)](https://pypi.python.org/pypi/django-routines)
-[![Documentation Status](https://readthedocs.org/projects/django-routines/badge/?version=latest)](http://django-routines.readthedocs.io/?badge=latest/)
+[![Documentation Status](https://readthedocs.org/projects/django-routines/badge/?version=latest)](https://django-routines.readthedocs.io/en/latest/)
 [![Code Cov](https://codecov.io/gh/bckohan/django-routines/branch/main/graph/badge.svg?token=0IZOKN2DYL)](https://codecov.io/gh/bckohan/django-routines)
 [![Test Status](https://github.com/bckohan/django-routines/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/bckohan/django-routines/actions/workflows/test.yml?query=branch:main)
 [![Lint Status](https://github.com/bckohan/django-routines/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/bckohan/django-routines/actions/workflows/lint.yml?query=branch:main)
