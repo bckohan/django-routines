@@ -631,13 +631,13 @@ dev = [
     { name = "pytest-django" },
     { name = "pytest-env" },
     { name = "pywinpty", marker = "sys_platform == 'win32'" },
+    { name = "readme-renderer", extra = ["md"] },
     { name = "ruff" },
     { name = "tomlkit" },
 ]
 docs = [
     { name = "doc8" },
     { name = "furo" },
-    { name = "readme-renderer", extra = ["md"] },
     { name = "sphinx", version = "7.4.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -669,13 +669,13 @@ dev = [
     { name = "pytest-django", specifier = ">=4.7.0" },
     { name = "pytest-env", specifier = ">=1.0.0" },
     { name = "pywinpty", marker = "sys_platform == 'win32'", specifier = ">=2.0.14" },
+    { name = "readme-renderer", extras = ["md"], specifier = ">=44.0" },
     { name = "ruff", specifier = ">=0.9" },
     { name = "tomlkit", specifier = ">=0.13.2" },
 ]
 docs = [
     { name = "doc8", specifier = ">=1.1.2" },
     { name = "furo", specifier = ">=2024.8.6" },
-    { name = "readme-renderer", extras = ["md"], specifier = ">=44.0" },
     { name = "sphinx", specifier = ">=7.4.7" },
     { name = "sphinx-autobuild", specifier = ">=2024.10.3" },
     { name = "sphinx-tabs", specifier = ">=3.4.7" },
