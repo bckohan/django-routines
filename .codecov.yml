@@ -1,0 +1,5 @@
+# https://github.com/codecov/codecov-python/issues/136
+coverage:
+  fixes:
+    - "__init__.py::django_routines/__init__.py"
+    - "management/__init__.py::django_routines/management/__init__.py"
