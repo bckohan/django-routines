@@ -22,9 +22,9 @@ the site for the first time on a new server or when we deploy version updates on
     Routine commands are run in the order they are registered, or by priority_.
 
 There are two types of commands, management commands and system commands. The management commands
-will be called in the same process space as routine unless --subprocess is specified in which case
-they will use the same management script as routine was invoked with or whatever value you supply
-to --manage-script. System commands are always invoked as subprocesses.
+will be called in the same process space as routine unless ``--subprocess`` is specified in which
+case they will use the same management script as routine was invoked with or whatever value you
+supply to ``--manage-script``. System commands are always invoked as subprocesses.
 
 In our settings file we may define these routines like this:
 
@@ -77,8 +77,8 @@ For example to deploy our demo on a new server we would run:
 
 :big:`Settings`
 
-The :class:`~django_routines.ManagementCommand` dataclass, :func:`django_routines.routine` and
-:func:`django_routines.command` helper functions in the example above make it easier for us to
+The :class:`~django_routines.ManagementCommand` dataclass, :func:`~django_routines.routine` and
+:func:`~django_routines.command` helper functions in the example above make it easier for us to
 work with the native configuration format which is a dictionary structure defined in the
 ``DJANGO_ROUTINES`` setting attribute. For example the above configuration is equivalent to:
 
@@ -130,6 +130,16 @@ these parameters when you define the Routine.
 The default routine behavior for these execution controls can be overridden on the command
 line.
 
+:big:`Pre/Post Hooks`
+
+:attr:`~django_routines.PreHook` and :attr:`~django_routines.PostHook` functions can be attached to
+routines and commands. These functions provide:
+
+- a way to execute arbitrary code before or after the routine or command execution.
+- full access to the routine or command context (options and results).
+- the ability to halt execution of the routine early or skip individual commands.
+- the ability to modify the routine or command context.
+
 .. _rationale:
 
 :big:`Rationale`
@@ -141,6 +151,10 @@ appropriate. If your goal is to keep your Django deployment as tight and self co
 and the deployment is not generally very complex, using django-routines can make a lot of sense. It
 can eliminate extra dependencies on a shell scripting environment or just files and can keep this
 logic packaged with your installable wheel.
+
+Django routines also encourages stronger command logic encapsulation. It allows complex workflows
+to be broken down into smaller, more manageable commands that can be attached and invoked together
+as part of larger routines.
 
 .. toctree::
    :maxdepth: 2

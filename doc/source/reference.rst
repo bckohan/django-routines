@@ -8,12 +8,10 @@ Reference
 
 .. _base:
 
-django_routines
----------------
-
 .. automodule:: django_routines
    :members:
    :show-inheritance:
+   :inherited-members:
 
 routine command
 ---------------

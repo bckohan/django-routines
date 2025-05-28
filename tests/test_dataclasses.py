@@ -1,6 +1,6 @@
 import os
 from django.test import TestCase, override_settings
-from django_routines import ROUTINE_SETTING, Routine, RoutineCommand, SystemCommand
+from django_routines import ROUTINE_SETTING, Routine, ManagementCommand, SystemCommand
 from django.conf import settings
 from .test_core import CoreTests
 from . import system_cmd
@@ -13,23 +13,25 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
     DJANGO_ROUTINES={
         "bad": Routine(
             commands=[
-                RoutineCommand(command=("track", "0")),
-                RoutineCommand(command=("does_not_exist",)),
-                RoutineCommand(command=("track", "1")),
+                ManagementCommand(command=("track", "0")),
+                ManagementCommand(command=("does_not_exist",)),
+                ManagementCommand(command=("track", "1")),
             ],
             help_text="Bad command test routine",
             name="bad",
         ),
         "deploy": Routine(
             commands=[
-                RoutineCommand(command=("makemigrations",), switches=["prepare"]),
-                RoutineCommand(command=("migrate",)),
-                RoutineCommand(command=("renderstatic",)),
-                RoutineCommand(command="collectstatic", options={"interactive": False}),
-                RoutineCommand(
+                ManagementCommand(command=("makemigrations",), switches=["prepare"]),
+                ManagementCommand(command=("migrate",)),
+                ManagementCommand(command=("renderstatic",)),
+                ManagementCommand(
+                    command="collectstatic", options={"interactive": False}
+                ),
+                ManagementCommand(
                     command=("shellcompletion", "install"), switches=("import",)
                 ),
-                RoutineCommand(
+                ManagementCommand(
                     command=("loaddata", "./fixtures/initial_data.json"),
                     switches=("demo",),
                 ),
@@ -43,21 +45,25 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
         ),
         "import": Routine(
             commands=[
-                RoutineCommand(command=("track", "2"), switches=("import", "demo")),
-                RoutineCommand(
+                ManagementCommand(command=("track", "2"), switches=("import", "demo")),
+                ManagementCommand(
                     command=("track", "0"),
                     options={"verbosity": 0},
                     priority=1,
                     switches=("import",),
                 ),
-                RoutineCommand(command=("track", "3"), options={"demo": 2}, priority=3),
-                RoutineCommand(
+                ManagementCommand(
+                    command=("track", "3"), options={"demo": 2}, priority=3
+                ),
+                ManagementCommand(
                     command=("track", "4"),
                     options={"demo": 6, "flag": True},
                     priority=3,
                 ),
-                RoutineCommand(command=("track", "1"), priority=4),
-                RoutineCommand(command=("track", "5"), priority=6, switches=("demo",)),
+                ManagementCommand(command=("track", "1"), priority=4),
+                ManagementCommand(
+                    command=("track", "5"), priority=6, switches=("demo",)
+                ),
                 SystemCommand(
                     command=(*system_cmd, "sys 1"),
                     priority=7,
@@ -72,13 +78,13 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
         ),
         "--test-hyphen": Routine(
             commands=[
-                RoutineCommand(
+                ManagementCommand(
                     ("track", "1"), switches=["--hyphen-ok", "hyphen-ok-prefix"]
                 ),
-                RoutineCommand(("track", "2")),
-                RoutineCommand(("track", "3"), switches=["hyphen-ok"]),
-                RoutineCommand(("track", "4")),
-                RoutineCommand(
+                ManagementCommand(("track", "2")),
+                ManagementCommand(("track", "3"), switches=["hyphen-ok"]),
+                ManagementCommand(("track", "4")),
+                ManagementCommand(
                     ("track", "5"), switches=("hyphen-ok", "--hyphen-ok_prefix")
                 ),
             ],
@@ -91,10 +97,10 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
         ),
         "atomic_pass": Routine(
             commands=[
-                RoutineCommand(command=("edit", "0", "Name1")),
-                RoutineCommand(command=("edit", "0", "Name2")),
-                RoutineCommand(command=("edit", "0", "Name3")),
-                RoutineCommand(command=("edit", "1", "Name4")),
+                ManagementCommand(command=("edit", "0", "Name1")),
+                ManagementCommand(command=("edit", "0", "Name2")),
+                ManagementCommand(command=("edit", "0", "Name3")),
+                ManagementCommand(command=("edit", "1", "Name4")),
             ],
             name="atomic_pass",
             help_text="Atomic test routine.",
@@ -102,10 +108,10 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
         ),
         "atomic_fail": Routine(
             commands=[
-                RoutineCommand(command=("edit", "0", "Name1")),
-                RoutineCommand(command=("edit", "0", "Name2")),
-                RoutineCommand(command=("edit", "0", "Name3")),
-                RoutineCommand(command=("edit", "1", "Name4", "--raise")),
+                ManagementCommand(command=("edit", "0", "Name1")),
+                ManagementCommand(command=("edit", "0", "Name2")),
+                ManagementCommand(command=("edit", "0", "Name3")),
+                ManagementCommand(command=("edit", "1", "Name4", "--raise")),
             ],
             name="atomic_fail",
             help_text="Atomic test routine failure.",
@@ -113,9 +119,9 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
         ),
         "test_continue": Routine(
             commands=[
-                RoutineCommand(command=("edit", "0", "Name1")),
-                RoutineCommand(command=("edit", "0", "Name2", "--raise")),
-                RoutineCommand(command=("edit", "0", "Name3")),
+                ManagementCommand(command=("edit", "0", "Name1")),
+                ManagementCommand(command=("edit", "0", "Name2", "--raise")),
+                ManagementCommand(command=("edit", "0", "Name3")),
             ],
             name="test_continue",
             help_text="Test continue option.",
@@ -130,9 +136,9 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["bad"],
             Routine(
                 commands=[
-                    RoutineCommand(command=("track", "0")),
-                    RoutineCommand(command=("does_not_exist",)),
-                    RoutineCommand(command=("track", "1")),
+                    ManagementCommand(command=("track", "0")),
+                    ManagementCommand(command=("does_not_exist",)),
+                    ManagementCommand(command=("track", "1")),
                 ],
                 help_text="Bad command test routine",
                 name="bad",
@@ -142,17 +148,19 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["deploy"],
             Routine(
                 commands=[
-                    RoutineCommand(command=("makemigrations",), switches=["prepare"]),
-                    RoutineCommand(command=("migrate",)),
-                    RoutineCommand(command=("renderstatic",)),
-                    RoutineCommand(
+                    ManagementCommand(
+                        command=("makemigrations",), switches=["prepare"]
+                    ),
+                    ManagementCommand(command=("migrate",)),
+                    ManagementCommand(command=("renderstatic",)),
+                    ManagementCommand(
                         command="collectstatic", options={"interactive": False}
                     ),
-                    RoutineCommand(
+                    ManagementCommand(
                         command=("shellcompletion", "install"),
                         switches=("import",),
                     ),
-                    RoutineCommand(
+                    ManagementCommand(
                         command=("loaddata", "./fixtures/initial_data.json"),
                         switches=("demo",),
                     ),
@@ -169,23 +177,25 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["import"],
             Routine(
                 commands=[
-                    RoutineCommand(command=("track", "2"), switches=("import", "demo")),
-                    RoutineCommand(
+                    ManagementCommand(
+                        command=("track", "2"), switches=("import", "demo")
+                    ),
+                    ManagementCommand(
                         command=("track", "0"),
                         options={"verbosity": 0},
                         priority=1,
                         switches=("import",),
                     ),
-                    RoutineCommand(
+                    ManagementCommand(
                         command=("track", "3"), options={"demo": 2}, priority=3
                     ),
-                    RoutineCommand(
+                    ManagementCommand(
                         command=("track", "4"),
                         options={"demo": 6, "flag": True},
                         priority=3,
                     ),
-                    RoutineCommand(command=("track", "1"), priority=4),
-                    RoutineCommand(
+                    ManagementCommand(command=("track", "1"), priority=4),
+                    ManagementCommand(
                         command=("track", "5"), priority=6, switches=("demo",)
                     ),
                     SystemCommand(
@@ -205,13 +215,13 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["--test-hyphen"],
             Routine(
                 commands=[
-                    RoutineCommand(
+                    ManagementCommand(
                         ("track", "1"), switches=["hyphen_ok", "hyphen_ok_prefix"]
                     ),
-                    RoutineCommand(("track", "2")),
-                    RoutineCommand(("track", "3"), switches=["hyphen_ok"]),
-                    RoutineCommand(("track", "4")),
-                    RoutineCommand(
+                    ManagementCommand(("track", "2")),
+                    ManagementCommand(("track", "3"), switches=["hyphen_ok"]),
+                    ManagementCommand(("track", "4")),
+                    ManagementCommand(
                         ("track", "5"), switches=("hyphen_ok", "hyphen_ok_prefix")
                     ),
                 ],
@@ -228,10 +238,10 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["atomic_pass"],
             Routine(
                 commands=[
-                    RoutineCommand(command=("edit", "0", "Name1")),
-                    RoutineCommand(command=("edit", "0", "Name2")),
-                    RoutineCommand(command=("edit", "0", "Name3")),
-                    RoutineCommand(command=("edit", "1", "Name4")),
+                    ManagementCommand(command=("edit", "0", "Name1")),
+                    ManagementCommand(command=("edit", "0", "Name2")),
+                    ManagementCommand(command=("edit", "0", "Name3")),
+                    ManagementCommand(command=("edit", "1", "Name4")),
                 ],
                 name="atomic_pass",
                 help_text="Atomic test routine.",
@@ -243,10 +253,10 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["atomic_fail"],
             Routine(
                 commands=[
-                    RoutineCommand(command=("edit", "0", "Name1")),
-                    RoutineCommand(command=("edit", "0", "Name2")),
-                    RoutineCommand(command=("edit", "0", "Name3")),
-                    RoutineCommand(command=("edit", "1", "Name4", "--raise")),
+                    ManagementCommand(command=("edit", "0", "Name1")),
+                    ManagementCommand(command=("edit", "0", "Name2")),
+                    ManagementCommand(command=("edit", "0", "Name3")),
+                    ManagementCommand(command=("edit", "1", "Name4", "--raise")),
                 ],
                 name="atomic_fail",
                 help_text="Atomic test routine failure.",
@@ -258,9 +268,9 @@ class SettingsAsObjectsTests(CoreTests, TestCase):
             routines["test_continue"],
             Routine(
                 commands=[
-                    RoutineCommand(command=("edit", "0", "Name1")),
-                    RoutineCommand(command=("edit", "0", "Name2", "--raise")),
-                    RoutineCommand(command=("edit", "0", "Name3")),
+                    ManagementCommand(command=("edit", "0", "Name1")),
+                    ManagementCommand(command=("edit", "0", "Name2", "--raise")),
+                    ManagementCommand(command=("edit", "0", "Name3")),
                 ],
                 name="test_continue",
                 help_text="Test continue option.",

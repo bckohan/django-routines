@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+v1.5.0 (2025-05-28)
+===================
+
+* Implemented `Support python 3.14 <https://github.com/bckohan/django-render-static/issues/39>`_
+* Implemented `Support function pre and post hooks to be run prior to and after given commands. <https://github.com/bckohan/django-render-static/issues/9>`_
+
 v1.4.0 (2024-04-02)
 ===================
 

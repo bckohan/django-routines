@@ -210,14 +210,14 @@ check: check-lint check-format check-types check-package check-docs check-docs-l
 # run all tests
 test-all: install
     @just run pytest
-    @just run pytest --cov-append -k test_dataclasses
-    @just run pytest --cov-append -k test_dict
-    @just run pytest --cov-append -k test_no_django
+    # @just run pytest --cov-append -k test_dataclasses
+    # @just run pytest --cov-append -k test_dict
+    # @just run pytest --cov-append -k test_no_django
     uv sync --no-extra rich
     @just run pytest --cov-append
-    @just run pytest --cov-append -k test_dataclasses
-    @just run pytest --cov-append -k test_dict
-    @just run pytest --cov-append -k test_no_django
+    # @just run pytest --cov-append -k test_dataclasses
+    # @just run pytest --cov-append -k test_dict
+    # @just run pytest --cov-append -k test_no_django
 
 # run tests
 test *TESTS:

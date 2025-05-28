@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-routines"
-version = "1.4.0"
+version = "1.5.0"
 description = "Define named groups of management commands in Django settings files for batched execution."
 requires-python = ">=3.9,<4.0"
 authors = [
@@ -42,6 +42,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet :: WWW/HTTP :: Site Management",
     "Topic :: Software Development :: Libraries",

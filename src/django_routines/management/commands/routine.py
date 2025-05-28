@@ -4,6 +4,7 @@ import subprocess
 import sys
 import typing as t
 from contextlib import contextmanager
+from copy import deepcopy
 from importlib.util import find_spec
 from typing import Annotated
 
@@ -30,6 +31,15 @@ from django_routines import (
     to_symbol,
 )
 
+
+class _ExitEarly(Exception):
+    """
+    Exception to raise to exit the routine early.
+    """
+
+    pass
+
+
 RCommand = t.Union[ManagementCommand, SystemCommand]
 
 width = 80
@@ -50,6 +60,10 @@ def {routine_func}(
     {switch_args}
 ):
     self.routine = "{routine}"
+    self._routine_options = {{
+        **self._routine_options,
+        **ctx.params,
+    }}
     self.switches = []
     {add_switches}
     subprocess = subprocess if (
@@ -100,13 +114,18 @@ class Command(TyperCommand, rich_markup_mode="rich"):
 
     manage_script: str = sys.argv[0]
 
+    _routine_options: t.Dict[str, t.Any] = {}
+    _previous_command: t.Optional[RCommand] = None
+
     @property
     def routine(self) -> t.Optional[Routine]:
         return self._routine
 
     @routine.setter
     def routine(self, routine: t.Union[str, Routine]):
-        self._routine = (
+        # we create our own copy of the routine because run-specific data will be
+        # added to the objects
+        self._routine = deepcopy(
             routine if isinstance(routine, Routine) else get_routine(str(routine))
         )
 
@@ -127,12 +146,14 @@ class Command(TyperCommand, rich_markup_mode="rich"):
             str,
             typer.Option(
                 help=_(
-                    "The manage script to use if running management commands as subprocesses."
+                    "The manage script to use if running management commands as "
+                    "subprocesses."
                 )
             ),
         ] = manage_script,
         verbosity: Verbosity = verbosity,
     ):
+        self._routine_options = ctx.params.copy()
         self.verbosity = verbosity
         self._pass_verbosity = (
             ctx.get_parameter_source("verbosity")
@@ -167,18 +188,29 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         )
         ctx = transaction.atomic if is_atomic else noop
         with ctx():  # type: ignore
-            for command in self.plan:
+            plan = self.plan
+            for idx, command in enumerate(plan):
+                nxt = plan[idx + 1] if idx < len(plan) - 1 else None
                 try:
                     if isinstance(command, SystemCommand) or subprocess:
-                        self._subprocess(command)
+                        self._subprocess(command, nxt=nxt)
                     else:
-                        self._call_command(command)
+                        self._call_command(command, nxt=nxt)
+                except _ExitEarly:
+                    return
                 except Exception as e:
                     if not continue_on_error:
                         raise e
 
-    def _call_command(self, command: ManagementCommand):
+    def _call_command(self, command: ManagementCommand, nxt: t.Optional[RCommand]):
+        assert self.routine
         try:
+            if command.pre_hook:
+                if command.pre_hook(
+                    self.routine, command, self._previous_command, self._routine_options
+                ):
+                    return
+            self._previous_command = command
             cmd = get_command(
                 command.command_name,
                 BaseCommand,
@@ -201,13 +233,23 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                 options = {"verbosity": self.verbosity, **options}
             if self.verbosity > 0:
                 self.secho(command.command_str, fg="cyan")
-            call_command(cmd, *command.command_args, **options)
+            command.result = call_command(cmd, *command.command_args, **options)
             if command.command_name == "makemigrations":
                 importlib.invalidate_caches()
-        except KeyError:
-            raise CommandError(f"Command not found: {command.command_name}")
+            if command.post_hook:
+                if command.post_hook(self.routine, command, nxt, self._routine_options):
+                    raise _ExitEarly()
+        except KeyError as err:
+            raise CommandError(f"Command not found: {command.command_name}") from err
 
-    def _subprocess(self, command: RCommand):
+    def _subprocess(self, command: RCommand, nxt: t.Optional[RCommand]) -> int:
+        assert self.routine
+        if command.pre_hook:
+            if command.pre_hook(
+                self.routine, command, self._previous_command, self._routine_options
+            ):
+                return 0
+        self._previous_command = command
         options = []
         if isinstance(command, ManagementCommand):
             if command.options:
@@ -237,7 +279,8 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                 if len(options) != expected_opts:
                     raise CommandError(
                         _(
-                            "Failed to convert {command} options to CLI format: {unconverted}"
+                            "Failed to convert {command} options to CLI format: "
+                            "{unconverted}"
                         ).format(
                             command=command.command_name, unconverted=command.options
                         )
@@ -262,14 +305,17 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         if self.verbosity > 0:
             self.secho(" ".join(args), fg="cyan")
 
-        result = subprocess.run(args, env=os.environ.copy())
-        if result.returncode > 0:
+        command.result = subprocess.run(args, env=os.environ.copy())
+        if command.result.returncode > 0:
             raise CommandError(
                 _(
                     "Subprocess command failed: {command} with return code {code}"
-                ).format(command=" ".join(args), code=result.returncode)
+                ).format(command=" ".join(args), code=command.result.returncode)
             )
-        return result.returncode
+        if command.post_hook:
+            if command.post_hook(self.routine, command, nxt, self._routine_options):
+                raise _ExitEarly()
+        return command.result.returncode
 
     def _list(self) -> None:
         """
