@@ -85,6 +85,7 @@ dev = [
     "pywinpty>=2.0.14; sys_platform == 'win32'",
     "tomlkit>=0.13.2",
     "readme-renderer[md]>=44.0",
+    "packaging>=24.2",
 ]
 docs = [
     "doc8>=1.1.2",
