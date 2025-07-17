@@ -17,6 +17,14 @@ manage *COMMAND:
     os.environ["DJANGO_SETTINGS_MODULE"] = "tests.settings"
     management.execute_from_command_line(sys.argv + "{{ COMMAND }}".split(" "))
 
+[script]
+clean_manage *COMMAND:
+    import os
+    import sys
+    from django.core import management
+    os.environ["DJANGO_SETTINGS_MODULE"] = "tests.base_settings"
+    management.execute_from_command_line(sys.argv + "{{ COMMAND }}".split(" "))
+
 # install the uv package manager
 [linux]
 [macos]

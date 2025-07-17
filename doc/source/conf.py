@@ -98,4 +98,5 @@ def setup(app):
     # https://sphinxcontrib-typer.readthedocs.io/en/latest/howto.html#build-to-multiple-formats
     if Path(app.doctreedir).exists():
         shutil.rmtree(app.doctreedir)
+    app.add_crossref_type(directivename="django-admin", rolename="django-admin")
     return app

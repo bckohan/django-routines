@@ -2,31 +2,36 @@
 Change Log
 ==========
 
+v1.5.1 (2025-07-27)
+===================
+
+* Docs `Use django-admin role for command references. <https://github.com/bckohan/django-routines/issues/48>`_
+
 v1.5.0 (2025-05-28)
 ===================
 
-* Implemented `Support python 3.14 <https://github.com/bckohan/django-render-static/issues/39>`_
-* Implemented `Support function pre and post hooks to be run prior to and after given commands. <https://github.com/bckohan/django-render-static/issues/9>`_
+* Implemented `Support python 3.14 <https://github.com/bckohan/django-routines/issues/39>`_
+* Implemented `Support function pre and post hooks to be run prior to and after given commands. <https://github.com/bckohan/django-routines/issues/9>`_
 
 v1.4.0 (2024-04-02)
 ===================
 
-* Implemented `Use intersphinx for cross doc references <https://github.com/bckohan/django-render-static/issues/33>`_
-* Implemented `Switch from poetry -> uv <https://github.com/bckohan/django-render-static/issues/32>`_
-* Implemented `Support Django 5.2 <https://github.com/bckohan/django-render-static/issues/31>`_
+* Implemented `Use intersphinx for cross doc references <https://github.com/bckohan/django-routines/issues/33>`_
+* Implemented `Switch from poetry -> uv <https://github.com/bckohan/django-routines/issues/32>`_
+* Implemented `Support Django 5.2 <https://github.com/bckohan/django-routines/issues/31>`_
 
 v1.3.0 (2024-02-18)
 ===================
 
-* Implemented `Remove support for python 3.8 <https://github.com/bckohan/django-render-static/issues/30>`_
-* Implemented `Upgrade to django-typer 3.x <https://github.com/bckohan/django-render-static/issues/29>`_
-* Implemented `stdout/stderr streaming from subprocesses <https://github.com/bckohan/django-render-static/issues/15>`_
+* Implemented `Remove support for python 3.8 <https://github.com/bckohan/django-routines/issues/30>`_
+* Implemented `Upgrade to django-typer 3.x <https://github.com/bckohan/django-routines/issues/29>`_
+* Implemented `stdout/stderr streaming from subprocesses <https://github.com/bckohan/django-routines/issues/15>`_
 
 v1.2.1 (2024-08-26)
 ===================
 
-* Fixed `Switch rtd theme to furo. <https://github.com/bckohan/django-render-static/issues/27>`_
-* Fixed `Support python 3.13 <https://github.com/bckohan/django-render-static/issues/26>`_
+* Fixed `Switch rtd theme to furo. <https://github.com/bckohan/django-routines/issues/27>`_
+* Fixed `Support python 3.13 <https://github.com/bckohan/django-routines/issues/26>`_
 
 v1.2.0 (2024-07-27)
 ===================

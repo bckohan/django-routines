@@ -5,6 +5,8 @@
 Django Routines
 ===============
 
+.. django-admin:: routine
+
 Configure batches of Django management commands in your settings files and run them all at once.
 For example, batch together your common database maintenance tasks, deployment routines or any
 other set of commands you need to run together. This helps single source general site maintenance
