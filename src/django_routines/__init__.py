@@ -17,7 +17,8 @@ r"""
 
 
 A simple Django app that allows you to specify batches of commands in your settings
-files and then run them in sequence by name using the provided ``routine`` command.
+files and then run them in sequence by name using the provided :django-admin:`routine`
+command.
 """
 
 import bisect
@@ -30,7 +31,7 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 5, 1)
+VERSION = (1, 6, 0)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
@@ -79,10 +80,15 @@ Function type signature for a pre-hook functions. Pre-hook functions can modify 
 objects (including their arguments) before they are run.
 
 :param routine: The routine being run.
+:type routine: :class:`django_routines.Routine`
 :param command: The command about to be run.
+:type command: :class:`django_routines.ManagementCommand` | :class:`django_routines.SystemCommand`
 :param previous: The previous command that was run (or None if at the beginning).
+:type previous: :class:`django_routines.ManagementCommand` | :class:`django_routines.SystemCommand`
 :param options: A dictionary containing the routine level options.
+:type options: typing.Dict[str, typing.Any]
 :return: Return true to skip the command.
+:rtype: typing.Optional[bool]
 """
 
 PostHook = _Hook
@@ -92,10 +98,15 @@ command objects (including their results) after they are run or the next command
 before it is run. Returning a truthy value will exit the routine early.
 
 :param routine: The routine being run.
+:type routine: :class:`django_routines.Routine`
 :param command: The command about to be run.
+:type command: :class:`django_routines.ManagementCommand` | :class:`django_routines.SystemCommand`
 :param next: The next command that will be run (or None if at the end).
+:type next: :class:`django_routines.ManagementCommand` | :class:`django_routines.SystemCommand`
 :param options: A dictionary containing the routine level options.
+:type options: typing.Dict[str, typing.Any]
 :return: Return true to exit the routine early.
+:rtype: typing.Optional[bool]
 """
 
 
@@ -391,7 +402,8 @@ def routine(
     :param post_hook: A function to run after each command in the routine is run if the
         command does not have its own post_hook. See :attr:`PostHook`
     :param switch_helps: A mapping of switch names to help text for the switches.
-    :raises: ImproperlyConfigured if the DJANGO_ROUTINES settings variable is not valid.
+    :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
+        :setting:`DJANGO_ROUTINES` settings variable is not valid.
     """
     settings = sys._getframe(1).f_globals
     if not settings.get(ROUTINE_SETTING, {}):
@@ -503,7 +515,8 @@ def command(
     :param pre_hook: A function to run before the command is run. See :attr:`PreHook`
     :param post_hook: A function to run after the command has been run. See
         :attr:`PostHook`
-    :raises: ImproperlyConfigured if the DJANGO_ROUTINES settings variable is not valid.
+    :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
+        :setting:`DJANGO_ROUTINES` settings variable is not valid.
     :return: The new command.
     """
     return _add_command(
@@ -543,7 +556,8 @@ def system(
     :param pre_hook: A function to run before the command is run. See :attr:`PreHook`
     :param post_hook: A function to run after the command has been run. See
         :attr:`PostHook`
-    :raises: ImproperlyConfigured if the DJANGO_ROUTINES settings variable is not valid.
+    :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
+        :setting:`DJANGO_ROUTINES` settings variable is not valid.
     :return: The new command.
     """
     return _add_command(
@@ -570,7 +584,8 @@ def get_routine(name: str) -> Routine:
     :return: The routine.
     :raises: KeyError if the routine does not exist, or routines have not been
         configured.
-    :raises: ImproperlyConfigured if the DJANGO_ROUTINES settings variable is not valid.
+    :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
+        :setting:`DJANGO_ROUTINES` settings variable is not valid.
     """
     from django.conf import settings
 
@@ -592,7 +607,8 @@ def routines() -> t.Generator[Routine, None, None]:
     """
     A generator that yields Routine objects from settings.
     :yield: Routine objects
-    :raises: ImproperlyConfigured if the DJANGO_ROUTINES settings variable is not valid.
+    :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
+        :setting:`DJANGO_ROUTINES` settings variable is not valid.
     """
     from django.conf import settings
 

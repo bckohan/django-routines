@@ -4,13 +4,13 @@
 Installation
 ============
 
-1. Clone django-routines from GitHub_ or install a release off PyPI_ :
+1. Install :pypi:`django-routines` from pypi or clone from GitHub_:
 
     .. code:: bash
 
         pip install django-routines
 
-    rich_ is a powerful library for rich text and beautiful formatting in the terminal.
+    :pypi:`rich` is a powerful library for rich text and beautiful formatting in the terminal.
     It is not required, but highly recommended for the best experience:
 
     .. code:: bash
@@ -18,7 +18,7 @@ Installation
         pip install "django-routines[rich]"
 
 
-2. Add ``django_routines`` to your ``INSTALLED_APPS`` setting:
+2. Add ``django_routines`` to your :setting:`INSTALLED_APPS` setting:
 
     .. code:: python
 
@@ -28,8 +28,11 @@ Installation
             'django_typer',  # optional!
         ]
 
-   *You only need to install* django-typer_ *as an app if you want to use the shellcompletion
-   command to* :doc:`enable tab-completion <django-typer:shell_completion>` *or if you would like*
-   django-typer_ *to install*
+   *You only need to install* :pypi:`django-typer` *as an app if you want to use the*
+   :django-admin:`shellcompletion` *command to*
+   :doc:`enable tab-completion <django-typer:shell_completion>` *or if you would like*
+   :pypi:`django-typer` *to install*
    :ref:`rich traceback rendering <django-typer:configure-rich-exception-tracebacks>`
    *for you - which it does by default if rich is also installed.*
+
+3. Create routines by adding them to the :setting:`DJANGO_ROUTINES` directive in your settings file.

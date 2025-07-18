@@ -38,7 +38,7 @@ In our settings file we may define these routines like this:
 The routine command will read our settings file and generate two subcommands, one called deploy
 and one called package:
 
-.. typer:: django_routines.management.commands.routine.Command:typer_app:package
+.. typer:: django-routines.management.commands.routine.Command:typer_app:package
     :prog: django-admin routine package
     :theme: dark
     :convert-png: latex
@@ -57,7 +57,7 @@ Now we can run all of our package routines with one command:
 
 The deploy command has several switches that we can enable to run additional commands.
 
-.. typer:: django_routines.management.commands.routine.Command:typer_app:deploy
+.. typer:: django-routines.management.commands.routine.Command:typer_app:deploy
     :prog: django-admin routine deploy
     :theme: dark
     :convert-png: latex
@@ -79,10 +79,10 @@ For example to deploy our demo on a new server we would run:
 
 :big:`Settings`
 
-The :class:`~django_routines.ManagementCommand` dataclass, :func:`~django_routines.routine` and
-:func:`~django_routines.command` helper functions in the example above make it easier for us to
+The :class:`~django-routines.ManagementCommand` dataclass, :func:`~django-routines.routine` and
+:func:`~django-routines.command` helper functions in the example above make it easier for us to
 work with the native configuration format which is a dictionary structure defined in the
-``DJANGO_ROUTINES`` setting attribute. For example the above configuration is equivalent to:
+:setting:`DJANGO-ROUTINES` setting attribute. For example the above configuration is equivalent to:
 
 .. literalinclude:: ../../examples/readme_dict.py
     :caption: settings.py
@@ -95,7 +95,7 @@ work with the native configuration format which is a dictionary structure define
 :big:`Priorities`
 
 If you are composing settings from multiple apps or source files using a utility like
-django-split-settings_ you may not be able to define all routines at once. You can use
+:pypi:`django-split-settings` you may not be able to define all routines at once. You can use
 priorities to make sure commands defined in a de-coupled way run in the correct order.
 
 .. code-block:: python
@@ -134,7 +134,7 @@ line.
 
 :big:`Pre/Post Hooks`
 
-:attr:`~django_routines.PreHook` and :attr:`~django_routines.PostHook` functions can be attached to
+:attr:`~django-routines.PreHook` and :attr:`~django-routines.PostHook` functions can be attached to
 routines and commands. These functions provide:
 
 - a way to execute arbitrary code before or after the routine or command execution.
@@ -150,9 +150,9 @@ When does it make sense to configure routines in Django settings? Its generally 
 common management pathways into easily discoverable and executable aggregations of subroutines.
 This is usually done in supporting shell scripts or just files and in most cases that is
 appropriate. If your goal is to keep your Django deployment as tight and self contained as possible
-and the deployment is not generally very complex, using django-routines can make a lot of sense. It
-can eliminate extra dependencies on a shell scripting environment or just files and can keep this
-logic packaged with your installable wheel.
+and the deployment is not generally very complex, using :pypi:`django-routines` can make a lot of
+sense. It can eliminate extra dependencies on a shell scripting environment or just files and can
+keep this logic packaged with your installable wheel.
 
 Django routines also encourages stronger command logic encapsulation. It allows complex workflows
 to be broken down into smaller, more manageable commands that can be attached and invoked together
@@ -163,5 +163,7 @@ as part of larger routines.
    :caption: Contents:
 
    installation
+   settings
+   signals
    reference
    changelog

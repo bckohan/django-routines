@@ -45,7 +45,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
-    "sphinxcontrib.typer"
+    "sphinxcontrib.typer",
+    'sphinx_tabs.tabs'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -90,13 +91,31 @@ intersphinx_mapping = {
         "https://docs.djangoproject.com/en/stable/_objects/",
     ),
     "django-typer": ("https://django-typer.readthedocs.io/en/stable", None),
+    "rich": ("https://rich.readthedocs.io/en/stable", None),
     "python": ('https://docs.python.org/3', None)
 }
 
+autodoc_default_options = {
+    'show-inheritance': True,
+    # Add other autodoc options here if desired, e.g.:
+    # 'members': True,
+    # 'inherited-members': True,
+}
+
+autodoc_member_order = 'bysource'
+
+def pypi_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    from docutils import nodes
+    url = f"https://pypi.org/project/{text}/"
+    node = nodes.reference(rawtext, text, refuri=url, **options)
+    return [node], []
+
 
 def setup(app):
+    from docutils.parsers.rst import roles
     # https://sphinxcontrib-typer.readthedocs.io/en/latest/howto.html#build-to-multiple-formats
     if Path(app.doctreedir).exists():
         shutil.rmtree(app.doctreedir)
     app.add_crossref_type(directivename="django-admin", rolename="django-admin")
+    roles.register_local_role('pypi', pypi_role)
     return app

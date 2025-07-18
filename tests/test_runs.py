@@ -29,9 +29,15 @@ class TestDeploy(TestCase):
         out = StringIO()
         err = StringIO()
         call_command(
-            "routine", "deploy", "--prepare", stdout=out, stderr=err, subprocess=True
+            "routine",
+            "deploy",
+            "--prepare",
+            stdout=out,
+            stderr=err,
+            subprocess=True,
+            manage_script="./manage.py",
         )
-        self.assertTrue(out.getvalue())
+        self.assertTrue(out.getvalue(), err.getvalue())
         self.assertTrue(
             "makemigrations" in out.getvalue()
             and "migrate" in out.getvalue()

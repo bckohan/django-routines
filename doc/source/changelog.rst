@@ -2,7 +2,14 @@
 Change Log
 ==========
 
-v1.5.1 (2025-07-27)
+v1.6.0 (2025-07-17)
+===================
+
+* Fixed `--subprocess,--atomic, and --continue options not working <https://github.com/bckohan/django-routines/issues/49>`_
+* Implemented `Add signals for routine started/ended. <https://github.com/bckohan/django-routines/issues/45>`_
+* Fixed `KeyError catch can hide errors and produce misleading statements <https://github.com/bckohan/django-routines/issues/44>`_
+
+v1.5.1 (2025-07-17)
 ===================
 
 * Docs `Use django-admin role for command references. <https://github.com/bckohan/django-routines/issues/48>`_

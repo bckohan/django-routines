@@ -13,10 +13,16 @@ Reference
    :show-inheritance:
    :inherited-members:
 
+exceptions
+----------
+
+.. automodule:: django_routines.exceptions
+    :members:
+    :show-inheritance:
+
 routine command
 ---------------
 
 .. automodule:: django_routines.management.commands.routine
     :members:
     :show-inheritance:
-

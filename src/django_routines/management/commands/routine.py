@@ -30,15 +30,8 @@ from django_routines import (
     to_cli_option,
     to_symbol,
 )
-
-
-class _ExitEarly(Exception):
-    """
-    Exception to raise to exit the routine early.
-    """
-
-    pass
-
+from django_routines.exceptions import ExitEarly
+from django_routines.signals import routine_failed, routine_finished, routine_started
 
 RCommand = t.Union[ManagementCommand, SystemCommand]
 
@@ -66,39 +59,27 @@ def {routine_func}(
     }}
     self.switches = []
     {add_switches}
-    subprocess = subprocess if (
-        ctx.get_parameter_source("subprocess")
-        is not click.core.ParameterSource.DEFAULT
-    ) else None
-    atomic = atomic if (
-        ctx.get_parameter_source("atomic")
-        is not click.core.ParameterSource.DEFAULT
-    ) else None
-    continue_on_error = continue_on_error if (
-        ctx.get_parameter_source("continue_on_error")
-        is not click.core.ParameterSource.DEFAULT
-    ) else None
     if not ctx.invoked_subcommand:
         return self._run_routine(
             subprocess=subprocess,
             atomic=atomic,
             continue_on_error=continue_on_error
-        )
+       )
     return self.{routine_func}
 """
 
 
 class Command(TyperCommand, rich_markup_mode="rich"):
     """
-    A :class:`~django_typer.management.TyperCommand` that reads the DJANGO_ROUTINES
-    setting from settings and builds out a set of subcommands for each routine that when
-    invoked will run those routines in order. Each routine also has a subcommand called
-    ``list`` that prints which commands will be executed and in what order given the
-    switches the user has selected.
+    A :class:`~django_typer.management.TyperCommand` that reads the
+    :setting:`DJANGO_ROUTINES` setting from settings and builds out a set of subcommands
+    for each routine that when invoked will run those routines in order. Each routine
+    also has a subcommand called ``list`` that prints which commands will be executed
+    and in what order given the switches the user has selected.
 
     .. note::
 
-        If --verbosity is supplied, the value will be passed via options to any
+        If :option:`--verbosity` is supplied, the value will be passed via options to any
         command in the routine that accepts it.
     """
 
@@ -106,6 +87,9 @@ class Command(TyperCommand, rich_markup_mode="rich"):
 
     verbosity: int = 1
     switches: t.Set[str] = set()
+    """
+    The set of active switches for this routine run.
+    """
 
     suppressed_base_arguments = set()
 
@@ -119,6 +103,9 @@ class Command(TyperCommand, rich_markup_mode="rich"):
 
     @property
     def routine(self) -> t.Optional[Routine]:
+        """
+        The routine this command instance was created to run.
+        """
         return self._routine
 
     @routine.setter
@@ -186,69 +173,131 @@ class Command(TyperCommand, rich_markup_mode="rich"):
             if continue_on_error is not None
             else self.routine.continue_on_error
         )
+        cli_options = {
+            **self._routine_options,
+            # we pass the resolved version of these options below
+            # these will be based on the defaults for the routine if unspecified on the
+            # CLI
+            "subprocess": subprocess,
+            "atomic": is_atomic,
+            "continue_on_error": continue_on_error,
+        }
+        routine_started.send(sender=self, routine=self.routine.name, **cli_options)
+
         ctx = transaction.atomic if is_atomic else noop
         with ctx():  # type: ignore
             plan = self.plan
+            last = None
             for idx, command in enumerate(plan):
                 nxt = plan[idx + 1] if idx < len(plan) - 1 else None
                 try:
-                    if isinstance(command, SystemCommand) or subprocess:
-                        self._subprocess(command, nxt=nxt)
-                    else:
-                        self._call_command(command, nxt=nxt)
-                except _ExitEarly:
+                    try:
+                        if isinstance(command, SystemCommand) or subprocess:
+                            was_run = self._subprocess(command, nxt=nxt) is not None
+                        else:
+                            was_run = self._call_command(command, nxt=nxt)
+                        last = idx if was_run else last
+                    except ExitEarly:
+                        raise
+                    except Exception as routine_exc:
+                        if not continue_on_error:
+                            if any(
+                                ret
+                                for _, ret in routine_failed.send(
+                                    sender=self,
+                                    routine=self.routine.name,
+                                    failed_command=idx,
+                                    exception=routine_exc,
+                                    **cli_options,
+                                )
+                            ):
+                                continue
+                            raise routine_exc
+                except ExitEarly:
+                    routine_finished.send(
+                        sender=self,
+                        routine=self.routine.name,
+                        early_exit=True,
+                        last_command=idx,
+                        **cli_options,
+                    )
                     return
-                except Exception as e:
-                    if not continue_on_error:
-                        raise e
+        routine_finished.send(
+            sender=self,
+            routine=self.routine.name,
+            early_exit=False,
+            last_command=last,
+            **cli_options,
+        )
 
-    def _call_command(self, command: ManagementCommand, nxt: t.Optional[RCommand]):
-        assert self.routine
-        try:
-            if command.pre_hook:
-                if command.pre_hook(
-                    self.routine, command, self._previous_command, self._routine_options
-                ):
-                    return
-            self._previous_command = command
-            cmd = get_command(
-                command.command_name,
-                BaseCommand,
-                stdout=t.cast(t.IO[str], self.stdout._out),
-                stderr=t.cast(t.IO[str], self.stderr._out),
-                force_color=self.force_color,
-                no_color=self.no_color,
-            )
-            options = command.options
-            if (
-                self._pass_verbosity
-                and not any(
-                    "verbosity" in arg
-                    for arg in getattr(cmd, "suppressed_base_arguments", [])
-                )
-                and not any("--verbosity" in arg for arg in command.command_args)
-            ):
-                # only pass verbosity if it was passed to routines, not suppressed
-                # by the command class and not passed by the configured command
-                options = {"verbosity": self.verbosity, **options}
-            if self.verbosity > 0:
-                self.secho(command.command_str, fg="cyan")
-            command.result = call_command(cmd, *command.command_args, **options)
-            if command.command_name == "makemigrations":
-                importlib.invalidate_caches()
-            if command.post_hook:
-                if command.post_hook(self.routine, command, nxt, self._routine_options):
-                    raise _ExitEarly()
-        except KeyError as err:
-            raise CommandError(f"Command not found: {command.command_name}") from err
+    def _call_command(
+        self, command: ManagementCommand, nxt: t.Optional[RCommand]
+    ) -> bool:
+        """
+        Call a management command with the given options and arguments. If the command
+        has a pre_hook, it will be called before the command is run. If the pre
+        hook returns a truthy value, the command will not be run. If the command has a
+        post_hook, it will be called after the command is run. If the post hook returns
+        a truthy value, the routine will exit early.
 
-    def _subprocess(self, command: RCommand, nxt: t.Optional[RCommand]) -> int:
+        :return: True if the command was run, False if it was skipped due to pre_hook.
+        """
         assert self.routine
         if command.pre_hook:
             if command.pre_hook(
                 self.routine, command, self._previous_command, self._routine_options
             ):
-                return 0
+                return False
+        self._previous_command = command
+        cmd = get_command(
+            command.command_name,
+            BaseCommand,
+            stdout=t.cast(t.IO[str], self.stdout._out),
+            stderr=t.cast(t.IO[str], self.stderr._out),
+            force_color=self.force_color,
+            no_color=self.no_color,
+        )
+        options = command.options
+        if (
+            self._pass_verbosity
+            and not any(
+                "verbosity" in arg
+                for arg in getattr(cmd, "suppressed_base_arguments", [])
+            )
+            and not any("--verbosity" in arg for arg in command.command_args)
+        ):
+            # only pass verbosity if it was passed to routines, not suppressed
+            # by the command class and not passed by the configured command
+            options = {"verbosity": self.verbosity, **options}
+        if self.verbosity > 0:
+            self.secho(command.command_str, fg="cyan")
+        command.result = call_command(cmd, *command.command_args, **options)
+        if command.command_name == "makemigrations":
+            importlib.invalidate_caches()
+        if command.post_hook:
+            if command.post_hook(self.routine, command, nxt, self._routine_options):
+                raise ExitEarly()
+        return True
+
+    def _subprocess(
+        self, command: RCommand, nxt: t.Optional[RCommand]
+    ) -> t.Optional[int]:
+        """
+        Run a system command as a subprocess. If the command has a pre_hook, it will
+        be called before the command is run. If the pre hook returns a truthy value,
+        the command will not be run. If the command has a post_hook, it will be
+        called after the command is run. If the post hook returns a truthy value, the
+        routine will exit early.
+
+        :return: The return code of the command if it was run, None if it was skipped
+            due to pre_hook.
+        """
+        assert self.routine
+        if command.pre_hook:
+            if command.pre_hook(
+                self.routine, command, self._previous_command, self._routine_options
+            ):
+                return None
         self._previous_command = command
         options = []
         if isinstance(command, ManagementCommand):
@@ -309,12 +358,12 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         if command.result.returncode > 0:
             raise CommandError(
                 _(
-                    "Subprocess command failed: {command} with return code {code}"
+                    "Subprocess command failed: {command} with return code {code}."
                 ).format(command=" ".join(args), code=command.result.returncode)
             )
         if command.post_hook:
             if command.post_hook(self.routine, command, nxt, self._routine_options):
-                raise _ExitEarly()
+                raise ExitEarly()
         return command.result.returncode
 
     def _list(self) -> None:
