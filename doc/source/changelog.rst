@@ -17,7 +17,7 @@ v1.6.0 (2025-07-17)
             {"command": ("touch", "/var/www/site/wsgi.py"), "kind": "system"},
 
             # the above will still work but should be rewritten as:
-            
+
             {"management": ("migrate"),}
             {"system": ("touch", "/var/www/site/wsgi.py")},
         ]
