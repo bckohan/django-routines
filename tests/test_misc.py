@@ -140,10 +140,12 @@ def test_command_spec():
 
     import_routine = list(routines(scope=globals()))[0]
     assert import_routine.name == "import"
+    assert import_routine.commands[0].management[0] == "track"
     assert import_routine.commands[-1].command[0] == "python"
     assert isinstance(import_routine.commands[-1], SystemCommand)
     assert import_routine.commands[-2].command[0] == "python"
     assert isinstance(import_routine.commands[-2], SystemCommand)
+    assert import_routine.commands[-2].system[0] == "python"
 
 
 class KeyErrorTest(TestCase):
