@@ -25,11 +25,10 @@ import bisect
 import keyword
 import sys
 import typing as t
-from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.functional import Promise, classproperty
+from django.utils.functional import Promise
 
 VERSION = (1, 6, 0)
 
@@ -128,7 +127,7 @@ def to_cli_option(name: str) -> str:
 
 
 @dataclass
-class _RoutineCommand(ABC):
+class _RoutineCommand:
     """
     A base Dataclass to hold the routine command information.
     """
@@ -176,14 +175,12 @@ class _RoutineCommand(ABC):
     object if the command was run in a subprocess.
     """
 
+    kind: t.ClassVar[str]
+    """The kind of this command (i.e. management or system)."""
+
     def __post_init__(self):
         self.switches = tuple([to_symbol(switch) for switch in self.switches])
         assert self.command, f"`{self.kind}` must be set for {self.__class__.__name__}."
-
-    @classproperty
-    @abstractmethod
-    def kind(cls) -> str:
-        """The kind of this command (i.e. management or system)."""
 
     @property
     def command_name(self) -> str:
@@ -204,8 +201,9 @@ class _RoutineCommand(ABC):
         """
         if isinstance(obj, dict):
             cmd_cls: CommandTypes = ManagementCommand
+            command_types: t.List[CommandTypes] = [ManagementCommand, SystemCommand]
             kind = obj.get("kind", None)
-            for ct in [ManagementCommand, SystemCommand]:
+            for ct in command_types:
                 if ct.kind in obj:
                     cmd_cls = ct
                     break
@@ -250,9 +248,7 @@ class ManagementCommand(_RoutineCommand):
     :func:`~django.core.management.call_command`. Not valid for SystemCommands
     """
 
-    @classproperty
-    def kind(cls) -> str:
-        return "management"
+    kind: t.ClassVar[str] = "management"
 
 
 # this alias is for backwards compat and will be removed in 2.0
@@ -278,9 +274,7 @@ class SystemCommand(_RoutineCommand):
     would pass to the `args` :func:`~django.core.management.call_command`.
     """
 
-    @classproperty
-    def kind(cls) -> str:
-        return "system"
+    kind: t.ClassVar[str] = "system"
 
 
 def _insort_right_with_key(a: t.List[R], x: R, key: t.Callable[[R], t.Any]) -> None:
