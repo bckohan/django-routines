@@ -732,8 +732,7 @@ Commands:
             {
                 "commands": [
                     {
-                        "command": ("track", "0"),
-                        "kind": "management",
+                        "management": ("track", "0"),
                         "options": {},
                         "pre_hook": None,
                         "post_hook": None,
@@ -742,8 +741,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("does_not_exist",),
-                        "kind": "management",
+                        "management": ("does_not_exist",),
                         "options": {},
                         "pre_hook": None,
                         "post_hook": None,
@@ -752,8 +750,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "1"),
-                        "kind": "management",
+                        "management": ("track", "1"),
                         "options": {},
                         "pre_hook": None,
                         "post_hook": None,
@@ -777,8 +774,7 @@ Commands:
             {
                 "commands": [
                     {
-                        "command": ("makemigrations",),
-                        "kind": "management",
+                        "management": ("makemigrations",),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -787,8 +783,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("migrate",),
-                        "kind": "management",
+                        "management": ("migrate",),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -797,8 +792,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("renderstatic",),
-                        "kind": "management",
+                        "management": ("renderstatic",),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -807,8 +801,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": "collectstatic",
-                        "kind": "management",
+                        "management": "collectstatic",
                         "options": {"interactive": False},
                         "priority": 0,
                         "pre_hook": None,
@@ -817,8 +810,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("shellcompletion", "install"),
-                        "kind": "management",
+                        "management": ("shellcompletion", "install"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -827,8 +819,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("loaddata", "./fixtures/initial_data.json"),
-                        "kind": "management",
+                        "management": ("loaddata", "./fixtures/initial_data.json"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -855,8 +846,7 @@ Commands:
             {
                 "commands": [
                     {
-                        "command": ("track", "2"),
-                        "kind": "management",
+                        "management": ("track", "2"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -865,8 +855,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "0"),
-                        "kind": "management",
+                        "management": ("track", "0"),
                         "options": {"verbosity": 0},
                         "priority": 1,
                         "pre_hook": None,
@@ -875,8 +864,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "3"),
-                        "kind": "management",
+                        "management": ("track", "3"),
                         "options": {"demo": 2},
                         "priority": 3,
                         "pre_hook": None,
@@ -885,8 +873,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "4"),
-                        "kind": "management",
+                        "management": ("track", "4"),
                         "options": {"demo": 6, "flag": True},
                         "priority": 3,
                         "pre_hook": None,
@@ -895,8 +882,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "1"),
-                        "kind": "management",
+                        "management": ("track", "1"),
                         "options": {},
                         "priority": 4,
                         "pre_hook": None,
@@ -905,8 +891,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "5"),
-                        "kind": "management",
+                        "management": ("track", "5"),
                         "options": {},
                         "priority": 6,
                         "pre_hook": None,
@@ -915,8 +900,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("python", f"tests{os.sep}system_cmd.py", "sys 1"),
-                        "kind": "system",
+                        "system": ("python", f"tests{os.sep}system_cmd.py", "sys 1"),
                         "priority": 7,
                         "pre_hook": None,
                         "post_hook": None,
@@ -924,8 +908,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("python", f"tests{os.sep}system_cmd.py", "sys 2"),
-                        "kind": "system",
+                        "system": ("python", f"tests{os.sep}system_cmd.py", "sys 2"),
                         "priority": 8,
                         "pre_hook": None,
                         "post_hook": None,
@@ -948,8 +931,7 @@ Commands:
             {
                 "commands": [
                     {
-                        "command": ("track", "1"),
-                        "kind": "management",
+                        "management": ("track", "1"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -958,8 +940,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "2"),
-                        "kind": "management",
+                        "management": ("track", "2"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -968,8 +949,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "3"),
-                        "kind": "management",
+                        "management": ("track", "3"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -978,8 +958,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "4"),
-                        "kind": "management",
+                        "management": ("track", "4"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,
@@ -988,8 +967,7 @@ Commands:
                         "result": None,
                     },
                     {
-                        "command": ("track", "5"),
-                        "kind": "management",
+                        "management": ("track", "5"),
                         "options": {},
                         "priority": 0,
                         "pre_hook": None,

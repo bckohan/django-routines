@@ -78,6 +78,74 @@ def mult_result_by_4(command: Command):
         command.result = int(result) * 4
 
 
+@override_settings(DJANGO_ROUTINES={})
+def test_command_spec():
+    import os
+    from pathlib import Path
+    from django_routines import (
+        routine,
+        command,
+        system,
+        ManagementCommand,
+        _RoutineCommand,
+        SystemCommand,
+        Routine,
+        routines,
+        get_routine,
+    )
+    from tests import system_cmd
+
+    system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
+
+    command("import", "track", "2", priority=0, switches=("import", "demo"))
+    routine(
+        "import",
+        "Test Routine 1",
+        ManagementCommand(
+            ("track", "0"), priority=1, switches=("import",), options={"verbosity": 0}
+        ),
+        ManagementCommand(("track", "1"), priority=4),
+        SystemCommand((*system_cmd, "sys 2"), priority=8),
+    )
+
+    command("import", "track", "3", priority=3, demo=2)
+    command("import", "track", "4", priority=3, demo=6, flag=True)
+    command("import", "track", "5", priority=6, switches=["demo"])
+    system("import", *system_cmd, "sys 1", priority=7)
+
+    import_routine = globals()["DJANGO_ROUTINES"]["import"]
+    assert import_routine["commands"][-1].get("system")[0] == "python"
+    assert import_routine["commands"][-2].get("system")[0] == "python"
+
+    assert "system" in import_routine["commands"][-1]
+    assert "system" in import_routine["commands"][-2]
+
+    _RoutineCommand.from_dict(import_routine["commands"][-1])
+    assert "system" in import_routine["commands"][-2]
+    assert "system" in import_routine["commands"][-1]
+
+    import_routine = get_routine("import", scope=globals())
+
+    assert import_routine.name == "import"
+    assert import_routine.commands[-1].command[0] == "python"
+    assert isinstance(import_routine.commands[-1], SystemCommand)
+    assert import_routine.commands[-2].command[0] == "python"
+    assert isinstance(import_routine.commands[-2], SystemCommand)
+
+    import_routine = globals()["DJANGO_ROUTINES"]["import"]
+    assert "system" in import_routine["commands"][-1]
+    assert "system" in import_routine["commands"][-2]
+    assert "command" not in import_routine["commands"][-1]
+    assert "command" not in import_routine["commands"][-2]
+
+    import_routine = list(routines(scope=globals()))[0]
+    assert import_routine.name == "import"
+    assert import_routine.commands[-1].command[0] == "python"
+    assert isinstance(import_routine.commands[-1], SystemCommand)
+    assert import_routine.commands[-2].command[0] == "python"
+    assert isinstance(import_routine.commands[-2], SystemCommand)
+
+
 class KeyErrorTest(TestCase):
     """
     https://github.com/bckohan/django-routines/issues/44

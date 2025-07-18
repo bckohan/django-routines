@@ -31,7 +31,7 @@ Example:
         .. literalinclude:: ../../examples/readme.py
             :caption: settings.py
             :linenos:
-            :lines: 2-42
+            :lines: 2-41
 
 
 Configuration Reference

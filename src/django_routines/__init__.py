@@ -29,7 +29,7 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.functional import Promise
+from django.utils.functional import Promise, classproperty
 
 VERSION = (1, 6, 0)
 
@@ -137,6 +137,9 @@ class _RoutineCommand(ABC):
     """
     The command and its arguments to run the routine, all strings or
     coercible to strings that the command will parse correctly.
+
+    This should be what you would pass to the `args`
+    :func:`~django.core.management.call_command` or :func:`subprocess.run`
     """
 
     priority: int = 0
@@ -175,10 +178,11 @@ class _RoutineCommand(ABC):
 
     def __post_init__(self):
         self.switches = tuple([to_symbol(switch) for switch in self.switches])
+        assert self.command, f"`{self.kind}` must be set for {self.__class__.__name__}."
 
-    @property
+    @classproperty
     @abstractmethod
-    def kind(self) -> str:
+    def kind(cls) -> str:
         """The kind of this command (i.e. management or system)."""
 
     @property
@@ -194,22 +198,37 @@ class _RoutineCommand(ABC):
         return self.command if isinstance(self.command, str) else " ".join(self.command)
 
     @classmethod
-    def from_dict(
-        cls,
-        obj: t.Union[Command, t.Dict[str, t.Any]],
-    ) -> Command:
+    def from_dict(cls, obj: t.Union[Command, t.Dict[str, t.Any]]) -> Command:
         """
         Return a RoutineCommand object from a dictionary representing it.
         """
         if isinstance(obj, dict):
             cmd_cls: CommandTypes = ManagementCommand
-            if obj.get("kind", None) == "system":
-                cmd_cls = SystemCommand
-            return cmd_cls(**{k: v for k, v in obj.items() if k != "kind"})
+            kind = obj.get("kind", None)
+            for ct in [ManagementCommand, SystemCommand]:
+                if ct.kind in obj:
+                    cmd_cls = ct
+                    break
+                elif kind and ct.kind == kind:
+                    # deprecated, but still supported
+                    cmd_cls = ct
+                    break
+
+            return cmd_cls(
+                obj.get(cmd_cls.kind, obj.get("command", "")),
+                **{
+                    k: v
+                    for k, v in obj.items()
+                    if k not in {cmd_cls.kind, "command", "kind"}
+                },
+            )
         return obj
 
     def to_dict(self) -> t.Dict[str, t.Any]:
-        return {**asdict(self), "kind": self.kind}
+        return {
+            self.kind: self.command,
+            **{k: v for k, v in asdict(self).items() if k != "command"},
+        }
 
 
 @dataclass
@@ -218,14 +237,21 @@ class ManagementCommand(_RoutineCommand):
     A RoutineCommand that holds a information for invoking a management command.
     """
 
+    @property
+    def management(self) -> t.Union[str, t.Tuple[str, ...]]:
+        """
+        Alias for :attr:`~django_routines.RoutineCommand.command`.
+        """
+        return self.command
+
     options: t.Dict[str, t.Any] = field(default_factory=dict)
     """
     Any options to pass to the command via
     :func:`~django.core.management.call_command`. Not valid for SystemCommands
     """
 
-    @property
-    def kind(self) -> str:
+    @classproperty
+    def kind(cls) -> str:
         return "management"
 
 
@@ -240,7 +266,20 @@ class SystemCommand(_RoutineCommand):
     """
 
     @property
-    def kind(self) -> str:
+    def system(self) -> t.Union[str, t.Tuple[str, ...]]:
+        """
+        Alias for :attr:`~django_routines.RoutineCommand.command`.
+        """
+        return self.command
+
+    """
+    The system command and its arguments to run the routine, all strings or
+    coercible to strings that the command will parse correctly. This should be what you
+    would pass to the `args` :func:`~django.core.management.call_command`.
+    """
+
+    @classproperty
+    def kind(cls) -> str:
         return "system"
 
 
@@ -421,7 +460,7 @@ def routine(
 
     existing: t.List[Command] = []
     try:
-        routine = get_routine(name)
+        routine = get_routine(name, scope=settings)
         help_text = (
             help_text
             # don't trigger translation - we're in settings!
@@ -581,7 +620,7 @@ def system(
     )
 
 
-def get_routine(name: str) -> Routine:
+def get_routine(name: str, scope=None) -> Routine:
     """
     Get the routine by name.
 
@@ -600,9 +639,11 @@ def get_routine(name: str) -> Routine:
     from django.conf import settings
 
     try:
-        if not settings.configured:
-            Routine.from_dict(
-                _get_routine(name, sys._getframe(1).f_globals.get(ROUTINE_SETTING, {}))
+        if scope or not settings.configured:
+            return Routine.from_dict(
+                _get_routine(
+                    name, (scope or sys._getframe(1).f_globals).get(ROUTINE_SETTING, {})
+                )
             )
         return Routine.from_dict(
             _get_routine(name, getattr(settings, ROUTINE_SETTING, {}))
@@ -613,9 +654,10 @@ def get_routine(name: str) -> Routine:
         ) from err
 
 
-def routines() -> t.Generator[Routine, None, None]:
+def routines(scope=None) -> t.Generator[Routine, None, None]:
     """
     A generator that yields Routine objects from settings.
+
     :yield: Routine objects
     :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
         :setting:`DJANGO_ROUTINES` settings variable is not valid.
@@ -623,8 +665,8 @@ def routines() -> t.Generator[Routine, None, None]:
     from django.conf import settings
 
     routines = (
-        sys._getframe(1).f_globals.get(ROUTINE_SETTING, {})
-        if not settings.configured
+        (scope or sys._getframe(1).f_globals).get(ROUTINE_SETTING, {})
+        if scope or not settings.configured
         else getattr(settings, ROUTINE_SETTING, {})
     ) or {}
     for name, routine in routines.items():

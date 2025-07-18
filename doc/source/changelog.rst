@@ -5,6 +5,23 @@ Change Log
 v1.6.0 (2025-07-17)
 ===================
 
+* Implemented `Deprecate "kind" in favor of "management" vs "system" <https://github.com/bckohan/django-routines/issues/50>`_
+
+  The ``kind`` key is deprecated and should now be used as the ``command`` key in place of
+  ``command``. For example:
+
+    .. code-block:: python
+
+        "commands": [
+            {"command": ("migrate"), "kind": "management"},
+            {"command": ("touch", "/var/www/site/wsgi.py"), "kind": "system"},
+
+            # the above will still work but should be rewritten as:
+            
+            {"management": ("migrate"),}
+            {"system": ("touch", "/var/www/site/wsgi.py")},
+        ]
+
 * Fixed `--subprocess,--atomic, and --continue options not working <https://github.com/bckohan/django-routines/issues/49>`_
 * Implemented `Add signals for routine started/ended. <https://github.com/bckohan/django-routines/issues/45>`_
 * Fixed `KeyError catch can hide errors and produce misleading statements <https://github.com/bckohan/django-routines/issues/44>`_
