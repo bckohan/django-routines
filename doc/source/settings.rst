@@ -31,4 +31,42 @@ Example:
         .. literalinclude:: ../../examples/readme.py
             :caption: settings.py
             :linenos:
-            :lines: 2-39
+            :lines: 2-42
+
+
+Configuration Reference
+=======================
+
+Database Configuration
+-----------------------
+
+.. py:data:: config['database']
+   :type: dict
+
+   Database connection settings.
+
+   .. py:attribute:: host
+      :type: str
+
+      Database hostname or IP address.
+
+   .. py:attribute:: port
+      :type: int
+      :value: 5432
+
+      Database port number.
+
+   .. py:attribute:: credentials
+      :type: dict
+
+      Authentication credentials.
+
+      .. py:attribute:: username
+         :type: str
+
+         Database username.
+
+      .. py:attribute:: password
+         :type: str
+
+         Database password.

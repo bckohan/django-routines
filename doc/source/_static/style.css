@@ -2,3 +2,15 @@
     font-size: 24px;  /* Or any size you prefer */
     font-weight: bold; /* If you want it bold */
 }
+
+section#reference div.highlight pre {
+    color: #b30000;
+    background-color: #f8f8f8;
+    display: block;           /* ensures it's treated as a block */
+    margin-left: auto;        /* auto margins center block elements */
+    margin-right: auto;
+    width: fit-content;
+}
+body[data-theme="dark"] section#reference div.highlight pre {
+  background-color: #202020;
+}

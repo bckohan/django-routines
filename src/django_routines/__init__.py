@@ -79,6 +79,9 @@ PreHook = _Hook
 Function type signature for a pre-hook functions. Pre-hook functions can modify command
 objects (including their arguments) before they are run.
 
+**Signature:**
+``(routine, command, previous, options) -> bool | None``
+
 :param routine: The routine being run.
 :type routine: :class:`django_routines.Routine`
 :param command: The command about to be run.
@@ -96,6 +99,9 @@ PostHook = _Hook
 Function type signature for a post-hook functions. Post-hook functions can modify
 command objects (including their results) after they are run or the next command
 before it is run. Returning a truthy value will exit the routine early.
+
+**Signature:**
+``(routine, command, next, options) -> bool | None``
 
 :param routine: The routine being run.
 :type routine: :class:`django_routines.Routine`
@@ -208,6 +214,10 @@ class _RoutineCommand(ABC):
 
 @dataclass
 class ManagementCommand(_RoutineCommand):
+    """
+    A RoutineCommand that holds a information for invoking a management command.
+    """
+
     options: t.Dict[str, t.Any] = field(default_factory=dict)
     """
     Any options to pass to the command via
@@ -582,7 +592,7 @@ def get_routine(name: str) -> Routine:
 
     :param name: The name of the routine to get.
     :return: The routine.
-    :raises: KeyError if the routine does not exist, or routines have not been
+    :raises: :exc:`KeyError` if the routine does not exist, or routines have not been
         configured.
     :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
         :setting:`DJANGO_ROUTINES` settings variable is not valid.

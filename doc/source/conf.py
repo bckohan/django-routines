@@ -101,8 +101,12 @@ autodoc_default_options = {
     # 'members': True,
     # 'inherited-members': True,
 }
-
+# In your Sphinx conf.py
+autodoc_typehints = "description"
+autodoc_typehints_format = "short"
+autodoc_class_signature = "separated"
 autodoc_member_order = 'bysource'
+
 
 def pypi_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     from docutils import nodes
