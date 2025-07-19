@@ -244,8 +244,8 @@ class ManagementCommand(_RoutineCommand):
 
     options: t.Dict[str, t.Any] = field(default_factory=dict)
     """
-    Any options to pass to the command via
-    :func:`~django.core.management.call_command`. Not valid for SystemCommands
+    Any options to pass to the command via :func:`~django.core.management.call_command`.
+    **Not valid for SystemCommands**
     """
 
     kind: t.ClassVar[str] = "management"
@@ -303,7 +303,8 @@ class Routine:
 
     help_text: t.Union[str, Promise]
     """
-    The help text to display for the routine.
+    The help text to display for the routine. May be a string wrapped by
+    :func:`~django.utils.translation.gettext_lazy`
     """
 
     commands: t.List[Command] = field(default_factory=list)
@@ -312,6 +313,10 @@ class Routine:
     """
 
     switch_helps: t.Dict[str, t.Union[str, Promise]] = field(default_factory=dict)
+    """
+    Help text for switches. The keys are the switch names, and the values are the help
+    text to display for each switch in the CLI help output.
+    """
 
     subprocess: bool = False
     """
@@ -331,16 +336,16 @@ class Routine:
     pre_hook: t.Optional[PreHook] = None
     """
     This function will be run before each command that lacks its own pre_hook in the
-    routine. See :attr:`PreHook`. You can determine if this is the starting command
-    of the routine by checking if the previous command is None.
+    routine. See :attr:`~django_routines.PreHook`. You can determine if this is the
+    starting command of the routine by checking if the previous command is None.
     """
 
     post_hook: t.Optional[PostHook] = None
     """
     This function will be run after each command that lacks its own post_hook in the
-    routine. See :attr:`PostHook`. You can determine if this is the last command of the
-    routine by checking if the next command is None. Post hooks may also be used to
-    exit the routine early by returning True.
+    routine. See :attr:`~django_routines.PostHook`. You can determine if this is the
+    last command of the routine by checking if the next command is None. Post hooks may
+    also be used to exit the routine early by returning True.
     """
 
     def __post_init__(self):
@@ -483,19 +488,30 @@ def routine(
     settings[ROUTINE_SETTING][routine.name] = routine.to_dict()
 
 
-def _get_routine(routine_name: str, routines: t.Dict[str, t.Any]) -> Routine:
+def _get_routine(
+    routine_name: str, routines: t.Dict[str, t.Any]
+) -> t.Union[t.Dict[str, t.Any], Routine]:
     """
     Routine may undergo some normalization, we account for that here when trying
     to fetch them.
     """
+    routine = None
+    symbolized = to_symbol(routine_name)
     try:
-        routine_name = to_symbol(routine_name)
-        return routines[routine_name]
+        routine = routines[symbolized]
     except KeyError:
-        for name, routine in routines.items():
-            if to_symbol(name).lower() == routine_name.lower():
-                return routine
-        raise
+        for name, rt in routines.items():
+            if to_symbol(name).lower() == symbolized.lower():
+                routine = rt
+                break
+        if not routine:
+            raise
+    if isinstance(routine, Routine):
+        return routine
+
+    # add the name in, so users don't always have to specify it in the Routine
+    # dict
+    return {"name": routine_name, **routine}
 
 
 def _add_command(
@@ -665,7 +681,15 @@ def routines(scope=None) -> t.Generator[Routine, None, None]:
     ) or {}
     for name, routine in routines.items():
         try:
-            yield Routine.from_dict(routine)
+            if isinstance(routine, Routine):
+                yield routine
+            else:
+                yield Routine.from_dict(
+                    {
+                        "name": name,  # to_symbol(name).lower(),
+                        **routine,
+                    }
+                )
         except TypeError as err:
             raise ImproperlyConfigured(
                 f"{ROUTINE_SETTING} routine {name} is malformed."

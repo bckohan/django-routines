@@ -5,6 +5,7 @@ Change Log
 v1.6.0 (2025-07-17)
 ===================
 
+* Implemented `Should not require the name to be listed on the routine when specified as a dictionary. <https://github.com/bckohan/django-routines/issues/51>`_
 * Implemented `Deprecate "kind" in favor of "management" vs "system" <https://github.com/bckohan/django-routines/issues/50>`_
 
   The ``kind`` key is deprecated and should now be used as the ``command`` key in place of

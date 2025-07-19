@@ -1,7 +1,6 @@
 from django_typer.management import get_command
 from django.test import TestCase, override_settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.management import CommandError, call_command
 from django_routines import get_routine
 
 
@@ -16,11 +15,28 @@ class TestBadConfig(TestCase):
                 ],
                 "help_text": "Bad command test routine",
             },
+            # "hyphen-name": {
+            #     "commands": [
+            #         {"command": ("track", "0")},
+            #         {"command": ("does_not_exist",)},
+            #         {"command": ("track", "1")},
+            #     ],
+            #     "help_text": "Bad command test routine",
+            # },
+            # "CAP-name": {
+            #     "commands": [
+            #         {"command": ("track", "0")},
+            #         {"command": ("does_not_exist",)},
+            #         {"command": ("track", "1")},
+            #     ],
+            #     "help_text": "Bad command test routine",
+            # },
         }
     )
-    def test_malformed_routine(self):
-        with self.assertRaises(ImproperlyConfigured):
-            get_command("routine")
+    def test_no_name_given(self):
+        self.assertEqual(get_routine("no_name").name, "no_name")
+        # self.assertEqual(get_routine("hyphen-name").name, "hyphen-name")
+        # self.assertEqual(get_routine("CAP-name").name, "CAP-name")
 
     @override_settings(
         DJANGO_ROUTINES={

@@ -18,7 +18,6 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
                 {"command": ("track", "1")},
             ],
             "help_text": "Bad command test routine",
-            "name": "bad",
         },
         "deploy": {
             "commands": [
@@ -33,7 +32,6 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
                 },
             ],
             "help_text": "Deploy the site application into production.",
-            "name": "deploy",
             "switch_helps": {
                 "demo": "Deploy the demo.",
                 "prepare": "Prepare the deployment.",
@@ -64,7 +62,6 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
                 {"system": (*system_cmd, "sys 1"), "priority": 7},
             ],
             "help_text": "Test Routine 1",
-            "name": "import",
         },
         "test-hyphen": {
             "commands": [
@@ -81,14 +78,12 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
                 },
             ],
             "help_text": "Test that hyphens dont mess everything up.",
-            "name": "test-hyphen",
             "switch_helps": {
                 "hyphen-ok": "Test hyphen.",
                 "--hyphen-ok-prefix": "Test hyphen with -- prefix.",
             },
         },
         "atomic_pass": {
-            "name": "atomic_pass",
             "help_text": "Atomic test routine.",
             "commands": [
                 {
@@ -126,7 +121,6 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
             "continue_on_error": False,
         },
         "atomic_fail": {
-            "name": "atomic_fail",
             "help_text": "Atomic test routine failure.",
             "commands": [
                 {
@@ -164,7 +158,6 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
             "continue_on_error": False,
         },
         "test_continue": {
-            "name": "test_continue",
             "help_text": "Test continue option.",
             "commands": [
                 {
@@ -198,9 +191,11 @@ system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
 )
 class SettingsAsDictTests(CoreTests, TestCase):
     def test_settings_format(self):
-        routines = getattr(settings, ROUTINE_SETTING)
-        self.assertEqual(
-            routines,
+        from django_routines import routines
+
+        self.assertEqual(len(list(routines())), len(settings.DJANGO_ROUTINES))
+        self.assertDictEqual(
+            getattr(settings, ROUTINE_SETTING),
             {
                 "bad": {
                     "commands": [
@@ -209,7 +204,6 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         {"command": ("track", "1")},
                     ],
                     "help_text": "Bad command test routine",
-                    "name": "bad",
                 },
                 "deploy": {
                     "commands": [
@@ -227,7 +221,6 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         },
                     ],
                     "help_text": "Deploy the site application into production.",
-                    "name": "deploy",
                     "switch_helps": {
                         "demo": "Deploy the demo.",
                         "prepare": "Prepare the deployment.",
@@ -269,7 +262,6 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         },
                     ],
                     "help_text": "Test Routine 1",
-                    "name": "import",
                 },
                 "test-hyphen": {
                     "commands": [
@@ -286,14 +278,12 @@ class SettingsAsDictTests(CoreTests, TestCase):
                         },
                     ],
                     "help_text": "Test that hyphens dont mess everything up.",
-                    "name": "test-hyphen",
                     "switch_helps": {
                         "hyphen-ok": "Test hyphen.",
                         "--hyphen-ok-prefix": "Test hyphen with -- prefix.",
                     },
                 },
                 "atomic_pass": {
-                    "name": "atomic_pass",
                     "help_text": "Atomic test routine.",
                     "commands": [
                         {
@@ -331,7 +321,6 @@ class SettingsAsDictTests(CoreTests, TestCase):
                     "continue_on_error": False,
                 },
                 "atomic_fail": {
-                    "name": "atomic_fail",
                     "help_text": "Atomic test routine failure.",
                     "commands": [
                         {
@@ -369,7 +358,6 @@ class SettingsAsDictTests(CoreTests, TestCase):
                     "continue_on_error": False,
                 },
                 "test_continue": {
-                    "name": "test_continue",
                     "help_text": "Test continue option.",
                     "commands": [
                         {
