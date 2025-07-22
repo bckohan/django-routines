@@ -13,12 +13,9 @@ import typer
 from django.core.management import CommandError, call_command
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils.module_loading import import_string
 from django.utils.translation import gettext as _
-from django_typer.management import (
-    TyperCommand,
-    get_command,
-    initialize,
-)
+from django_typer.management import TyperCommand, finalize, get_command, initialize
 from django_typer.types import Verbosity
 
 from django_routines import (
@@ -77,8 +74,6 @@ def load_hook(hook: t.Union[str, Hook]) -> Hook:
     :raises: :exc:`ImportError` if the hook string cannot be imported.
     """
     if isinstance(hook, str):
-        from django.utils.module_loading import import_string
-
         return import_string(hook)
     return hook
 
@@ -162,6 +157,20 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         )
         self.manage_script = manage_script
 
+    @finalize()
+    def finished(self, results: t.List[t.Any]):
+        """
+        If we have a finalize callback defined, call it
+        with the results of the routine run.
+        """
+        assert self.routine
+        if self.routine.finalize:
+            (
+                import_string(self.routine.finalize)
+                if isinstance(self.routine.finalize, str)
+                else self.routine.finalize
+            )(self.routine, results)
+
     def _run_routine(
         self,
         subprocess: t.Optional[bool] = None,
@@ -202,6 +211,13 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         with ctx():  # type: ignore
             plan = self.plan
             last = None
+            if self.routine.initialize:
+                (
+                    import_string(self.routine.initialize)
+                    if isinstance(self.routine.initialize, str)
+                    else self.routine.initialize
+                )(self.routine, plan, self.switches, self._routine_options)
+
             for idx, command in enumerate(plan):
                 nxt = plan[idx + 1] if idx < len(plan) - 1 else None
                 try:

@@ -48,6 +48,8 @@ __all__ = [
     "get_routine",
     "routines",
     "Command",
+    "InitializeCallback",
+    "FinalizeCallback",
     "PreHook",
     "PostHook",
 ]
@@ -61,6 +63,52 @@ CommandTypes = t.Union[t.Type["ManagementCommand"], t.Type["SystemCommand"]]
 Command = t.Union["ManagementCommand", "SystemCommand"]
 """
 Command type, either a ManagementCommand or SystemCommand.
+"""
+
+InitializeCallback = t.Union[
+    str,
+    t.Callable[
+        [
+            "Routine",
+            t.List[t.Union["ManagementCommand", "SystemCommand"]],
+            t.Set[str],
+            t.Dict[str, t.Any],
+        ],
+        None,
+    ],
+]
+"""
+A callable or import string to a callable that will be run just before the routine's
+first command is run.
+
+**Signature:**
+``(routine, plan, switches, options) -> None``
+
+:param routine: The routine being run.
+:type routine: ~django_routines.Routine
+:param plan: The command execution order that will be run.
+:type plan: typing.List[typing.Union[~django_routines.ManagementCommand, ~django_routines.SystemCommand]]
+:param switches: The set of active switches for this routine run.
+:type switches: typing.Set[str]
+:param options: The routine level options.
+:type options: typing.Dict[str, typing.Any]
+"""
+
+FinalizeCallback = t.Union[str, t.Callable[["Routine", t.List[t.Any]], None]]
+"""
+A callable or import string to a callable that will be run just after the routine's
+last command is run. 
+
+See also :func:`django_typer.management.finalize`.
+
+**Signature:**
+``(routine, results) -> None``
+
+:param routine: An instance of the running routine command.
+:type routine:
+    :class:`RoutineCommand <django_routines.management.commands.routine.Command>`
+:param results: The results of the commands that were run in the routine.
+:type results: list
 """
 
 Hook = t.Callable[
@@ -162,7 +210,8 @@ class _RoutineCommand:
     pre_hook: t.Optional[PreHook] = None
     """
     A function that will be run before the command is run. It may make modifications
-    to the command or decide to skip the command by returning True. See :attr:`PreHook`
+    to the command or decide to skip the command by returning True. See
+    :attr:`~django_routines.PreHook`
 
     May be the callable function or an import string to the callable function.
     """
@@ -343,6 +392,22 @@ class Routine:
     Keep going if a command fails.
     """
 
+    initialize: t.Optional[InitializeCallback] = None
+    """
+    A function to run before the routine is run.
+    See :attr:`~django_routines.InitializeCallback`
+
+    May be the callable function or an import string to the callable function.
+    """
+
+    finalize: t.Optional[FinalizeCallback] = None
+    """
+    A function to run after the routine is run.
+    See :attr:`~django_routines.FinalizeCallback`
+
+    May be the callable function or an import string to the callable function.
+    """
+
     pre_hook: t.Optional[PreHook] = None
     """
     This function will be run before each command that lacks its own pre_hook in the
@@ -434,6 +499,8 @@ class Routine:
             "subprocess": self.subprocess,
             "atomic": self.atomic,
             "continue_on_error": self.continue_on_error,
+            "initialize": self.initialize,
+            "finalize": self.finalize,
             "pre_hook": self.pre_hook,
             "post_hook": self.post_hook,
         }
@@ -446,6 +513,8 @@ def routine(
     subprocess: bool = False,
     atomic: bool = False,
     continue_on_error: bool = False,
+    initialize: t.Optional[InitializeCallback] = None,
+    finalize: t.Optional[FinalizeCallback] = None,
     pre_hook: t.Optional[PreHook] = None,
     post_hook: t.Optional[PostHook] = None,
     **switch_helps,
@@ -459,10 +528,14 @@ def routine(
     :param subprocess: If true run each of the commands in a subprocess.
     :param atomic: Run all commands in the same transaction.
     :param continue_on_error: Keep going if a command fails.
+    :param initialize: A function to run before the routine is run.
+        See :attr:`~django_routines.InitializeCallback`
+    :param finalize: A function to run after the routine is run.
+        See :attr:`~django_routines.FinalizeCallback`
     :param pre_hook: A function to run before each command in the routine is run if the
-        command does not have its own pre_hook. See :attr:`PreHook`
+        command does not have its own pre_hook. See :attr:`~django_routines.PreHook`
     :param post_hook: A function to run after each command in the routine is run if the
-        command does not have its own post_hook. See :attr:`PostHook`
+        command does not have its own post_hook. See :attr:`~django_routines.PostHook`
     :param switch_helps: A mapping of switch names to help text for the switches.
     :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
         :setting:`DJANGO_ROUTINES` settings variable is not valid.
@@ -492,6 +565,8 @@ def routine(
         subprocess=subprocess,
         atomic=atomic,
         continue_on_error=continue_on_error,
+        initialize=initialize,
+        finalize=finalize,
         pre_hook=pre_hook,
         post_hook=post_hook,
     )
@@ -585,7 +660,7 @@ def command(
         or for all invocations of the routine if no switches are configured.
     :param options: t.Any options to pass to the command via
         :func:`~django.core.management.call_command`.
-    :param pre_hook: A function to run before the command is run. See :attr:`PreHook`
+    :param pre_hook: A function to run before the command is run. See :attr:`~django_routines.PreHook`
     :param post_hook: A function to run after the command has been run. See
         :attr:`PostHook`
     :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
@@ -626,7 +701,7 @@ def system(
         in insertion order (defaults to zero).
     :param switches: The command will run only when one of these switches is active,
         or for all invocations of the routine if no switches are configured.
-    :param pre_hook: A function to run before the command is run. See :attr:`PreHook`
+    :param pre_hook: A function to run before the command is run. See :attr:`~django_routines.PreHook`
     :param post_hook: A function to run after the command has been run. See
         :attr:`PostHook`
     :raises: :exc:`~django.core.exceptions.ImproperlyConfigured` if the
