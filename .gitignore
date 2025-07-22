@@ -162,4 +162,4 @@ cython_debug/
 **/.DS_Store
 **/track.json
 poetry.lock
-
+CLAUDE.md

@@ -110,6 +110,8 @@ class Command(TyperCommand, rich_markup_mode="rich"):
     _routine_options: t.Dict[str, t.Any] = {}
     _previous_command: t.Optional[RCommand] = None
 
+    _results: t.List[t.Any] = []
+
     @property
     def routine(self) -> t.Optional[Routine]:
         """
@@ -149,6 +151,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         ] = manage_script,
         verbosity: Verbosity = verbosity,
     ):
+        self._results = []
         self._routine_options = ctx.params.copy()
         self.verbosity = verbosity
         self._pass_verbosity = (
@@ -169,7 +172,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                 import_string(self.routine.finalize)
                 if isinstance(self.routine.finalize, str)
                 else self.routine.finalize
-            )(self.routine, results)
+            )(self.routine, self._results)
 
     def _run_routine(
         self,
@@ -302,6 +305,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         if self.verbosity > 0:
             self.secho(command.command_str, fg="cyan")
         command.result = call_command(cmd, *command.command_args, **options)
+        self._results.append(command.result)
         if command.command_name == "makemigrations":
             importlib.invalidate_caches()
         if command.post_hook:
@@ -387,6 +391,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
             self.secho(" ".join(args), fg="cyan")
 
         command.result = subprocess.run(args, env=os.environ.copy())
+        self._results.append(command.result)
         if command.result.returncode > 0:
             raise CommandError(
                 _(

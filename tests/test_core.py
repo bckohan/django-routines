@@ -129,14 +129,18 @@ class CoreTests(with_typehint(TestCase)):
         expected = [3, 4, 1]
         sys_expected = ["sys 1", "sys 2"]
         if verbosity is None or verbosity > 0:
+            expected_output = []
+            for exp in expected:
+                if not subprocess:
+                    expected_output.append(f"track {exp}")
+                expected_output.append(str(exp))
+            for exp in sys_expected:
+                expected_output.append(f"system_cmd.py {exp}")
             for line, exp in zip(
                 self.lines(out.getvalue(), no_color=no_color),
-                [
-                    *[f"track {exp}" for exp in expected],
-                    *[f"system_cmd.py {exp}" for exp in sys_expected],
-                ],
+                expected_output,
             ):
-                self.assertTrue(exp in line)
+                self.assertTrue(exp in line, f"{exp} not in {line}")
         else:
             self.assertTrue("track" not in out.getvalue().strip())
             self.assertTrue("system_cmd" not in out.getvalue().strip())
@@ -172,12 +176,16 @@ class CoreTests(with_typehint(TestCase)):
         call_command(*command, "--all", stdout=out)
         expected = [2, 0, 3, 4, 1, 5]
         if verbosity is None or verbosity > 0:
+            expected_output = []
+            for exp in expected:
+                if not subprocess:
+                    expected_output.append(f"track {exp}")
+                expected_output.append(str(exp))
+            for exp in sys_expected:
+                expected_output.append(f"system_cmd.py {exp}")
             for line, exp in zip(
                 self.lines(out.getvalue(), no_color=no_color),
-                [
-                    *[f"track {exp}" for exp in expected],
-                    *[f"system_cmd.py {exp}" for exp in sys_expected],
-                ],
+                expected_output,
             ):
                 self.assertTrue(exp in line)
         else:
@@ -222,12 +230,16 @@ class CoreTests(with_typehint(TestCase)):
         call_command(*command, "--demo", stdout=out)
         expected = [2, 3, 4, 1, 5]
         if verbosity is None or verbosity > 0:
+            expected_output = []
+            for exp in expected:
+                if not subprocess:
+                    expected_output.append(f"track {exp}")
+                expected_output.append(str(exp))
+            for exp in sys_expected:
+                expected_output.append(f"system_cmd.py {exp}")
             for line, exp in zip(
                 self.lines(out.getvalue(), no_color=no_color),
-                [
-                    *[f"track {exp}" for exp in expected],
-                    *[f"system_cmd.py {exp}" for exp in sys_expected],
-                ],
+                expected_output,
             ):
                 self.assertTrue(exp in line)
         else:
@@ -265,12 +277,16 @@ class CoreTests(with_typehint(TestCase)):
         call_command(*command, "--demo", "--import", stdout=out)
         expected = [2, 0, 3, 4, 1, 5]
         if verbosity is None or verbosity > 0:
+            expected_output = []
+            for exp in expected:
+                if not subprocess:
+                    expected_output.append(f"track {exp}")
+                expected_output.append(str(exp))
+            for exp in sys_expected:
+                expected_output.append(f"system_cmd.py {exp}")
             for line, exp in zip(
                 self.lines(out.getvalue(), no_color=no_color),
-                [
-                    *[f"track {exp}" for exp in expected],
-                    *[f"system_cmd.py {exp}" for exp in sys_expected],
-                ],
+                expected_output,
             ):
                 self.assertTrue(exp in line)
         else:
@@ -315,12 +331,16 @@ class CoreTests(with_typehint(TestCase)):
         call_command(*command, "--import", stdout=out)
         expected = [2, 0, 3, 4, 1]
         if verbosity is None or verbosity > 0:
+            expected_output = []
+            for exp in expected:
+                if not subprocess:
+                    expected_output.append(f"track {exp}")
+                expected_output.append(str(exp))
+            for exp in sys_expected:
+                expected_output.append(f"system_cmd.py {exp}")
             for line, exp in zip(
                 self.lines(out.getvalue(), no_color=no_color),
-                [
-                    *[f"track {exp}" for exp in expected],
-                    *[f"system_cmd.py {exp}" for exp in sys_expected],
-                ],
+                expected_output,
             ):
                 self.assertTrue(exp in line)
         else:

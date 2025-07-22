@@ -34,3 +34,4 @@ class Command(BaseCommand):
         track_file.write_text(json.dumps(track, indent=4))
         if options["raise"]:
             raise TestError("Kill the op.")
+        return str(options["id"])
