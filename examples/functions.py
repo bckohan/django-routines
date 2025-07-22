@@ -1,0 +1,37 @@
+from . import *  # noqa: F403
+from django_routines import routine, command, system
+
+# the function version of dict.py
+routine(
+    "<routine_name>",
+    help_text="<help_text>",
+    switch_helps={
+        "<switch_name>": "<switch_help_text>.",
+    },
+    subprocess=False,  # or True
+    atomic=False,  # or True
+    continue_on_error=False,  # or True
+    pre_hook=None,  # or a callable pre hook function
+    post_hook=None,  # or a callable post hook function
+)
+
+command(
+    "<routine_name>",
+    "<management_command>",
+    "<arg1>",
+    priority=0,  # an integer priority for execution order
+    options={},  # kwargs for call_command
+    switches=["<switch_name>"],  # optional switch enablers
+    pre_hook=None,  # or a callable pre hook function
+    post_hook=None,  # or a callable post hook function
+)
+
+system(
+    "<routine_name>",
+    "<cmd>",
+    "<arg1>",
+    priority=0,  # an integer priority for execution order
+    switches=["<switch_name>"],  # optional switch enablers
+    pre_hook=None,  # or a callable pre hook function
+    post_hook=None,  # or a callable post hook function
+)

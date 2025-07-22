@@ -137,7 +137,7 @@ class _RoutineCommand:
     The command and its arguments to run the routine, all strings or
     coercible to strings that the command will parse correctly.
 
-    This should be what you would pass to the `args`
+    This should be what you would pass as the ``args`` of
     :func:`~django.core.management.call_command` or :func:`subprocess.run`
     """
 
@@ -149,8 +149,14 @@ class _RoutineCommand:
 
     switches: t.Union[t.List[str], t.Tuple[str, ...]] = tuple()
     """
-    The command will run only when one of these switches is active,
-    or for all invocations of the routine if no switches are configured.
+    If any switches are specified, the command will only run when one of the
+    switches is activated on routine invocation from the command line. For example,
+    if you list a switch named ``init``, you would have to invoke the routine like
+    so to run this command as part of the routine:
+
+    .. code-block:: console
+
+        django-admin routine <routine_name> --init
     """
 
     pre_hook: t.Optional[PreHook] = None

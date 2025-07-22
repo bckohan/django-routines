@@ -3,21 +3,20 @@ from . import *  # noqa: F403
 DJANGO_ROUTINES = {
     "deploy": {
         "commands": [
-            {"command": ("routine", "package"), "switches": ["prepare"]},
-            {"command": "migrate"},
-            {"command": "collectstatic"},
+            {"management": ("routine", "package"), "switches": ["prepare"]},
+            {"management": "migrate"},
+            {"management": "collectstatic"},
             {
-                "command": ("shellcompletion", "install"),
+                "management": ("shellcompletion", "install"),
                 "switches": ["initial"],
             },
             {
-                "command": ("loaddata", "./fixtures/demo.json"),
+                "management": ("loaddata", "./fixtures/demo.json"),
                 "switches": ["demo"],
             },
-            {"command": ("touch", "/path/to/wsgi.py"), "kind": "system"},
+            {"system": ("touch", "/path/to/wsgi.py")},
         ],
         "help_text": "Deploy the site application into production.",
-        "name": "deploy",
         "switch_helps": {
             "demo": "Load the demo data.",
             "initial": "Things to do on the very first deployment on a new "
@@ -28,12 +27,11 @@ DJANGO_ROUTINES = {
     },
     "package": {
         "commands": [
-            {"command": "makemigrations"},
-            {"command": "renderstatic"},
-            {"command": ("poetry", "build"), "kind": "system"},
+            {"management": "makemigrations"},
+            {"management": "renderstatic"},
+            {"system": ("uv", "build")},
         ],
         "help_text": "Generate pre-package artifacts like migrations and "
                      "transpiled javascript.",
-        "name": "package",
     },
 }

@@ -2,9 +2,10 @@ import os
 import shutil
 import sys
 from pathlib import Path
-
+from sphinx.ext.autodoc import AttributeDocumenter
 import django
 
+sys.path.append(str(Path(__file__).parent / 'ext'))
 sys.path.append(str(Path(__file__).parent.parent.parent))
 sys.path.append(str(Path(__file__).parent.parent / "tests"))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "examples.readme")
@@ -43,10 +44,11 @@ release = django_routines.__version__
 extensions = [
     'sphinxcontrib_django',
     'sphinx.ext.intersphinx',
+    "sphinx_autosetting",
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinxcontrib.typer",
-    'sphinx_tabs.tabs'
+    'sphinx_tabs.tabs',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

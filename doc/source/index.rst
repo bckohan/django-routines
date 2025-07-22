@@ -38,7 +38,7 @@ In our settings file we may define these routines like this:
 The routine command will read our settings file and generate two subcommands, one called deploy
 and one called package:
 
-.. typer:: django-routines.management.commands.routine.Command:typer_app:package
+.. typer:: django_routines.management.commands.routine.Command:typer_app:package
     :prog: django-admin routine package
     :theme: dark
     :convert-png: latex
@@ -57,7 +57,7 @@ Now we can run all of our package routines with one command:
 
 The deploy command has several switches that we can enable to run additional commands.
 
-.. typer:: django-routines.management.commands.routine.Command:typer_app:deploy
+.. typer:: django_routines.management.commands.routine.Command:typer_app:deploy
     :prog: django-admin routine deploy
     :theme: dark
     :convert-png: latex
@@ -79,15 +79,15 @@ For example to deploy our demo on a new server we would run:
 
 :big:`Settings`
 
-The :class:`~django-routines.ManagementCommand` dataclass, :func:`~django-routines.routine` and
-:func:`~django-routines.command` helper functions in the example above make it easier for us to
+The :class:`~django_routines.ManagementCommand` dataclass, :func:`~django_routines.routine` and
+:func:`~django_routines.command` helper functions in the example above make it easier for us to
 work with the native configuration format which is a dictionary structure defined in the
 :setting:`DJANGO-ROUTINES` setting attribute. For example the above configuration is equivalent to:
 
 .. literalinclude:: ../../examples/readme_dict.py
     :caption: settings.py
     :linenos:
-    :lines: 2-39
+    :lines: 2-37
 
 
 .. _priority:
@@ -134,7 +134,7 @@ line.
 
 :big:`Pre/Post Hooks`
 
-:attr:`~django-routines.PreHook` and :attr:`~django-routines.PostHook` functions can be attached to
+:attr:`~django_routines.PreHook` and :attr:`~django_routines.PostHook` functions can be attached to
 routines and commands. These functions provide:
 
 - a way to execute arbitrary code before or after the routine or command execution.
