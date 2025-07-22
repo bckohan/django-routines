@@ -22,6 +22,8 @@ post_hook_track = partial(post_hook, label="post_hook_track")
 
 system_cmd = ("python", str(system_cmd.relative_to(Path(os.getcwd()))))
 
+post_hook_ret = partial(post_hook, ret=True)
+pre_hook_override = partial(pre_hook, label="pre_hook_override")
 
 DEFAULT_OPTIONS = {
     "force_color": False,
@@ -81,14 +83,14 @@ class HooksTests(TestCase):
                     ),
                     SystemCommand(
                         command=(*system_cmd, "track 3"),
-                        pre_hook=partial(pre_hook, label="pre_hook_override"),
+                        pre_hook="tests.test_hooks.pre_hook_override",
                     ),
                 ],
                 help_text=(
                     "Test pre/post hooks at the routine and command level overrides."
                 ),
-                pre_hook=pre_hook_track,
-                post_hook=post_hook_track,
+                pre_hook="tests.test_hooks.pre_hook_track",
+                post_hook="tests.test_hooks.post_hook_track",
                 name="routine-hooks",
                 continue_on_error=True,
             ),
@@ -146,7 +148,7 @@ class HooksTests(TestCase):
                     ManagementCommand(command=("track", "1")),
                     ManagementCommand(
                         command=("track", "2"),
-                        post_hook=partial(post_hook, ret=True),
+                        post_hook="tests.test_hooks.post_hook_ret",
                     ),
                     ManagementCommand(command=("track", "3")),
                 ],

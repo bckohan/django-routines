@@ -22,6 +22,7 @@ from django_typer.management import (
 from django_typer.types import Verbosity
 
 from django_routines import (
+    Hook,
     ManagementCommand,
     Routine,
     SystemCommand,
@@ -67,6 +68,19 @@ def {routine_func}(
        )
     return self.{routine_func}
 """
+
+
+def load_hook(hook: t.Union[str, Hook]) -> Hook:
+    """
+    Load a hook function from a string or return the hook as-is.
+
+    :raises: :exc:`ImportError` if the hook string cannot be imported.
+    """
+    if isinstance(hook, str):
+        from django.utils.module_loading import import_string
+
+        return import_string(hook)
+    return hook
 
 
 class Command(TyperCommand, rich_markup_mode="rich"):
@@ -244,7 +258,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         """
         assert self.routine
         if command.pre_hook:
-            if command.pre_hook(
+            if load_hook(command.pre_hook)(
                 self.routine, command, self._previous_command, self._routine_options
             ):
                 return False
@@ -275,7 +289,9 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         if command.command_name == "makemigrations":
             importlib.invalidate_caches()
         if command.post_hook:
-            if command.post_hook(self.routine, command, nxt, self._routine_options):
+            if load_hook(command.post_hook)(
+                self.routine, command, nxt, self._routine_options
+            ):
                 raise ExitEarly()
         return True
 
@@ -294,7 +310,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         """
         assert self.routine
         if command.pre_hook:
-            if command.pre_hook(
+            if load_hook(command.pre_hook)(
                 self.routine, command, self._previous_command, self._routine_options
             ):
                 return None
@@ -362,7 +378,9 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                 ).format(command=" ".join(args), code=command.result.returncode)
             )
         if command.post_hook:
-            if command.post_hook(self.routine, command, nxt, self._routine_options):
+            if load_hook(command.post_hook)(
+                self.routine, command, nxt, self._routine_options
+            ):
                 raise ExitEarly()
         return command.result.returncode
 

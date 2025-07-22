@@ -63,7 +63,7 @@ Command = t.Union["ManagementCommand", "SystemCommand"]
 Command type, either a ManagementCommand or SystemCommand.
 """
 
-_Hook = t.Callable[
+Hook = t.Callable[
     [
         "Routine",
         "Command",
@@ -73,7 +73,7 @@ _Hook = t.Callable[
     t.Optional[bool],
 ]
 
-PreHook = _Hook
+PreHook = t.Union[str, Hook]
 """
 Function type signature for a pre-hook functions. Pre-hook functions can modify command
 objects (including their arguments) before they are run.
@@ -93,7 +93,7 @@ objects (including their arguments) before they are run.
 :rtype: typing.Optional[bool]
 """
 
-PostHook = _Hook
+PostHook = t.Union[str, Hook]
 """
 Function type signature for a post-hook functions. Post-hook functions can modify
 command objects (including their results) after they are run or the next command
@@ -163,6 +163,8 @@ class _RoutineCommand:
     """
     A function that will be run before the command is run. It may make modifications
     to the command or decide to skip the command by returning True. See :attr:`PreHook`
+
+    May be the callable function or an import string to the callable function.
     """
 
     post_hook: t.Optional[PostHook] = None
@@ -172,6 +174,8 @@ class _RoutineCommand:
     early by returning True. See :attr:`PostHook`
 
     It may also make modifications to the next command that will be run, if any.
+
+    May be the callable function or an import string to the callable function.
     """
 
     result: t.Any = None
@@ -344,6 +348,8 @@ class Routine:
     This function will be run before each command that lacks its own pre_hook in the
     routine. See :attr:`~django_routines.PreHook`. You can determine if this is the
     starting command of the routine by checking if the previous command is None.
+
+    May be the callable function or an import string to the callable function.
     """
 
     post_hook: t.Optional[PostHook] = None
@@ -352,6 +358,8 @@ class Routine:
     routine. See :attr:`~django_routines.PostHook`. You can determine if this is the
     last command of the routine by checking if the next command is None. Post hooks may
     also be used to exit the routine early by returning True.
+
+    May be the callable function or an import string to the callable function.
     """
 
     def __post_init__(self):
