@@ -6,6 +6,8 @@ v1.6.0 (2025-07-17)
 ===================
 
 * Implemented `Allow callback to be specified as import strings. <https://github.com/bckohan/django-routines/issues/54>`_
+* Implemented `Add an initialize callback. <https://github.com/bckohan/django-routines/issues/53>`_
+* Implemented `Add a finalize callback option for routines. <https://github.com/bckohan/django-routines/issues/52>`_
 * Implemented `Should not require the name to be listed on the routine when specified as a dictionary. <https://github.com/bckohan/django-routines/issues/51>`_
 * Implemented `Deprecate "kind" in favor of "management" vs "system" <https://github.com/bckohan/django-routines/issues/50>`_
 
