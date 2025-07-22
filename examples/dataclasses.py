@@ -28,7 +28,9 @@ DJANGO_ROUTINES = {
         },
         subprocess=False,  # or True
         atomic=False,  # or True
-        continue_on_error=False,  # or True 
+        continue_on_error=False,  # or True
+        initialize=None,  # or a callable initialize function
+        finalize=None,  # or a callable finalize function
         pre_hook=None,  # or a callable pre hook function
         post_hook=None,  # or a callable post hook function
     )

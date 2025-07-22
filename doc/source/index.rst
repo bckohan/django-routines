@@ -12,6 +12,9 @@ For example, batch together your common database maintenance tasks, deployment r
 other set of commands you need to run together. This helps single source general site maintenance
 into your settings files keeping your code base DRY_.
 
+If you have ever written one management command that calls other management commands this package
+may help you.
+
 :big:`Example`
 
 Let's define two named routines, "package" and "deploy". The package routine will be a collection

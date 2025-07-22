@@ -2,7 +2,7 @@
 Change Log
 ==========
 
-v1.6.0 (2025-07-17)
+v1.6.0 (2025-07-22)
 ===================
 
 * Implemented `Allow callback to be specified as import strings. <https://github.com/bckohan/django-routines/issues/54>`_

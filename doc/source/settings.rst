@@ -45,6 +45,12 @@ Structure
       .. autosetting:: django_routines.Routine.continue_on_error
          :no-index:
 
+      .. autosetting:: django_routines.Routine.initialize
+         :no-index:
+
+      .. autosetting:: django_routines.Routine.finalize
+         :no-index:
+
       .. autosetting:: django_routines.Routine.pre_hook
          :no-index:
 
@@ -88,7 +94,7 @@ The dictionary can be specified using any combination of these different methods
       .. literalinclude:: ../../examples/dict.py
          :caption: settings.py
          :linenos:
-         :lines: 3-32
+         :lines: 3-34
 
     .. tab:: Data Classes
 
@@ -97,7 +103,7 @@ The dictionary can be specified using any combination of these different methods
       .. literalinclude:: ../../examples/dataclasses.py
          :caption: settings.py
          :linenos:
-         :lines: 2-35
+         :lines: 2-37
 
     .. tab:: Functions
 
@@ -108,4 +114,4 @@ The dictionary can be specified using any combination of these different methods
       .. literalinclude:: ../../examples/functions.py
          :caption: settings.py
          :linenos:
-         :lines: 2-37
+         :lines: 2-39
