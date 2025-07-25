@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-routines"
-version = "1.6.0"
+version = "1.6.1"
 description = "Define named groups of management commands in Django settings files for batched execution."
 requires-python = ">=3.9,<4.0"
 authors = [
@@ -58,7 +58,7 @@ packages = ["src/django_routines"]
 [project.optional-dependencies]
 # this should track typer's rich dependency, so long as our console
 # patches still work - so be sure to test on the low end of the range
-rich = ["rich>=10.11.0,<14.0.0"]
+rich = ["rich>=10.11.0,<15.0.0"]
 
 [project.urls]
 "Homepage" = "https://django-routines.readthedocs.io"
