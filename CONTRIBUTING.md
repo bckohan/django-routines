@@ -104,7 +104,7 @@ just release x.x.x
 ## Just Recipes
 
 ```bash
-        build                        # build docs and package
+    build                        # build docs and package
     build-docs                   # build the docs
     build-docs-html              # build html documentation
     build-docs-pdf               # build pdf documentation
