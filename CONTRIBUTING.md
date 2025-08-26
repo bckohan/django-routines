@@ -104,44 +104,44 @@ just release x.x.x
 ## Just Recipes
 
 ```bash
-    build                        # build docs and package
-    build-docs                   # build the docs
-    build-docs-html              # build html documentation
-    build-docs-pdf               # build pdf documentation
-    check                        # run all static checks
-    check-docs                   # lint the documentation
-    check-docs-links             # check the documentation links for broken links
-    check-format                 # check if the code needs formatting
-    check-lint                   # lint the code
-    check-package                # run package checks
-    check-readme                 # check that the readme renders
-    check-types                  # run static type checking
-    clean                        # remove all non repository artifacts
-    clean-docs                   # remove doc build artifacts
-    clean-env                    # remove the virtual environment
-    clean-git-ignored            # remove all git ignored files
-    clean_manage *COMMAND
-    coverage                     # generate the test coverage report
-    docs                         # build and open the documentation
-    docs-live                    # serve the documentation, with auto-reload
-    fetch-refs LIB               # fetch the intersphinx references for the given package
-    fix                          # fix formatting, linting issues and import sorting
-    format                       # format the code and sort imports
-    install *OPTS="--all-extras" # update and install development dependencies
-    install-docs                 # install documentation dependencies
-    install-precommit            # install git pre-commit hooks
-    install_uv                   # install the uv package manager
-    lint                         # sort the imports and fix linting issues
-    manage *COMMAND              # run the django admin
-    open-docs                    # open the html documentation
-    precommit                    # run the pre-commit checks
-    release VERSION              # issue a relase for the given semver string (e.g. 2.1.0)
-    run +ARGS                    # run the command in the virtual environment
-    runserver                    # run the development server
-    setup python="python"        # setup the venv, pre-commit hooks
-    sort-imports                 # sort the python imports
-    test *TESTS                  # run tests
-    test-all                     # run all tests
-    test-lock +PACKAGES          # lock to specific python and versions of given dependencies
-    validate_version VERSION     # validate the given version string against the lib version
+build                        # build docs and package
+build-docs                   # build the docs
+build-docs-html              # build html documentation
+build-docs-pdf               # build pdf documentation
+check                        # run all static checks
+check-docs                   # lint the documentation
+check-docs-links             # check the documentation links for broken links
+check-format                 # check if the code needs formatting
+check-lint                   # lint the code
+check-package                # run package checks
+check-readme                 # check that the readme renders
+check-types                  # run static type checking
+clean                        # remove all non repository artifacts
+clean-docs                   # remove doc build artifacts
+clean-env                    # remove the virtual environment
+clean-git-ignored            # remove all git ignored files
+clean_manage *COMMAND
+coverage                     # generate the test coverage report
+docs                         # build and open the documentation
+docs-live                    # serve the documentation, with auto-reload
+fetch-refs LIB               # fetch the intersphinx references for the given package
+fix                          # fix formatting, linting issues and import sorting
+format                       # format the code and sort imports
+install *OPTS="--all-extras" # update and install development dependencies
+install-docs                 # install documentation dependencies
+install-precommit            # install git pre-commit hooks
+install_uv                   # install the uv package manager
+lint                         # sort the imports and fix linting issues
+manage *COMMAND              # run the django admin
+open-docs                    # open the html documentation
+precommit                    # run the pre-commit checks
+release VERSION              # issue a relase for the given semver string (e.g. 2.1.0)
+run +ARGS                    # run the command in the virtual environment
+runserver                    # run the development server
+setup python="python"        # setup the venv, pre-commit hooks
+sort-imports                 # sort the python imports
+test *TESTS                  # run tests
+test-all                     # run all tests
+test-lock +PACKAGES          # lock to specific python and versions of given dependencies
+validate_version VERSION     # validate the given version string against the lib version
 ```
