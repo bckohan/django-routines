@@ -741,7 +741,7 @@ dev = [
 ]
 docs = [
     { name = "doc8", specifier = ">=1.1.2" },
-    { name = "furo", specifier = ">=2024.8.6" },
+    { name = "furo", specifier = ">=2025.7.19" },
     { name = "sphinx", specifier = ">=7.4.7" },
     { name = "sphinx-autobuild", specifier = ">=2024.10.3" },
     { name = "sphinx-tabs", specifier = ">=3.4.7" },
