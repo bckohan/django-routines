@@ -74,7 +74,7 @@ jobs:
       with:
         node-version: 22
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       id: sp
       with:
         python-version: ${{ matrix.python-version }}
@@ -136,7 +136,7 @@ jobs:
       with:
         node-version: 22
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       id: sp
       with:
         python-version: ${{ matrix.python-version }}
@@ -201,7 +201,7 @@ jobs:
       with:
         node-version: 22
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       id: sp
       with:
         python-version: ${{ matrix.python-version }}
@@ -242,7 +242,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         id: sp
         with:
           python-version: '3.12'
