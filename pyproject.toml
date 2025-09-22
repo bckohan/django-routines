@@ -82,7 +82,7 @@ dev = [
     "mypy>=1.10.0",
     "pre-commit>=4.0.1",
     "django-render-static>=3.2.1",
-    "pywinpty>=2.0.14; sys_platform == 'win32'",
+    "pywinpty>=2.0.14,<3.0.0; sys_platform == 'win32'",
     "tomlkit>=0.13.2",
     "readme-renderer[md]>=44.0",
     "packaging>=24.2",
