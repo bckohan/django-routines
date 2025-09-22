@@ -116,6 +116,7 @@ if platform.system() == "Windows":
                     "routine",
                     "--settings",
                     "tests.settings_option_toggle",
+                    "--no-color",
                     "option-off",
                     "--subprocess",
                 ]
@@ -139,6 +140,7 @@ else:
                     "routine",
                     "--settings",
                     "tests.settings_option_toggle",
+                    "--no-color",
                     "option-on",
                     "--subprocess",
                 ]
@@ -154,6 +156,7 @@ else:
                     "routine",
                     "--settings",
                     "tests.settings_option_toggle",
+                    "--no-color",
                     "option-off",
                     "--subprocess",
                 ]
