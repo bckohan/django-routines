@@ -2,6 +2,13 @@
 Change Log
 ==========
 
+v1.6.2 (2025-09-27)
+===================
+
+* `Boolean flags on routine runners are broken on click 8.3+ <https://github.com/bckohan/django-routines/issues/63>`_
+* Support Django 6.0 - test against alpha
+
+
 v1.6.1 (2025-07-25)
 ===================
 

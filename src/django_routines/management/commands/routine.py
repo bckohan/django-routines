@@ -44,9 +44,30 @@ COMMAND_TMPL = """
 def {routine_func}(
     self,
     ctx: typer.Context,
-    subprocess: Annotated[bool, typer.Option("{subprocess_opt}", help="{subprocess_help}", show_default=False)] = {subprocess},
-    atomic: Annotated[bool, typer.Option("{atomic_opt}", help="{atomic_help}", show_default=False)] = {atomic},
-    continue_on_error: Annotated[bool, typer.Option("{continue_opt}", help="{continue_help}", show_default=False)] = {continue_on_error},
+    subprocess: Annotated[
+        bool,
+        typer.Option(
+            "{subprocess_opt}",
+            help="{subprocess_help}",
+            show_default=False
+        )
+    ] = None,
+    atomic: Annotated[
+        bool,
+        typer.Option(
+            "{atomic_opt}",
+            help="{atomic_help}",
+            show_default=False
+        )
+    ] = None,
+    continue_on_error: Annotated[
+        bool,
+        typer.Option(
+            "{continue_opt}",
+            help="{continue_help}",
+            show_default=False
+        )
+    ] = None,
     all: Annotated[bool, typer.Option("--all", help="{all_help}")] = False,
     {switch_args}
 ):
@@ -192,14 +213,16 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         def noop():
             yield
 
-        subprocess = subprocess if subprocess is not None else self.routine.subprocess
-        is_atomic = atomic if atomic is not None else self.routine.atomic
+        subprocess = (
+            not self.routine.subprocess if subprocess else self.routine.subprocess
+        )
+        is_atomic = not self.routine.atomic if atomic else self.routine.atomic
         continue_on_error = (
-            continue_on_error
-            if continue_on_error is not None
+            not self.routine.continue_on_error
+            if continue_on_error
             else self.routine.continue_on_error
         )
-        cli_options = {
+        self._routine_options = {
             **self._routine_options,
             # we pass the resolved version of these options below
             # these will be based on the defaults for the routine if unspecified on the
@@ -208,7 +231,9 @@ class Command(TyperCommand, rich_markup_mode="rich"):
             "atomic": is_atomic,
             "continue_on_error": continue_on_error,
         }
-        routine_started.send(sender=self, routine=self.routine.name, **cli_options)
+        routine_started.send(
+            sender=self, routine=self.routine.name, **self._routine_options
+        )
 
         ctx = transaction.atomic if is_atomic else noop
         with ctx():  # type: ignore
@@ -241,7 +266,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                                     routine=self.routine.name,
                                     failed_command=idx,
                                     exception=routine_exc,
-                                    **cli_options,
+                                    **self._routine_options,
                                 )
                             ):
                                 continue
@@ -252,7 +277,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                         routine=self.routine.name,
                         early_exit=True,
                         last_command=idx,
-                        **cli_options,
+                        **self._routine_options,
                     )
                     return
         routine_finished.send(
@@ -260,7 +285,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
             routine=self.routine.name,
             early_exit=False,
             last_command=last,
-            **cli_options,
+            **self._routine_options,
         )
 
     def _call_command(
