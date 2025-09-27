@@ -2,6 +2,13 @@
 Change Log
 ==========
 
+v1.6.2 (2025-09-27)
+===================
+
+* `Fix windows tests to run on pywinpty >=3.0 <https://github.com/bckohan/django-routines/issues/61>`_
+* Support Django 6.0 - test against alpha
+
+
 v1.6.1 (2025-07-25)
 ===================
 
