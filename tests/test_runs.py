@@ -3,6 +3,7 @@ Miscellaneous tests - mostly for coverage
 """
 
 from io import StringIO
+import pytest
 import sys
 import subprocess
 from django.core.management import call_command
@@ -91,6 +92,7 @@ if platform.system() == "Windows":
     from winpty import PtyProcess
     import time
 
+    @pytest.mark.skip(reason="winpty 3.0 is not working")
     def test_option_toggle():
         result = subprocess.run(
             [
@@ -123,7 +125,7 @@ if platform.system() == "Windows":
             )
         )
         time.sleep(3)
-        initial_output = proc.read(1024)
+        initial_output = proc.read(4096)
         assert "Type 'yes' to continue, or 'no' to cancel:" in initial_output
         proc.write("yes\r\n")
         time.sleep(3)

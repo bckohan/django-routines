@@ -34,9 +34,9 @@ DEFAULT_OPTIONS = {
     "settings": "",
     "pythonpath": None,
     "traceback": False,
-    "subprocess": False,
-    "atomic": False,
-    "continue_on_error": False,
+    "subprocess": None,
+    "atomic": None,
+    "continue_on_error": None,
     "all": False,
 }
 if find_spec("rich"):
@@ -130,6 +130,8 @@ class HooksTests(TestCase):
             expected = {
                 **DEFAULT_OPTIONS,
                 "continue_on_error": True,
+                "atomic": False,
+                "subprocess": False,
                 "no_color": True,
                 "switch": True,
             }

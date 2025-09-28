@@ -28,9 +28,9 @@ DEFAULT_OPTIONS = {
     "settings": "",
     "pythonpath": None,
     "traceback": False,
-    "subprocess": False,
-    "atomic": False,
-    "continue_on_error": False,
+    "subprocess": None,
+    "atomic": None,
+    "continue_on_error": None,
     "all": False,
 }
 if find_spec("rich"):
@@ -154,6 +154,9 @@ class InitializeFinalizeTests(TestCase):
             **DEFAULT_OPTIONS,
             "no_color": True,
             "switch": True,
+            "subprocess": False,
+            "atomic": False,
+            "continue_on_error": False,
         }
         init_opts = init_data["options"]
         del init_opts["manage_script"]  # Remove variable path
