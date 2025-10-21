@@ -82,7 +82,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-node@v5
+    - uses: actions/setup-node@v6
       with:
         node-version: 22
     - name: Set up Python ${{ matrix.python-version }}
@@ -150,7 +150,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-node@v5
+    - uses: actions/setup-node@v6
       with:
         node-version: 22
     - name: Set up Python ${{ matrix.python-version }}
@@ -216,7 +216,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-    - uses: actions/setup-node@v5
+    - uses: actions/setup-node@v6
       with:
         node-version: 22
     - name: Set up Python ${{ matrix.python-version }}
