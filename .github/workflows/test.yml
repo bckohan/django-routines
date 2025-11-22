@@ -29,52 +29,25 @@ jobs:
       actions: write
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
         django-version:
-          - '3.2' # LTS April 2024
           - '4.2' # LTS April 2026
-          - '5.0' # April 2025
           - '5.1' # December 2025
           - '5.2' # LTS April 2028
-          - '6.0a1' # prerelease
+          - '6.0rc1' # April 2027
         exclude:
-          - python-version: '3.11'
-            django-version: '3.2'
-          - python-version: '3.12'
-            django-version: '3.2'
-          - python-version: '3.9'
-            django-version: '5.0'
-          - python-version: '3.9'
-            django-version: '5.1'
-          - python-version: '3.9'
-            django-version: '5.2'
-          - python-version: '3.10'
-            django-version: '5.2'
-          - python-version: '3.13'
-            django-version: '3.2'
           - python-version: '3.13'
             django-version: '4.2'
-          - python-version: '3.13'
-            django-version: '5.0'
-          - python-version: '3.14'
-            django-version: '3.2'
           - python-version: '3.14'
             django-version: '4.2'
-          - python-version: '3.14'
-            django-version: '5.0'
+
           - python-version: '3.14'
             django-version: '5.1'
           
-          - python-version: '3.9'
-            django-version: '6.0a1'
           - python-version: '3.10'
-            django-version: '6.0a1'
+            django-version: '6.0rc1'
           - python-version: '3.11'
-            django-version: '6.0a1'
-          - python-version: '3.12'
-            django-version: '6.0a1'
-          - python-version: '3.13'
-            django-version: '6.0a1'
+            django-version: '6.0rc1'
     env:
       COVERAGE_FILE: linux-py${{ matrix.python-version }}-dj${{ matrix.django-version }}.coverage
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
@@ -95,6 +68,9 @@ jobs:
       uses: astral-sh/setup-uv@v7
       with:
         enable-cache: true  
+    - name: Upgrade all dependencies for our weekly runs
+      if: github.event_name == 'schedule'
+      run: uv lock --upgrade
     - name: Setup Just
       uses: extractions/setup-just@v3
     - name: Install Dependencies
@@ -134,15 +110,27 @@ jobs:
       actions: write
     strategy:
       matrix:
-        python-version: ['3.9', '3.14']
+        python-version: ['3.10', '3.12', '3.14']
         django-version:
-          - '3.2' # LTS April 2024
+          - '4.2' # LTS April 2026
           - '5.2' # LTS April 2028
+          - '6.0rc1' # April 2027
         exclude:
-          - python-version: '3.9'
+          - python-version: '3.12'
+            django-version: '4.2'
+          - python-version: '3.14'
+            django-version: '4.2'
+
+          - python-version: '3.10'
             django-version: '5.2'
           - python-version: '3.14'
-            django-version: '3.2'
+            django-version: '5.2'
+
+          - python-version: '3.10'
+            django-version: '6.0rc1'
+          - python-version: '3.12'
+            django-version: '6.0rc1'
+
     env:
       COVERAGE_FILE: macos-py${{ matrix.python-version }}-dj${{ matrix.django-version }}.coverage
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
@@ -168,7 +156,11 @@ jobs:
     - name: Install Dependencies
       run: |
         just setup ${{ steps.sp.outputs.python-path }}
-        just test-lock "Django~=${{ matrix.django-version }}.0"
+        if [[ "${{ matrix.django-version }}" =~ (a|b|rc) ]]; then
+          just test-lock Django==${{ matrix.django-version }}
+        else
+          just test-lock Django~=${{ matrix.django-version }}.0
+        fi
         just install
     - name: install-emacs-macos
       if: ${{ github.event.inputs.debug == 'true' }}
@@ -200,15 +192,26 @@ jobs:
         shell: pwsh
     strategy:
       matrix:
-        python-version: ['3.9', '3.13']
+        python-version: ['3.10', '3.12', '3.14']
         django-version:
-          - '3.2' # LTS April 2024
+          - '4.2' # LTS April 2026
           - '5.2' # LTS April 2028
+          - '6.0rc1' # April 2027
         exclude:
-          - python-version: '3.9'
+          - python-version: '3.12'
+            django-version: '4.2'
+          - python-version: '3.14'
+            django-version: '4.2'
+
+          - python-version: '3.10'
             django-version: '5.2'
-          - python-version: '3.13'
-            django-version: '3.2'
+          - python-version: '3.14'
+            django-version: '5.2'
+
+          - python-version: '3.10'
+            django-version: '6.0rc1'
+          - python-version: '3.12'
+            django-version: '6.0rc1'
     env:
       COVERAGE_FILE: windows-py${{ matrix.python-version }}-dj${{ matrix.django-version }}.coverage
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
@@ -232,9 +235,16 @@ jobs:
     - name: Setup Just
       uses: extractions/setup-just@v3
     - name: Install Dependencies
+      shell: pwsh
       run: |
         just setup ${{ steps.sp.outputs.python-path }}
-        just test-lock "Django~=${{ matrix.django-version }}.0"
+        $version = "${{ matrix.django-version }}"
+
+        if ($version -match "(a|b|rc)") {
+          just test-lock "Django==$version"
+        } else {
+          just test-lock "Django~=$version.0"
+        }
         just install
     - name: install-vim-windows
       if: ${{ github.event.inputs.debug == 'true' }}

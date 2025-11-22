@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-routines"
-version = "1.6.2"
+version = "1.7.0"
 description = "Define named groups of management commands in Django settings files for batched execution."
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 authors = [
   {name = "Brian Kohan", email = "bckohan@gmail.com"},
 ]
@@ -17,7 +17,7 @@ repository = "https://github.com/bckohan/django-routines"
 homepage = "https://django-routines.readthedocs.io"
 keywords = ["django", "CLI", "management", "routine", "routines", "batch", "commands", "deploy", "tasks", "package", "backup"]
 dependencies = [
-    "Django>=3.2,<6.1",
+    "Django>=4.2,<6.1",
     "django-typer>=3.2.2,<4.0"
 ]
 classifiers = [
@@ -26,11 +26,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Development Status :: 5 - Production/Stable",
-    "Framework :: Django :: 3.2",
-    "Framework :: Django :: 4.0",
-    "Framework :: Django :: 4.1",
     "Framework :: Django :: 4.2",
-    "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
     "Framework :: Django :: 6.0",
@@ -38,7 +34,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",

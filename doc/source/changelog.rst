@@ -2,6 +2,13 @@
 Change Log
 ==========
 
+v1.7.0 (2025-11-22)
+===================
+
+* `Drop support for Django 3.2-4.1 and 5.0 <https://github.com/bckohan/django-routines/issues/74>`_
+* `Drop support for python 3.9 <https://github.com/bckohan/django-routines/issues/73>`_
+
+
 v1.6.2 (2025-09-27)
 ===================
 
