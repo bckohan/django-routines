@@ -152,6 +152,7 @@ exclude = [
     "dist",
     "examples"
 ]
+target-version = "py310"
 
 [tool.ruff.lint]
 exclude = [
