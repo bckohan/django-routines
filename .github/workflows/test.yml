@@ -36,7 +36,7 @@ jobs:
           - '4.2' # LTS April 2026
           - '5.1' # December 2025
           - '5.2' # LTS April 2028
-          - '6.0rc1' # April 2027
+          - '6.0' # April 2027
         exclude:
           - python-version: '3.13'
             django-version: '4.2'
@@ -47,9 +47,9 @@ jobs:
             django-version: '5.1'
           
           - python-version: '3.10'
-            django-version: '6.0rc1'
+            django-version: '6.0'
           - python-version: '3.11'
-            django-version: '6.0rc1'
+            django-version: '6.0'
     env:
       COVERAGE_FILE: linux-py${{ matrix.python-version }}-dj${{ matrix.django-version }}.coverage
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
@@ -119,7 +119,7 @@ jobs:
         django-version:
           - '4.2' # LTS April 2026
           - '5.2' # LTS April 2028
-          - '6.0rc1' # April 2027
+          - '6.0' # April 2027
         exclude:
           - python-version: '3.12'
             django-version: '4.2'
@@ -132,9 +132,9 @@ jobs:
             django-version: '5.2'
 
           - python-version: '3.10'
-            django-version: '6.0rc1'
+            django-version: '6.0'
           - python-version: '3.12'
-            django-version: '6.0rc1'
+            django-version: '6.0'
 
     env:
       COVERAGE_FILE: macos-py${{ matrix.python-version }}-dj${{ matrix.django-version }}.coverage
@@ -204,7 +204,7 @@ jobs:
         django-version:
           - '4.2' # LTS April 2026
           - '5.2' # LTS April 2028
-          - '6.0rc1' # April 2027
+          - '6.0' # April 2027
         exclude:
           - python-version: '3.12'
             django-version: '4.2'
@@ -217,9 +217,9 @@ jobs:
             django-version: '5.2'
 
           - python-version: '3.10'
-            django-version: '6.0rc1'
+            django-version: '6.0'
           - python-version: '3.12'
-            django-version: '6.0rc1'
+            django-version: '6.0'
     env:
       COVERAGE_FILE: windows-py${{ matrix.python-version }}-dj${{ matrix.django-version }}.coverage
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
