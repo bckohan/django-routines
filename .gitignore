@@ -163,3 +163,4 @@ cython_debug/
 **/track.json
 uv.lock
 CLAUDE.md
+results.sarif
