@@ -245,6 +245,13 @@ test-all *ENV: coverage-erase
 test *TESTS:
     @just run --group test --no-sync pytest {{ TESTS }}
 
+# debug a test (project venv)
+debug-test *TESTS:
+    @just run pytest \
+      -o addopts='-ra -q' \
+      -s --trace --pdbcls=IPython.terminal.debugger:Pdb \
+      {{ TESTS }}
+
 # run the pre-commit checks
 precommit:
     @just run pre-commit
