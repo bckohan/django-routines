@@ -5,53 +5,55 @@
 Django Routines
 ===============
 
-.. image:: https://img.shields.io/badge/License-MIT-blue.svg
-   :target: https://lbesson.mit-license.org/
-   :alt: License: BSD
+.. only:: html
 
-.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
-   :target: https://github.com/astral-sh/ruff
-   :alt: Ruff
+    .. image:: https://img.shields.io/badge/License-MIT-blue.svg
+        :target: https://lbesson.mit-license.org/
+        :alt: License: BSD
 
-.. image:: https://badge.fury.io/py/django-routines.svg
-   :target: https://pypi.python.org/pypi/django-routines/
-   :alt: PyPI version
+    .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+        :target: https://github.com/astral-sh/ruff
+        :alt: Ruff
 
-.. image:: https://img.shields.io/pypi/pyversions/django-routines.svg
-   :target: https://pypi.python.org/pypi/django-routines/
-   :alt: PyPI pyversions
+    .. image:: https://badge.fury.io/py/django-routines.svg
+        :target: https://pypi.python.org/pypi/django-routines/
+        :alt: PyPI version
 
-.. image:: https://img.shields.io/pypi/djversions/django-routines.svg
-   :target: https://pypi.org/project/django-routines/
-   :alt: PyPI Django versions
+    .. image:: https://img.shields.io/pypi/pyversions/django-routines.svg
+        :target: https://pypi.python.org/pypi/django-routines/
+        :alt: PyPI pyversions
 
-.. image:: https://img.shields.io/pypi/status/django-routines.svg
-   :target: https://pypi.python.org/pypi/django-routines
-   :alt: PyPI status
+    .. image:: https://img.shields.io/pypi/djversions/django-routines.svg
+        :target: https://pypi.org/project/django-routines/
+        :alt: PyPI Django versions
 
-.. image:: https://img.shields.io/pypi/types/django-routines.svg
-   :target: https://pypi.python.org/pypi/django-routines
-   :alt: PyPi Typed
+    .. image:: https://img.shields.io/pypi/status/django-routines.svg
+        :target: https://pypi.python.org/pypi/django-routines
+        :alt: PyPI status
 
-.. image:: https://readthedocs.org/projects/django-routines/badge/?version=latest
-   :target: http://django-routines.readthedocs.io/?badge=latest/
-   :alt: Documentation Status
+    .. image:: https://img.shields.io/pypi/types/django-routines.svg
+        :target: https://pypi.python.org/pypi/django-routines
+        :alt: PyPi Typed
 
-.. image:: https://img.shields.io/codecov/c/github/bckohan/django-routines/main.svg
-   :target: https://codecov.io/github/bckohan/django-routines?branch=main
-   :alt: Code Coverage
+    .. image:: https://readthedocs.org/projects/django-routines/badge/?version=latest
+        :target: http://django-routines.readthedocs.io/?badge=latest/
+        :alt: Documentation Status
 
-.. image:: https://github.com/bckohan/django-routines/actions/workflows/test.yml/badge.svg?branch=main
-   :target: https://github.com/bckohan/django-routines/actions/workflows/test.yml?query=branch:main
-   :alt: Test Status
+    .. image:: https://img.shields.io/codecov/c/github/bckohan/django-routines/main.svg
+        :target: https://codecov.io/github/bckohan/django-routines?branch=main
+        :alt: Code Coverage
 
-.. image:: https://github.com/bckohan/django-routines/actions/workflows/lint.yml/badge.svg?branch=main
-   :target: https://github.com/bckohan/django-routines/actions/workflows/lint.yml?query=branch:main
-   :alt: Lint Status
+    .. image:: https://github.com/bckohan/django-routines/actions/workflows/test.yml/badge.svg?branch=main
+        :target: https://github.com/bckohan/django-routines/actions/workflows/test.yml?query=branch:main
+        :alt: Test Status
 
-.. image:: https://img.shields.io/badge/Published%20on-Django%20Packages-0c3c26
-   :target: https://djangopackages.org/packages/p/django-routines/
-   :alt: Published on Django Packages
+    .. image:: https://github.com/bckohan/django-routines/actions/workflows/lint.yml/badge.svg?branch=main
+        :target: https://github.com/bckohan/django-routines/actions/workflows/lint.yml?query=branch:main
+        :alt: Lint Status
+
+    .. image:: https://img.shields.io/badge/Published%20on-Django%20Packages-0c3c26
+        :target: https://djangopackages.org/packages/p/django-routines/
+        :alt: Published on Django Packages
 
 .. django-admin:: routine
 
