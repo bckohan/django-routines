@@ -73,6 +73,53 @@ just format
 
 `django-routines` is set up to use [pytest](https://docs.pytest.org/en/stable/) to run unit tests. All the tests are housed in `tests/test_*.py`. Before a PR is accepted, all tests must be passing and the code coverage must be at 100%. A small number of exempted error handling branches are acceptable.
 
+To run the full suite in an isolated virtual environment with only the minimal test dependencies installed you should use ``test-all``:
+
+```sh
+just test-all
+```
+To run the full test suite against a specific python/django you can pass sync options to ``test-all``. This requires the djXX dependency groups. For example to run against python 3.11 on Django 5.2.x:
+
+```sh
+just test-all -p 3.11 --group dj52
+```
+
+The other test commands will use the current synced virtual environment. To run a single test, or group of tests in a class:
+
+```sh
+just install  # install the default dev environment if you haven't
+just test <path_to_tests_file>::ClassName::FunctionName
+```
+
+For instance, to run all tests in SettingsAsDictTests, and then just the test_command test you would do:
+
+```shell
+just test tests/test_dict.py
+just test tests/test_dict.py::SettingsAsDictTests::test_command
+```
+
+### Debugging tests
+
+To debug a test use the ``debug-test`` recipe:
+
+```sh
+just debug-test <path_to_tests_file>::ClassName::FunctionName
+```
+
+This will set a breakpoint at the start of the test.
+
+To run specific tests or debug tests against specific Python or Django versions you must first sync:
+
+```sh
+just install -p 3.11 --group dj52
+just test -k test_command
+just debug-test -k test_command
+```
+
+## Running Tests
+
+`django-routines` is set up to use [pytest](https://docs.pytest.org/en/stable/) to run unit tests. All the tests are housed in `tests/test_*.py`. Before a PR is accepted, all tests must be passing and the code coverage must be at 100%. A small number of exempted error handling branches are acceptable.
+
 To run the full suite:
 
 ```bash

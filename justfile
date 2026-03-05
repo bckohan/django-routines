@@ -28,31 +28,30 @@ clean_manage *COMMAND:
 # install the uv package manager
 [linux]
 [macos]
-install_uv:
+install-uv:
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # install the uv package manager
 [windows]
-install_uv:
+install-uv:
     powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
 # setup the venv, pre-commit hooks
 setup python="python":
     uv venv -p {{ python }}
-    @just run pre-commit install
+    @just install-precommit
 
 # install git pre-commit hooks
 install-precommit:
-    @just run pre-commit install
+    @just run --no-default-groups --group precommit --exact --isolated pre-commit install
 
 # update and install development dependencies
 install *OPTS="--all-extras":
     uv sync {{ OPTS }}
-    @just run pre-commit install
 
 # install documentation dependencies
-install-docs:
-    uv sync --group docs --all-extras
+_install-docs:
+    uv sync --no-default-groups --group docs --all-extras
 
 # run the development server
 runserver:
@@ -60,27 +59,14 @@ runserver:
     @just manage migrate
     @just manage runserver 8027
 
-[script]
-_lock-python:
-    import tomlkit
-    import sys
-    f='pyproject.toml'
-    d=tomlkit.parse(open(f).read())
-    d['project']['requires-python']='=={}'.format(sys.version.split()[0])
-    open(f,'w').write(tomlkit.dumps(d))
-
-# lock to specific python and versions of given dependencies
-test-lock +PACKAGES: _lock-python
-    uv add {{ PACKAGES }}
-
 # run static type checking
-check-types:
-    @just run mypy
-    @just run pyright
+check-types *ENV:
+    @just run {{ ENV }} --no-default-groups --all-extras --group typing mypy
+    @just run {{ ENV }} --no-default-groups --all-extras --group typing pyright
 
 # run package checks
 check-package:
-    @just run pip check
+    uv pip check
 
 # remove doc build artifacts
 [script]
@@ -89,11 +75,8 @@ clean-docs:
     shutil.rmtree('./doc/build', ignore_errors=True)
 
 # remove the virtual environment
-[script]
 clean-env:
-    import shutil
-    import sys
-    shutil.rmtree(".venv", ignore_errors=True)
+    python -c "import shutil, pathlib; p=pathlib.Path('.venv'); shutil.rmtree(p, ignore_errors=True) if p.exists() else None"
 
 # remove all git ignored files
 clean-git-ignored:
@@ -103,8 +86,8 @@ clean-git-ignored:
 clean: clean-docs clean-env clean-git-ignored
 
 # build html documentation
-build-docs-html: install-docs
-    @just run sphinx-build --fresh-env --builder html --doctree-dir ./doc/build/doctrees ./doc/source ./doc/build/html
+build-docs-html:
+    @just run --no-default-groups --group docs --all-extras --isolated --exact sphinx-build --fresh-env --builder html --doctree-dir ./doc/build/doctrees ./doc/source ./doc/build/html
 
 [script]
 _open-pdf-docs:
@@ -113,8 +96,8 @@ _open-pdf-docs:
     webbrowser.open(f"file://{Path('./doc/build/pdf/djangoroutines.pdf').absolute()}")
 
 # build pdf documentation
-build-docs-pdf: install-docs
-    @just run sphinx-build --fresh-env --builder latex --doctree-dir ./doc/build/doctrees ./doc/source ./doc/build/pdf
+build-docs-pdf:
+    @just run --no-default-groups --group docs --all-extras --isolated --exact sphinx-build --fresh-env --builder latex --doctree-dir ./doc/build/doctrees ./doc/source ./doc/build/pdf
     make -C ./doc/build/pdf
     @just _open-pdf-docs
 
@@ -136,11 +119,11 @@ open-docs:
 docs: build-docs-html open-docs
 
 # serve the documentation, with auto-reload
-docs-live: install-docs
-    @just run sphinx-autobuild doc/source doc/build --open-browser --watch src --port 8000 --delay 1
+docs-live:
+    @just run --no-default-groups --group docs --all-extras --isolated --exact sphinx-autobuild doc/source doc/build --open-browser --watch src --port 0 --delay 1
 
 _link_check:
-    -uv run sphinx-build -b linkcheck -Q -D linkcheck_timeout=10 ./doc/source ./doc/build
+    -uv run --no-default-groups --group docs --all-extras sphinx-build -b linkcheck -Q -D linkcheck_timeout=10 ./doc/source ./doc/build
 
 # check the documentation links for broken links
 [script]
@@ -158,12 +141,12 @@ check-docs-links: _link_check
         sys.exit(1)
 
 # lint the documentation
-check-docs:
-    @just run doc8 --ignore-path ./doc/build --max-line-length 100 -q ./doc
+check-docs *ENV:
+    @just run {{ ENV }} --no-default-groups --group docs doc8 --ignore-path ./doc/build --max-line-length 100 -q ./doc
 
 # fetch the intersphinx references for the given package
 [script]
-fetch-refs LIB: install-docs
+fetch-refs LIB: _install-docs
     import os
     from pathlib import Path
     import logging as _logging
@@ -184,62 +167,87 @@ fetch-refs LIB: install-docs
     raise SystemExit(inspect_main([url]))
 
 # lint the code
-check-lint:
-    @just run ruff check --select I
-    @just run ruff check
+check-lint *ENV:
+    @just run {{ ENV }} --no-default-groups --group lint ruff check --select I
+    @just run {{ ENV }} --no-default-groups --group lint ruff check
 
 # check if the code needs formatting
-check-format:
-    @just run ruff format --check
+check-format *ENV:
+    @just run {{ ENV }} --no-default-groups --group lint ruff format --check
 
 # check that the readme renders
-check-readme:
-    @just run -m readme_renderer ./README.md -o /tmp/README.html
+check-readme *ENV:
+    @just run {{ ENV }} --no-default-groups --group lint -m readme_renderer ./README.md -o /tmp/README.html
 
 # sort the python imports
-sort-imports:
-    @just run ruff check --fix --select I
+sort-imports *ENV:
+    @just run {{ ENV }} --no-default-groups --group lint ruff check --fix --select I
 
 # format the code and sort imports
-format: sort-imports
+format *ENV: sort-imports
     just --fmt --unstable
-    @just run ruff format
+    @just run {{ ENV }} --no-default-groups --group lint ruff format
 
 # sort the imports and fix linting issues
-lint: sort-imports
-    @just run ruff check --fix
+lint *ENV: sort-imports
+    @just run {{ ENV }} --no-default-groups --group lint ruff check --fix
 
 # fix formatting, linting issues and import sorting
-fix: lint format
+fix *ENV:
+    @just lint {{ ENV }}
+    @just format {{ ENV }}
 
 # run all static checks
-check: check-lint check-format check-types check-package check-docs check-docs-links check-readme
+check *ENV:
+    @just check-lint {{ ENV }}
+    @just check-format {{ ENV }}
+    @just check-types {{ ENV }}
+    @just check-package
+    @just check-docs {{ ENV }}
+    @just check-readme {{ ENV }}
 
-# run all tests
-test-all: install
-    @just run pytest
-    # @just run pytest --cov-append -k test_dataclasses
-    # @just run pytest --cov-append -k test_dict
-    # @just run pytest --cov-append -k test_no_django
-    uv sync --no-extra rich
-    @just run pytest --cov-append
-    # @just run pytest --cov-append -k test_dataclasses
-    # @just run pytest --cov-append -k test_dict
-    # @just run pytest --cov-append -k test_no_django
+# run all checks including documentation link checking
+check-all *ENV:
+    @just check {{ ENV }}
+    @just check-docs-links
+
+# erase any coverage data
+coverage-erase:
+    @just run --no-default-groups --group coverage coverage erase
+
+# generate the test coverage report
+coverage:
+    @just run --no-default-groups --group coverage coverage combine --keep *.coverage
+    @just run --no-default-groups --group coverage coverage report
+    @just run --no-default-groups --group coverage coverage xml
+
+# run tests without the rich extra (isolated venv)
+test-no-rich *ENV:
+    uv run --no-default-groups --exact --group test --isolated {{ ENV }} pytest --cov-append
+
+# run tests with the rich extra (isolated venv)
+test-rich *ENV:
+    uv run --no-default-groups --exact --all-extras --group test --isolated {{ ENV }} pytest --cov-append
+
+# run all tests (isolated venv)
+test-all *ENV: coverage-erase
+    @just test-rich {{ ENV }}
+    @just test-no-rich {{ ENV }}
 
 # run tests
 test *TESTS:
-    @just run pytest --cov-append {{ TESTS }}
+    @just run --group test --no-sync pytest {{ TESTS }}
+
+# debug a test (project venv)
+debug-test *TESTS:
+    @just run pytest \
+      -o addopts='-ra -q' \
+      -s --trace --pdbcls=IPython.terminal.debugger:Pdb \
+      {{ TESTS }}
 
 # run the pre-commit checks
 precommit:
     @just run pre-commit
-
-# generate the test coverage report
-coverage:
-    @just run coverage combine --keep *.coverage
-    @just run coverage report
-    @just run coverage xml
 
 # run the command in the virtual environment
 run +ARGS:
