@@ -197,6 +197,11 @@ fix *ENV:
     @just lint {{ ENV }}
     @just format {{ ENV }}
 
+# run zizmor security analysis of CI
+zizmor:
+    cargo install --locked zizmor
+    zizmor --format sarif .github/workflows/ > zizmor.sarif
+
 # run all static checks
 check *ENV:
     @just check-lint {{ ENV }}
