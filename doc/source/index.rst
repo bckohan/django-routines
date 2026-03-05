@@ -21,19 +21,19 @@ Django Routines
 
     .. image:: https://img.shields.io/pypi/pyversions/django-routines.svg
         :target: https://pypi.python.org/pypi/django-routines/
-        :alt: PyPI pyversions
+        :alt: Python Versions
 
     .. image:: https://img.shields.io/pypi/djversions/django-routines.svg
         :target: https://pypi.org/project/django-routines/
-        :alt: PyPI Django versions
+        :alt: Django Versions
 
     .. image:: https://img.shields.io/pypi/status/django-routines.svg
         :target: https://pypi.python.org/pypi/django-routines
-        :alt: PyPI status
+        :alt: Development Status
 
     .. image:: https://img.shields.io/pypi/types/django-routines.svg
         :target: https://pypi.python.org/pypi/django-routines
-        :alt: PyPi Typed
+        :alt: Typed
 
     .. image:: https://readthedocs.org/projects/django-routines/badge/?version=latest
         :target: http://django-routines.readthedocs.io/?badge=latest/
@@ -54,6 +54,10 @@ Django Routines
     .. image:: https://img.shields.io/badge/Published%20on-Django%20Packages-0c3c26
         :target: https://djangopackages.org/packages/p/django-routines/
         :alt: Published on Django Packages
+
+    .. image:: https://api.securityscorecards.dev/projects/github.com/bckohan/django-routines/badge
+        :target: https://securityscorecards.dev/viewer/?uri=github.com/bckohan/django-routines
+        :alt: OSSF Scorecard
 
 .. django-admin:: routine
 
