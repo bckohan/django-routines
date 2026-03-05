@@ -52,6 +52,7 @@ jobs:
             django-version: 'dj60'
     env:
       COVERAGE_FILE: py${{ matrix.python-version }}-linux-${{ matrix.django-version }}.coverage
+      ENV_FILE: py${{ matrix.python-version }}-linux-${{ matrix.django-version }}-env
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
       TEST_DJANGO_VERSION: ${{ matrix.django-version }}
 
@@ -93,6 +94,11 @@ jobs:
       with:
         name: ${{ env.COVERAGE_FILE }}
         path: ${{ env.COVERAGE_FILE }}
+    - name: Store env files
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+      with:
+        name: ${{ env.ENV_FILE }}
+        path: requirements-test*.txt
 
   test-macos:
     runs-on: macos-latest
@@ -124,6 +130,7 @@ jobs:
 
     env:
       COVERAGE_FILE: py${{ matrix.python-version }}-macos-${{ matrix.django-version }}.coverage
+      ENV_FILE: py${{ matrix.python-version }}-macos-${{ matrix.django-version }}-env
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
       TEST_DJANGO_VERSION: ${{ matrix.django-version }}
 
@@ -166,6 +173,11 @@ jobs:
       with:
         name: ${{ env.COVERAGE_FILE }}
         path: ${{ env.COVERAGE_FILE }}
+    - name: Store env files
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+      with:
+        name: ${{ env.ENV_FILE }}
+        path: requirements-test*.txt
 
   test-windows:
     runs-on: windows-latest
@@ -199,6 +211,7 @@ jobs:
             django-version: 'dj60'
     env:
       COVERAGE_FILE: py${{ matrix.python-version }}-windows-${{ matrix.django-version }}.coverage
+      ENV_FILE: py${{ matrix.python-version }}-windows-${{ matrix.django-version }}-env
       TEST_PYTHON_VERSION: ${{ matrix.python-version }}
       TEST_DJANGO_VERSION: ${{ matrix.django-version }}
 
@@ -240,6 +253,11 @@ jobs:
       with:
         name: ${{ env.COVERAGE_FILE }}
         path: ${{ env.COVERAGE_FILE }}
+    - name: Store env files
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+      with:
+        name: ${{ env.ENV_FILE }}
+        path: requirements-test*.txt
 
   coverage-combine:
     needs: [test-linux, test-macos, test-windows]
