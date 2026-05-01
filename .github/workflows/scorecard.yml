@@ -18,6 +18,9 @@ jobs:
     permissions:
       security-events: write
       id-token: write
+    environment:
+      name: scorecard
+      deployment: false  # Prevents creating a GitHub deployment object
 
     steps:
       - name: "Checkout code"
