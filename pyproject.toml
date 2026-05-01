@@ -126,7 +126,7 @@ dj52 = [
     "Django~=5.2",
 ]
 dj60 = [
-    "Django~=6.0; python_version >= '3.12'",
+    "Django>=6,<6; python_version >= '3.12'",
 ]
 
 [tool.mypy]
