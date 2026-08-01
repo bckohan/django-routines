@@ -36,7 +36,7 @@ jobs:
         django-version:
           - 'dj42' # LTS April 2026
           - 'dj52' # LTS April 2028
-          - 'dj60' # April 2027
+          - 'dj61' # April 2027
         exclude:
           - python-version: '3.13'
             django-version: 'dj42'
@@ -44,9 +44,9 @@ jobs:
             django-version: 'dj42'
 
           - python-version: '3.10'
-            django-version: 'dj60'
+            django-version: 'dj61'
           - python-version: '3.11'
-            django-version: 'dj60'
+            django-version: 'dj61'
     env:
       COVERAGE_FILE: py${{ matrix.python-version }}-linux-${{ matrix.django-version }}.coverage
       ENV_FILE: py${{ matrix.python-version }}-linux-${{ matrix.django-version }}-env
@@ -108,7 +108,7 @@ jobs:
         django-version:
           - 'dj42' # LTS April 2026
           - 'dj52' # LTS April 2028
-          - 'dj60' # April 2027
+          - 'dj61' # April 2027
         exclude:
           - python-version: '3.12'
             django-version: 'dj42'
@@ -121,9 +121,9 @@ jobs:
             django-version: 'dj52'
 
           - python-version: '3.10'
-            django-version: 'dj60'
+            django-version: 'dj61'
           - python-version: '3.12'
-            django-version: 'dj60'
+            django-version: 'dj61'
 
     env:
       COVERAGE_FILE: py${{ matrix.python-version }}-macos-${{ matrix.django-version }}.coverage
@@ -190,7 +190,7 @@ jobs:
         django-version:
           - 'dj42' # LTS April 2026
           - 'dj52' # LTS April 2028
-          - 'dj60' # April 2027
+          - 'dj61' # April 2027
         exclude:
           - python-version: '3.12'
             django-version: 'dj42'
@@ -203,9 +203,9 @@ jobs:
             django-version: 'dj52'
 
           - python-version: '3.10'
-            django-version: 'dj60'
+            django-version: 'dj61'
           - python-version: '3.12'
-            django-version: 'dj60'
+            django-version: 'dj61'
     env:
       COVERAGE_FILE: py${{ matrix.python-version }}-windows-${{ matrix.django-version }}.coverage
       ENV_FILE: py${{ matrix.python-version }}-windows-${{ matrix.django-version }}-env
