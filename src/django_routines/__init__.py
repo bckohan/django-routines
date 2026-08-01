@@ -21,6 +21,8 @@ files and then run them in sequence by name using the provided :django-admin:`ro
 command.
 """
 
+from __future__ import annotations
+
 import bisect
 import keyword
 import sys
@@ -30,7 +32,7 @@ from dataclasses import asdict, dataclass, field
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import Promise
 
-VERSION = (1, 7, 1)
+VERSION = (1, 7, 2)
 
 __title__ = "Django Routines"
 __version__ = ".".join(str(i) for i in VERSION)
@@ -40,18 +42,18 @@ __copyright__ = "Copyright 2024-2025 Brian Kohan"
 
 __all__ = [
     "ROUTINE_SETTING",
+    "Command",
+    "FinalizeCallback",
+    "InitializeCallback",
     "ManagementCommand",
-    "SystemCommand",
+    "PostHook",
+    "PreHook",
     "Routine",
-    "routine",
+    "SystemCommand",
     "command",
     "get_routine",
+    "routine",
     "routines",
-    "Command",
-    "InitializeCallback",
-    "FinalizeCallback",
-    "PreHook",
-    "PostHook",
 ]
 
 
@@ -59,24 +61,24 @@ ROUTINE_SETTING = "DJANGO_ROUTINES"
 
 
 R = t.TypeVar("R")
-CommandTypes = t.Union[t.Type["ManagementCommand"], t.Type["SystemCommand"]]
-Command = t.Union["ManagementCommand", "SystemCommand"]
+CommandTypes = type["ManagementCommand"] | type["SystemCommand"]
+Command: t.TypeAlias = "ManagementCommand | SystemCommand"
 """
 Command type, either a ManagementCommand or SystemCommand.
 """
 
-InitializeCallback = t.Union[
-    str,
-    t.Callable[
+InitializeCallback = (
+    str
+    | t.Callable[
         [
             "Routine",
-            t.List[t.Union["ManagementCommand", "SystemCommand"]],
-            t.Set[str],
-            t.Dict[str, t.Any],
+            "list[ManagementCommand | SystemCommand]",
+            set[str],
+            dict[str, t.Any],
         ],
         None,
-    ],
-]
+    ]
+)
 """
 A callable or import string to a callable that will be run just before the routine's
 first command is run.
@@ -94,7 +96,7 @@ first command is run.
 :type options: typing.Dict[str, typing.Any]
 """
 
-FinalizeCallback = t.Union[str, t.Callable[["Routine", t.List[t.Any]], None]]
+FinalizeCallback = str | t.Callable[["Routine", list[t.Any]], None]
 """
 A callable or import string to a callable that will be run just after the routine's
 last command is run. 
@@ -116,12 +118,12 @@ Hook = t.Callable[
         "Routine",
         "Command",
         t.Optional["Command"],
-        t.Dict[str, t.Any],
+        dict[str, t.Any],
     ],
-    t.Optional[bool],
+    bool | None,
 ]
 
-PreHook = t.Union[str, Hook]
+PreHook = str | Hook
 """
 Function type signature for a pre-hook functions. Pre-hook functions can modify command
 objects (including their arguments) before they are run.
@@ -141,7 +143,7 @@ objects (including their arguments) before they are run.
 :rtype: typing.Optional[bool]
 """
 
-PostHook = t.Union[str, Hook]
+PostHook = str | Hook
 """
 Function type signature for a post-hook functions. Post-hook functions can modify
 command objects (including their results) after they are run or the next command
@@ -180,7 +182,7 @@ class _RoutineCommand:
     A base Dataclass to hold the routine command information.
     """
 
-    command: t.Union[str, t.Tuple[str, ...]]
+    command: str | tuple[str, ...]
     """
     The command and its arguments to run the routine, all strings or
     coercible to strings that the command will parse correctly.
@@ -195,7 +197,7 @@ class _RoutineCommand:
     insertion order.
     """
 
-    switches: t.Union[t.List[str], t.Tuple[str, ...]] = tuple()
+    switches: list[str] | tuple[str, ...] = ()
     """
     If any switches are specified, the command will only run when one of the
     switches is activated on routine invocation from the command line. For example,
@@ -207,7 +209,7 @@ class _RoutineCommand:
         django-admin routine <routine_name> --init
     """
 
-    pre_hook: t.Optional[PreHook] = None
+    pre_hook: PreHook | None = None
     """
     A function that will be run before the command is run. It may make modifications
     to the command or decide to skip the command by returning True. See
@@ -216,7 +218,7 @@ class _RoutineCommand:
     May be the callable function or an import string to the callable function.
     """
 
-    post_hook: t.Optional[PostHook] = None
+    post_hook: PostHook | None = None
     """
     A function that will be run after the command has been run. It may make
     modifications to the command (including its result) or decide to exit the routine
@@ -246,21 +248,21 @@ class _RoutineCommand:
         return self.command if isinstance(self.command, str) else self.command[0]
 
     @property
-    def command_args(self) -> t.Tuple[str, ...]:
-        return tuple() if isinstance(self.command, str) else self.command[1:]
+    def command_args(self) -> tuple[str, ...]:
+        return () if isinstance(self.command, str) else self.command[1:]
 
     @property
     def command_str(self) -> str:
         return self.command if isinstance(self.command, str) else " ".join(self.command)
 
     @classmethod
-    def from_dict(cls, obj: t.Union[Command, t.Dict[str, t.Any]]) -> Command:
+    def from_dict(cls, obj: Command | dict[str, t.Any]) -> Command:
         """
         Return a RoutineCommand object from a dictionary representing it.
         """
         if isinstance(obj, dict):
             cmd_cls: CommandTypes = ManagementCommand
-            command_types: t.List[CommandTypes] = [ManagementCommand, SystemCommand]
+            command_types: list[CommandTypes] = [ManagementCommand, SystemCommand]
             kind = obj.get("kind", None)
             for ct in command_types:
                 if ct.kind in obj:
@@ -281,7 +283,7 @@ class _RoutineCommand:
             )
         return obj
 
-    def to_dict(self) -> t.Dict[str, t.Any]:
+    def to_dict(self) -> dict[str, t.Any]:
         return {
             self.kind: self.command,
             **{k: v for k, v in asdict(self).items() if k != "command"},
@@ -295,13 +297,13 @@ class ManagementCommand(_RoutineCommand):
     """
 
     @property
-    def management(self) -> t.Union[str, t.Tuple[str, ...]]:
+    def management(self) -> str | tuple[str, ...]:
         """
         Alias for :attr:`~django_routines.RoutineCommand.command`.
         """
         return self.command
 
-    options: t.Dict[str, t.Any] = field(default_factory=dict)
+    options: dict[str, t.Any] = field(default_factory=dict)
     """
     Any options to pass to the command via :func:`~django.core.management.call_command`.
     **Not valid for SystemCommands**
@@ -321,7 +323,7 @@ class SystemCommand(_RoutineCommand):
     """
 
     @property
-    def system(self) -> t.Union[str, t.Tuple[str, ...]]:
+    def system(self) -> str | tuple[str, ...]:
         """
         Alias for :attr:`~django_routines.RoutineCommand.command`.
         """
@@ -336,7 +338,7 @@ class SystemCommand(_RoutineCommand):
     kind: t.ClassVar[str] = "system"
 
 
-def _insort_right_with_key(a: t.List[R], x: R, key: t.Callable[[R], t.Any]) -> None:
+def _insort_right_with_key(a: list[R], x: R, key: t.Callable[[R], t.Any]) -> None:
     """
     A function that implements bisect.insort_right with a key callable on items.
 
@@ -360,18 +362,18 @@ class Routine:
     The name of the routine.
     """
 
-    help_text: t.Union[str, Promise]
+    help_text: str | Promise
     """
     The help text to display for the routine. May be a string wrapped by
     :func:`~django.utils.translation.gettext_lazy`
     """
 
-    commands: t.List[Command] = field(default_factory=list)
+    commands: list[Command] = field(default_factory=list)
     """
     The commands to run in the routine.
     """
 
-    switch_helps: t.Dict[str, t.Union[str, Promise]] = field(default_factory=dict)
+    switch_helps: dict[str, str | Promise] = field(default_factory=dict)
     """
     Help text for switches. The keys are the switch names, and the values are the help
     text to display for each switch in the CLI help output.
@@ -392,7 +394,7 @@ class Routine:
     Keep going if a command fails.
     """
 
-    initialize: t.Optional[InitializeCallback] = None
+    initialize: InitializeCallback | None = None
     """
     A function to run before the routine is run.
     See :attr:`~django_routines.InitializeCallback`
@@ -400,7 +402,7 @@ class Routine:
     May be the callable function or an import string to the callable function.
     """
 
-    finalize: t.Optional[FinalizeCallback] = None
+    finalize: FinalizeCallback | None = None
     """
     A function to run after the routine is run.
     See :attr:`~django_routines.FinalizeCallback`
@@ -408,7 +410,7 @@ class Routine:
     May be the callable function or an import string to the callable function.
     """
 
-    pre_hook: t.Optional[PreHook] = None
+    pre_hook: PreHook | None = None
     """
     This function will be run before each command that lacks its own pre_hook in the
     routine. See :attr:`~django_routines.PreHook`. You can determine if this is the
@@ -417,7 +419,7 @@ class Routine:
     May be the callable function or an import string to the callable function.
     """
 
-    post_hook: t.Optional[PostHook] = None
+    post_hook: PostHook | None = None
     """
     This function will be run after each command that lacks its own post_hook in the
     routine. See :attr:`~django_routines.PostHook`. You can determine if this is the
@@ -437,18 +439,18 @@ class Routine:
         return len(self.commands)
 
     @property
-    def switches(self) -> t.List[str]:
-        switches: t.Set[str] = set()
+    def switches(self) -> list[str]:
+        switches: set[str] = set()
         for command in self.commands:
             if command.switches:
                 switches.update(command.switches)
         return sorted(switches)
 
-    def plan(self, switches: t.Set[str]) -> t.List[Command]:
+    def plan(self, switches: set[str]) -> list[Command]:
         def set_hooks(
             command: Command,
-            pre_hook: t.Optional[PreHook],
-            post_hook: t.Optional[PostHook],
+            pre_hook: PreHook | None,
+            post_hook: PostHook | None,
         ) -> Command:
             if pre_hook and not command.pre_hook:
                 command.pre_hook = pre_hook
@@ -472,13 +474,13 @@ class Routine:
         return command
 
     @classmethod
-    def from_dict(cls, obj: t.Union["Routine", t.Dict[str, t.Any]]) -> "Routine":
+    def from_dict(cls, obj: Routine | dict[str, t.Any]) -> Routine:
         """
         Return a RoutineCommand object from a dictionary representing it.
         """
         if isinstance(obj, Routine):
             return obj
-        commands: t.List[Command] = []
+        commands: list[Command] = []
         for cmd in obj.get("commands", []):
             _insort_right_with_key(
                 commands,
@@ -490,7 +492,7 @@ class Routine:
             commands=commands,
         )
 
-    def to_dict(self) -> t.Dict[str, t.Any]:
+    def to_dict(self) -> dict[str, t.Any]:
         return {
             "name": self.name,
             "help_text": self.help_text,
@@ -508,15 +510,15 @@ class Routine:
 
 def routine(
     name: str,
-    help_text: t.Union[str, Promise] = "",
+    help_text: str | Promise = "",
     *commands: Command,
     subprocess: bool = False,
     atomic: bool = False,
     continue_on_error: bool = False,
-    initialize: t.Optional[InitializeCallback] = None,
-    finalize: t.Optional[FinalizeCallback] = None,
-    pre_hook: t.Optional[PreHook] = None,
-    post_hook: t.Optional[PostHook] = None,
+    initialize: InitializeCallback | None = None,
+    finalize: FinalizeCallback | None = None,
+    pre_hook: PreHook | None = None,
+    post_hook: PostHook | None = None,
     **switch_helps,
 ):
     """
@@ -544,7 +546,7 @@ def routine(
     if not settings.get(ROUTINE_SETTING, {}):
         settings[ROUTINE_SETTING] = {}
 
-    existing: t.List[Command] = []
+    existing: list[Command] = []
     try:
         routine = get_routine(name, scope=settings)
         help_text = (
@@ -578,8 +580,8 @@ def routine(
 
 
 def _get_routine(
-    routine_name: str, routines: t.Dict[str, t.Any]
-) -> t.Union[t.Dict[str, t.Any], Routine]:
+    routine_name: str, routines: dict[str, t.Any]
+) -> dict[str, t.Any] | Routine:
     """
     Routine may undergo some normalization, we account for that here when trying
     to fetch them.
@@ -608,9 +610,9 @@ def _add_command(
     routine: str,
     *command: str,
     priority: int = _RoutineCommand.priority,
-    switches: t.Optional[t.Sequence[str]] = _RoutineCommand.switches,
-    pre_hook: t.Optional[PreHook] = None,
-    post_hook: t.Optional[PostHook] = None,
+    switches: t.Sequence[str] | None = _RoutineCommand.switches,
+    pre_hook: PreHook | None = None,
+    post_hook: PostHook | None = None,
     **options,
 ):
     settings = sys._getframe(2).f_globals
@@ -623,7 +625,7 @@ def _add_command(
     extra = {"options": options} if command_type is ManagementCommand else {}
     new_cmd = routine_obj.add(
         command_type(
-            t.cast(t.Tuple[str], command),
+            t.cast(tuple[str], command),
             priority,
             tuple(switches or []),
             pre_hook=pre_hook,
@@ -639,9 +641,9 @@ def command(
     routine: str,
     *command: str,
     priority: int = RoutineCommand.priority,
-    switches: t.Optional[t.Sequence[str]] = RoutineCommand.switches,
-    pre_hook: t.Optional[PreHook] = None,
-    post_hook: t.Optional[PostHook] = None,
+    switches: t.Sequence[str] | None = RoutineCommand.switches,
+    pre_hook: PreHook | None = None,
+    post_hook: PostHook | None = None,
     **options,
 ):
     """
@@ -683,9 +685,9 @@ def system(
     routine: str,
     *command: str,
     priority: int = _RoutineCommand.priority,
-    switches: t.Optional[t.Sequence[str]] = _RoutineCommand.switches,
-    pre_hook: t.Optional[PreHook] = None,
-    post_hook: t.Optional[PostHook] = None,
+    switches: t.Sequence[str] | None = _RoutineCommand.switches,
+    pre_hook: PreHook | None = None,
+    post_hook: PostHook | None = None,
 ):
     """
     Add a system command to the named routine in settings to be run.

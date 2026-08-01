@@ -31,7 +31,7 @@ from django_routines import (
 from django_routines.exceptions import ExitEarly
 from django_routines.signals import routine_failed, routine_finished, routine_started
 
-RCommand = t.Union[ManagementCommand, SystemCommand]
+RCommand = ManagementCommand | SystemCommand
 
 width = 80
 use_rich = find_spec("rich") is not None
@@ -88,7 +88,7 @@ def {routine_func}(
 """
 
 
-def load_hook(hook: t.Union[str, Hook]) -> Hook:
+def load_hook(hook: str | Hook) -> Hook:
     """
     Load a hook function from a string or return the hook as-is.
 
@@ -116,32 +116,34 @@ class Command(TyperCommand, rich_markup_mode="rich"):
     help = _("Run batches of commands configured in settings.")
 
     verbosity: int = 1
-    switches: t.Set[str] = set()
+    switches: set[str]
     """
     The set of active switches for this routine run.
     """
 
-    suppressed_base_arguments = set()
+    suppressed_base_arguments = set()  # noqa: RUF012
 
-    _routine: t.Optional[Routine] = None
+    _routine: Routine | None = None
     _verbosity_passed: bool = False
 
     manage_script: str = sys.argv[0]
 
-    _routine_options: t.Dict[str, t.Any] = {}
-    _previous_command: t.Optional[RCommand] = None
+    _previous_command: RCommand | None = None
 
-    _results: t.List[t.Any] = []
+    # the builtin list is shadowed by the list subcommand in this class scope,
+    # so we must use t.List for annotations
+    _results: t.List[t.Any]  # noqa: UP006
+    _routine_options: dict[str, t.Any]
 
     @property
-    def routine(self) -> t.Optional[Routine]:
+    def routine(self) -> Routine | None:
         """
         The routine this command instance was created to run.
         """
         return self._routine
 
     @routine.setter
-    def routine(self, routine: t.Union[str, Routine]):
+    def routine(self, routine: str | Routine):
         # we create our own copy of the routine because run-specific data will be
         # added to the objects
         self._routine = deepcopy(
@@ -149,7 +151,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         )
 
     @property
-    def plan(self) -> t.List[RCommand]:
+    def plan(self) -> t.List[RCommand]:  # noqa: UP006
         """
         The Commands that make up the execution plan for the currently
         active routine and switches.
@@ -172,6 +174,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         ] = manage_script,
         verbosity: Verbosity = verbosity,
     ):
+        self.switches = set()
         self._results = []
         self._routine_options = ctx.params.copy()
         self.verbosity = verbosity
@@ -182,7 +185,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         self.manage_script = manage_script
 
     @finalize()
-    def finished(self, results: t.List[t.Any]):
+    def finished(self, results: t.List[t.Any]):  # noqa: UP006
         """
         If we have a finalize callback defined, call it
         with the results of the routine run.
@@ -197,9 +200,9 @@ class Command(TyperCommand, rich_markup_mode="rich"):
 
     def _run_routine(
         self,
-        subprocess: t.Optional[bool] = None,
-        atomic: t.Optional[bool] = None,
-        continue_on_error: t.Optional[bool] = None,
+        subprocess: bool | None = None,
+        atomic: bool | None = None,
+        continue_on_error: bool | None = None,
     ):
         """
         Execute the current routine plan. If verbosity is zero, do not print the
@@ -270,7 +273,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                                 )
                             ):
                                 continue
-                            raise routine_exc
+                            raise
                 except ExitEarly:
                     routine_finished.send(
                         sender=self,
@@ -288,9 +291,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
             **self._routine_options,
         )
 
-    def _call_command(
-        self, command: ManagementCommand, nxt: t.Optional[RCommand]
-    ) -> bool:
+    def _call_command(self, command: ManagementCommand, nxt: RCommand | None) -> bool:
         """
         Call a management command with the given options and arguments. If the command
         has a pre_hook, it will be called before the command is run. If the pre
@@ -301,11 +302,10 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         :return: True if the command was run, False if it was skipped due to pre_hook.
         """
         assert self.routine
-        if command.pre_hook:
-            if load_hook(command.pre_hook)(
-                self.routine, command, self._previous_command, self._routine_options
-            ):
-                return False
+        if command.pre_hook and load_hook(command.pre_hook)(
+            self.routine, command, self._previous_command, self._routine_options
+        ):
+            return False
         self._previous_command = command
         cmd = get_command(
             command.command_name,
@@ -333,16 +333,13 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         self._results.append(command.result)
         if command.command_name == "makemigrations":
             importlib.invalidate_caches()
-        if command.post_hook:
-            if load_hook(command.post_hook)(
-                self.routine, command, nxt, self._routine_options
-            ):
-                raise ExitEarly()
+        if command.post_hook and load_hook(command.post_hook)(
+            self.routine, command, nxt, self._routine_options
+        ):
+            raise ExitEarly()
         return True
 
-    def _subprocess(
-        self, command: RCommand, nxt: t.Optional[RCommand]
-    ) -> t.Optional[int]:
+    def _subprocess(self, command: RCommand, nxt: RCommand | None) -> int | None:
         """
         Run a system command as a subprocess. If the command has a pre_hook, it will
         be called before the command is run. If the pre hook returns a truthy value,
@@ -354,11 +351,10 @@ class Command(TyperCommand, rich_markup_mode="rich"):
             due to pre_hook.
         """
         assert self.routine
-        if command.pre_hook:
-            if load_hook(command.pre_hook)(
-                self.routine, command, self._previous_command, self._routine_options
-            ):
-                return None
+        if command.pre_hook and load_hook(command.pre_hook)(
+            self.routine, command, self._previous_command, self._routine_options
+        ):
+            return None
         self._previous_command = command
         options = []
         if isinstance(command, ManagementCommand):
@@ -383,7 +379,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                                 else:
                                     expected_opts -= 1
                             else:
-                                options.append(f"--{opt}={str(value)}")
+                                options.append(f"--{opt}={value!s}")
                             break
 
                 if len(options) != expected_opts:
@@ -415,7 +411,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         if self.verbosity > 0:
             self.secho(" ".join(args), fg="cyan")
 
-        command.result = subprocess.run(args, env=os.environ.copy())
+        command.result = subprocess.run(args, env=os.environ.copy(), check=False)
         self._results.append(command.result)
         if command.result.returncode > 0:
             raise CommandError(
@@ -423,11 +419,10 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                     "Subprocess command failed: {command} with return code {code}."
                 ).format(command=" ".join(args), code=command.result.returncode)
             )
-        if command.post_hook:
-            if load_hook(command.post_hook)(
-                self.routine, command, nxt, self._routine_options
-            ):
-                raise ExitEarly()
+        if command.post_hook and load_hook(command.post_hook)(
+            self.routine, command, nxt, self._routine_options
+        ):
+            raise ExitEarly()
         return command.result.returncode
 
     def _list(self) -> None:
@@ -536,7 +531,7 @@ for routine in routines():
         )
         command_strings.append(f"[{priority}] {cmd_str}{switches_str}")
 
-    exec(cmd_code)
+    exec(cmd_code)  # noqa: S102
 
     if not use_rich and command_strings:
         width = max([len(cmd) for cmd in command_strings])

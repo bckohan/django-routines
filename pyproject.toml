@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-routines"
-version = "1.7.1"
+version = "1.7.2"
 description = "Define named groups of management commands in Django settings files for batched execution."
 requires-python = ">=3.10,<4.0"
 authors = [
@@ -17,7 +17,7 @@ repository = "https://github.com/bckohan/django-routines"
 homepage = "https://django-routines.readthedocs.io"
 keywords = ["django", "CLI", "management", "routine", "routines", "batch", "commands", "deploy", "tasks", "package", "backup"]
 dependencies = [
-    "Django>=4.2,<6.1",
+    "Django>=4.2,<6.2",
     "django-typer>=3.2.2,<4.0"
 ]
 classifiers = [
@@ -29,6 +29,7 @@ classifiers = [
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.2",
     "Framework :: Django :: 6.0",
+    "Framework :: Django :: 6.1",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
@@ -51,7 +52,7 @@ conflicts = [
   [
     { group = "dj42" },
     { group = "dj52" },
-    { group = "dj60" },
+    { group = "dj61" },
   ],
 ]
 
@@ -118,15 +119,16 @@ dev = [
     "tomlkit>=0.13.2",
 ]
 
+
 # for CI and testing
 dj42 = [
-    "Django~=4.2; python_version < '3.13'",
+    "Django>=4.2,<5.0; python_version < '3.13'",
 ]
 dj52 = [
-    "Django~=5.2",
+    "Django>=5.2,<6.0"
 ]
-dj60 = [
-    "Django~=6.0; python_version >= '3.12'",
+dj61 = [
+    "Django>=6.1rc1,<6.2; python_version >= '3.12'",
 ]
 
 [tool.mypy]
