@@ -8,7 +8,6 @@ from copy import deepcopy
 from importlib.util import find_spec
 from typing import Annotated
 
-import click
 import typer
 from django.core.management import CommandError, call_command
 from django.core.management.base import BaseCommand
@@ -17,6 +16,7 @@ from django.utils.module_loading import import_string
 from django.utils.translation import gettext as _
 from django_typer.management import TyperCommand, finalize, get_command, initialize
 from django_typer.types import Verbosity
+from typer._click.core import ParameterSource
 
 from django_routines import (
     Hook,
@@ -179,8 +179,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
         self._routine_options = ctx.params.copy()
         self.verbosity = verbosity
         self._pass_verbosity = (
-            ctx.get_parameter_source("verbosity")
-            is not click.core.ParameterSource.DEFAULT
+            ctx.get_parameter_source("verbosity") is not ParameterSource.DEFAULT
         )
         self.manage_script = manage_script
 
@@ -440,12 +439,12 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                 else ""
             )
             if self.force_color or not self.no_color:
-                priority = click.style(priority, fg="green")
-                cmd_str = click.style(cmd_str, fg="cyan", bold=True)
+                priority = typer.style(priority, fg="green")
+                cmd_str = typer.style(cmd_str, fg="cyan", bold=True)
                 opt_str = (
                     ", ".join(
                         [
-                            f"{click.style(k, 'blue')}={click.style(v, 'magenta')}"
+                            f"{typer.style(k, 'blue')}={typer.style(v, 'magenta')}"
                             for k, v in command.options.items()
                         ]
                     )
@@ -453,7 +452,7 @@ class Command(TyperCommand, rich_markup_mode="rich"):
                     else ""
                 )
                 switches_str += ", ".join(
-                    click.style(to_cli_option(switch).lstrip("-"), fg="yellow")
+                    typer.style(to_cli_option(switch).lstrip("-"), fg="yellow")
                     for switch in (command.switches or [])
                 )
             else:

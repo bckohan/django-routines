@@ -18,7 +18,7 @@ homepage = "https://django-routines.readthedocs.io"
 keywords = ["django", "CLI", "management", "routine", "routines", "batch", "commands", "deploy", "tasks", "package", "backup"]
 dependencies = [
     "Django>=5.2,<6.2",
-    "django-typer>=4.0,<5.0"
+    "django-typer>=4.0,<4.2"
 ]
 classifiers = [
     "Environment :: Console",
