@@ -9,15 +9,20 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-permissions: read-all
+concurrency:
+  group: scorecard-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   analysis:
     name: Scorecard analysis
     runs-on: ubuntu-latest
     permissions:
-      security-events: write
-      id-token: write
+      security-events: write # allow uploading code scanning results
+      id-token: write # to allow OIDC authentication for publishing results to OpenSSF REST API
     environment:
       name: scorecard
       deployment: false  # Prevents creating a GitHub deployment object
