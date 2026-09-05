@@ -19,12 +19,22 @@ from tests import track_file
 import json
 import os
 from pathlib import Path
+import typer
 
 from tests.django_routines_tests.management.commands.track import (
     invoked,
     passed_options,
     TestError,
 )
+
+TYPER_VERSION = tuple(int(v) for v in typer.__version__.split(".")[:2])
+
+# typer 0.27 dropped its click dependency and renders parameter type
+# metavars differently (e.g. <str> instead of TEXT)
+if TYPER_VERSION >= (0, 27):
+    TEXT, INT_RANGE, PATH_MV = "<str>", "<int range>", "<path>"
+else:
+    TEXT, INT_RANGE, PATH_MV = "TEXT", "INTEGER RANGE", "PATH"
 
 WORD = re.compile(r"\w+")
 
@@ -541,33 +551,33 @@ class CoreTests(with_typehint(TestCase)):
     def test_subprocess(self):
         self.test_command(subprocess=True)
 
-    routine_help_rich = """
+    routine_help_rich = f"""
  Usage: ./manage.py routine [OPTIONS] COMMAND [ARGS]...                         
                                                                                 
  Run batches of commands configured in settings.                                
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --manage-script        TEXT  The manage script to use if running management  │
+│ --manage-script        {TEXT}  The manage script to use if running management  │
 │                              commands as subprocesses.                       │
 │                              [default: manage.py]                            │
 │ --help                       Show this message and exit.                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Django ─────────────────────────────────────────────────────────────────────╮
-│ --verbosity          INTEGER RANGE [0<=x<=3]  Verbosity level; 0=minimal     │
+│ --verbosity          {INT_RANGE} [0<=x<=3]  Verbosity level; 0=minimal     │
 │                                               output, 1=normal output,       │
 │                                               2=verbose output, 3=very       │
 │                                               verbose output                 │
 │                                               [default: 1]                   │
 │ --version                                     Show program's version number  │
 │                                               and exit.                      │
-│ --settings           TEXT                     The Python path to a settings  │
+│ --settings           {TEXT}                     The Python path to a settings  │
 │                                               module, e.g.                   │
 │                                               "myproject.settings.main". If  │
 │                                               this isn't provided, the       │
 │                                               DJANGO_SETTINGS_MODULE         │
 │                                               environment variable will be   │
 │                                               used.                          │
-│ --pythonpath         PATH                     A directory to add to the      │
+│ --pythonpath         {PATH_MV}                     A directory to add to the      │
 │                                               Python path, e.g.              │
 │                                               "/home/djangoprojects/myproje… │
 │ --traceback                                   Raise on CommandError          │
@@ -653,23 +663,23 @@ class CoreTests(with_typehint(TestCase)):
             0.99,
         )
 
-    routine_help_no_rich = """
+    routine_help_no_rich = f"""
 Usage: ./manage.py routine [OPTIONS] COMMAND [ARGS]...
 
   Run batches of commands configured in settings.
 
 Options:
-  --manage-script TEXT       The manage script to use if running management
+  --manage-script {TEXT}       The manage script to use if running management
                              commands as subprocesses.  [default: manage.py]
-  --verbosity INTEGER RANGE  Verbosity level; 0=minimal output, 1=normal
+  --verbosity {INT_RANGE}  Verbosity level; 0=minimal output, 1=normal
                              output, 2=verbose output, 3=very verbose output
                              [default: 1; 0<=x<=3]
   --version                  Show program's version number and exit.
-  --settings TEXT            The Python path to a settings module, e.g.
+  --settings {TEXT}            The Python path to a settings module, e.g.
                              "myproject.settings.main". If this isn't
                              provided, the DJANGO_SETTINGS_MODULE environment
                              variable will be used.
-  --pythonpath PATH          A directory to add to the Python path, e.g.
+  --pythonpath {PATH_MV}          A directory to add to the Python path, e.g.
                              "/home/djangoprojects/myproject".
   --traceback                Raise on CommandError exceptions
   --no-color                 Don't colorize the command output.
@@ -732,7 +742,7 @@ Commands:
         self.assertGreater(
             similarity(
                 result.stdout.strip().decode(),
-                self.routine_help_no_rich.format(script=sys.argv[0]).strip(),
+                self.routine_help_no_rich.strip(),
             ),
             0.99,
         )
