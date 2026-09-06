@@ -97,7 +97,6 @@ and one called package:
 
 .. typer:: django_routines.management.commands.routine.Command:typer_app:package
     :prog: django-admin routine package
-    :theme: dark
     :convert-png: latex
 
 Now we can run all of our package routines with one command:
@@ -116,7 +115,6 @@ The deploy command has several switches that we can enable to run additional com
 
 .. typer:: django_routines.management.commands.routine.Command:typer_app:deploy
     :prog: django-admin routine deploy
-    :theme: dark
     :convert-png: latex
 
 For example to deploy our demo on a new server we would run:
