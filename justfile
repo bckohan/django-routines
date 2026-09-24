@@ -25,6 +25,58 @@ clean_manage *COMMAND:
     os.environ["DJANGO_SETTINGS_MODULE"] = "tests.base_settings"
     management.execute_from_command_line(sys.argv + "{{ COMMAND }}".split(" "))
 
+# regenerate the help screenshots (examples/*.svg) referenced by the README
+[script]
+readme-svgs:
+    import io
+    import os
+    import sys
+    from pathlib import Path
+    os.environ["DJANGO_SETTINGS_MODULE"] = "examples.readme"
+    os.environ["TERMINAL_WIDTH"] = "80"
+    import django
+    django.setup()
+    from django.core import management
+    from rich.console import Console
+    from rich.theme import Theme
+    from typer import rich_utils
+
+    out = Path("{{ source_directory() }}") / "examples"
+    for routine in ("package", "deploy"):
+        console = Console(
+            theme=Theme(
+                {
+                    "option": rich_utils.STYLE_OPTION,
+                    "switch": rich_utils.STYLE_SWITCH,
+                    "negative_option": rich_utils.STYLE_NEGATIVE_OPTION,
+                    "negative_switch": rich_utils.STYLE_NEGATIVE_SWITCH,
+                    "types": rich_utils.STYLE_TYPES,
+                    "types_sep": rich_utils.STYLE_TYPES_SEPARATOR,
+                    "usage": rich_utils.STYLE_USAGE,
+                }
+            ),
+            highlighter=rich_utils.highlighter,
+            color_system=rich_utils.COLOR_SYSTEM,
+            force_terminal=rich_utils.FORCE_TERMINAL,
+            width=80,
+            record=True,
+            file=io.StringIO(),
+            legacy_windows=False,
+        )
+        get_console = rich_utils._get_rich_console
+        rich_utils._get_rich_console = lambda stderr=False: console
+        try:
+            sys.argv = ["./manage.py", "routine", routine, "--help"]
+            try:
+                management.execute_from_command_line(sys.argv)
+            except SystemExit:
+                pass
+        finally:
+            rich_utils._get_rich_console = get_console
+        svg = out / f"{routine}.svg"
+        svg.write_text(console.export_svg(title=f"./manage.py routine {routine}"))
+        print(f"wrote {svg.relative_to(Path.cwd())}")
+
 # install the uv package manager
 [linux]
 [macos]
