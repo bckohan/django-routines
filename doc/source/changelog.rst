@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+v1.9.0 (2026-11-22)
+===================
+
+* Require django-typer 4.3+ and transitively typer 0.29 and pydantic.
+
+
 v1.8.1 (2026-09-06)
 ===================
 

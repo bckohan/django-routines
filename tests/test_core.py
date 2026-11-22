@@ -19,22 +19,12 @@ from tests import track_file
 import json
 import os
 from pathlib import Path
-import typer
 
 from tests.django_routines_tests.management.commands.track import (
     invoked,
     passed_options,
     TestError,
 )
-
-TYPER_VERSION = tuple(int(v) for v in typer.__version__.split(".")[:2])
-
-# typer 0.27 dropped its click dependency and renders parameter type
-# metavars differently (e.g. <str> instead of TEXT)
-if TYPER_VERSION >= (0, 27):
-    TEXT, INT_RANGE, PATH_MV = "<str>", "<int range>", "<path>"
-else:
-    TEXT, INT_RANGE, PATH_MV = "TEXT", "INTEGER RANGE", "PATH"
 
 WORD = re.compile(r"\w+")
 
@@ -557,47 +547,46 @@ class CoreTests(with_typehint(TestCase)):
  Run batches of commands configured in settings.                                
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --manage-script        {TEXT}  The manage script to use if running management  │
-│                              commands as subprocesses.                       │
-│                              [default: manage.py]                            │
-│ --help                       Show this message and exit.                     │
+│ --manage-script        <str>   The manage script to use if running           │
+│                                management commands as subprocesses.          │
+│                                [default: manage.py]                          │
+│ --help                 <bool>  Show this message and exit.                   │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Django ─────────────────────────────────────────────────────────────────────╮
-│ --verbosity          {INT_RANGE} [0<=x<=3]  Verbosity level; 0=minimal     │
-│                                               output, 1=normal output,       │
-│                                               2=verbose output, 3=very       │
-│                                               verbose output                 │
-│                                               [default: 1]                   │
-│ --version                                     Show program's version number  │
-│                                               and exit.                      │
-│ --settings           {TEXT}                     The Python path to a settings  │
-│                                               module, e.g.                   │
-│                                               "myproject.settings.main". If  │
-│                                               this isn't provided, the       │
-│                                               DJANGO_SETTINGS_MODULE         │
-│                                               environment variable will be   │
-│                                               used.                          │
-│ --pythonpath         {PATH_MV}                     A directory to add to the      │
-│                                               Python path, e.g.              │
-│                                               "/home/djangoprojects/myproje… │
-│ --traceback                                   Raise on CommandError          │
-│                                               exceptions                     │
-│ --show-locals                                 Print local variables in       │
-│                                               tracebacks.                    │
-│ --no-color                                    Don't colorize the command     │
-│                                               output.                        │
-│ --force-color                                 Force colorization of the      │
-│                                               command output.                │
-│ --skip-checks                                 Skip system checks.            │
+│ --verbosity          <int range> [0<=x<=3]  Verbosity level; 0=minimal       │
+│                                             output, 1=normal output,         │
+│                                             2=verbose output, 3=very verbose │
+│                                             output                           │
+│                                             [default: 1]                     │
+│ --version            <bool>                 Show program's version number    │
+│                                             and exit.                        │
+│ --settings           <str>                  The Python path to a settings    │
+│                                             module, e.g.                     │
+│                                             "myproject.settings.main". If    │
+│                                             this isn't provided, the         │
+│                                             DJANGO_SETTINGS_MODULE           │
+│                                             environment variable will be     │
+│                                             used.                            │
+│ --pythonpath         <path>                 A directory to add to the Python │
+│                                             path, e.g.                       │
+│                                             "/home/djangoprojects/myproject… │
+│ --traceback          <bool>                 Raise on CommandError exceptions │
+│ --show-locals        <bool>                 Print local variables in         │
+│                                             tracebacks.                      │
+│ --no-color           <bool>                 Don't colorize the command       │
+│                                             output.                          │
+│ --force-color        <bool>                 Force colorization of the        │
+│                                             command output.                  │
+│ --skip-checks        <bool>                 Skip system checks.              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ deploy          Deploy the site application into production.                 │
-│ import          Test Routine 1                                               │
-│ bad             Bad command test routine                                     │
-│ test-hyphen     Test that hyphens dont mess everything up.                   │
-│ atomic-pass     Atomic test routine.                                         │
-│ atomic-fail     Atomic test routine failure.                                 │
-│ test-continue   Test continue option.                                        │
+│ deploy         Deploy the site application into production.                  │
+│ import         Test Routine 1                                                │
+│ bad            Bad command test routine                                      │
+│ test-hyphen    Test that hyphens dont mess everything up.                    │
+│ atomic-pass    Atomic test routine.                                          │
+│ atomic-fail    Atomic test routine failure.                                  │
+│ test-continue  Test continue option.                                         │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 """
 
@@ -614,20 +603,21 @@ class CoreTests(with_typehint(TestCase)):
  [3] track 4 (demo=6, flag=True)                                                
  [4] track 1                                                                    
  [6] track 5 | demo                                                             
- [7] python tests{os.sep}system_cmd.py sys 1                                                  
- [8] python tests{os.sep}system_cmd.py sys 2                                                  
+ [7] python tests{os.sep}system_cmd.py sys 1                                           
+ [8] python tests{os.sep}system_cmd.py sys 2                                           
                                                                                 
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --subprocess          Run commands as subprocesses.                          │
-│ --atomic              Run all commands in the same transaction.              │
-│ --continue            Continue through the routine if any commands fail.     │
-│ --all                 Include all switched commands.                         │
-│ --demo                                                                       │
-│ --import                                                                     │
-│ --help                Show this message and exit.                            │
+│ --subprocess        <bool>  Run commands as subprocesses.                    │
+│ --atomic            <bool>  Run all commands in the same transaction.        │
+│ --continue          <bool>  Continue through the routine if any commands     │
+│                             fail.                                            │
+│ --all               <bool>  Include all switched commands.                   │
+│ --demo              <bool>                                                   │
+│ --import            <bool>                                                   │
+│ --help              <bool>  Show this message and exit.                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ list   List the commands that will be run.                                   │
+│ list  List the commands that will be run.                                    │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 """
 
@@ -662,98 +652,6 @@ class CoreTests(with_typehint(TestCase)):
             ),
             0.99,
         )
-
-    routine_help_no_rich = f"""
-Usage: ./manage.py routine [OPTIONS] COMMAND [ARGS]...
-
-  Run batches of commands configured in settings.
-
-Options:
-  --manage-script {TEXT}       The manage script to use if running management
-                             commands as subprocesses.  [default: manage.py]
-  --verbosity {INT_RANGE}  Verbosity level; 0=minimal output, 1=normal
-                             output, 2=verbose output, 3=very verbose output
-                             [default: 1; 0<=x<=3]
-  --version                  Show program's version number and exit.
-  --settings {TEXT}            The Python path to a settings module, e.g.
-                             "myproject.settings.main". If this isn't
-                             provided, the DJANGO_SETTINGS_MODULE environment
-                             variable will be used.
-  --pythonpath {PATH_MV}          A directory to add to the Python path, e.g.
-                             "/home/djangoprojects/myproject".
-  --traceback                Raise on CommandError exceptions
-  --no-color                 Don't colorize the command output.
-  --force-color              Force colorization of the command output.
-  --skip-checks              Skip system checks.
-  --help                     Show this message and exit.
-
-Commands:
-  deploy         Deploy the site application into production.
-  import         Test Routine 1
-  bad            Bad command test routine
-  test-hyphen    Test that hyphens dont mess everything up.
-  atomic-pass    Atomic test routine.
-  atomic-fail    Atomic test routine failure.
-  test-continue  Test continue option.
-"""
-
-    routine_test_help_no_rich = f"""
-Usage: ./manage.py routine import [OPTIONS] COMMAND [ARGS]...
-
-  Test Routine 1
-  ----------------------------------
-  
-  [0] track 2 | import, demo
-  [1] track 0 (verbosity=0) | import
-  [3] track 3 (demo=2)
-  [3] track 4 (demo=6, flag=True)
-  [4] track 1
-  [6] track 5 | demo
-  [7] python tests{os.sep}system_cmd.py sys 1
-  [8] python tests{os.sep}system_cmd.py sys 2
-
-Options:
-  --subprocess  Run commands as subprocesses.
-  --atomic      Run all commands in the same transaction.
-  --continue    Continue through the routine if any commands fail.
-  --all         Include all switched commands.
-  --demo
-  --import
-  --help        Show this message and exit.
-
-Commands:
-  list  List the commands that will be run.
-"""
-
-    @pytest.mark.skipif(find_spec("rich") is not None, reason="Rich is installed.")
-    def test_helps_no_rich(self):
-        result = subprocess.run(
-            [
-                sys.executable,
-                manage_py.relative_to(Path(os.getcwd())),
-                "routine",
-                "--help",
-            ],
-            env=os.environ.copy(),
-            capture_output=True,
-        )
-        self.assertEqual(result.returncode, 0)
-        self.assertFalse(result.stderr)
-        self.assertGreater(
-            similarity(
-                result.stdout.strip().decode(),
-                self.routine_help_no_rich.strip(),
-            ),
-            0.99,
-        )
-
-        stdout = StringIO()
-
-        routine = get_command("routine", TyperCommand, stdout=stdout, no_color=True)
-        routine.print_help("./manage.py", "routine", "import")
-        printed = stdout.getvalue().strip().replace("\x08", "")
-        expected = self.routine_test_help_no_rich
-        self.assertGreater(similarity(printed, expected), 0.99)
 
     def test_settings_format(self):
         routines = getattr(settings, ROUTINE_SETTING)

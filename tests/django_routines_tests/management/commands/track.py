@@ -9,7 +9,7 @@ passed_options = []
 
 
 class TestError(Exception):
-    pass
+    __test__ = False  # not a test class - keep pytest from trying to collect it
 
 
 class Command(BaseCommand):

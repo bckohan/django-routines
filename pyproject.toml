@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-routines"
-version = "1.8.1"
+version = "1.9.0"
 description = "Define named groups of management commands in Django settings files for batched execution."
 requires-python = ">=3.11,<4.0"
 authors = [
@@ -18,7 +18,7 @@ homepage = "https://django-routines.readthedocs.io"
 keywords = ["django", "CLI", "management", "routine", "routines", "batch", "commands", "deploy", "tasks", "package", "backup"]
 dependencies = [
     "Django>=5.2,<6.2",
-    "django-typer>=4.0,<4.2"
+    "django-typer>=4.3,<5.0"
 ]
 classifiers = [
     "Environment :: Console",
@@ -68,11 +68,6 @@ pywinpty = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/django_routines"]
-
-[project.optional-dependencies]
-# this should track typer's rich dependency, so long as our console
-# patches still work - so be sure to test on the low end of the range
-rich = ["rich>=10.11.0,<16.0.0"]
 
 [project.urls]
 "Homepage" = "https://django-routines.readthedocs.io"
@@ -156,7 +151,6 @@ sphinx = true
 [tool.pytest.ini_options]
 # py.test options:
 DJANGO_SETTINGS_MODULE = "tests.settings"
-PYTHONIOENCODING = "utf-8"
 python_files = "test_*.py"
 norecursedirs = "*.egg .eggs dist build docs .tox .git __pycache__ shellcompletion"
 env = [
